@@ -1,1 +1,0 @@
-# Iterations of gradient descent.

@@ -1,3 +1,7 @@
 cpsc-448-notes
-gradient-descent-basics
-iterations-of-gradient-descent.
+gradient-descent-analysis
+gradient-descent-background
+showing-gradient-descent-reduces-the-objective-function.
+what-learning-rate-to-use
+convergence-rate
+modifications-fo-gradient-descent
