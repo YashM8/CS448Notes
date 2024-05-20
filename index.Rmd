@@ -1,9 +1,11 @@
 --- 
-title: "YOUR TITLE HERE"
-author: "YOUR NAME HERE"
+title: "CS448Notes"
+author: "Yash Mali"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 ---
 
-# Down the rabbit-hole
+# CPSC 448 Notes 
+
+Directed studies on optimization in ML and advanced deep learning architectures.
 

@@ -1,2 +1,2 @@
-# The pool of tears
+# Gradient Descent Basics
 

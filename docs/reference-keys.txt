@@ -1,0 +1,3 @@
+cpsc-448-notes
+gradient-descent-basics
+iterations-of-gradient-descent.
