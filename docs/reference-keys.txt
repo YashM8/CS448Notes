@@ -4,4 +4,16 @@ gradient-descent-background
 showing-gradient-descent-reduces-the-objective-function.
 what-learning-rate-to-use
 convergence-rate
-modifications-fo-gradient-descent
+improving-gradient-descent
+oracle-model-of-computation
+heavy-ball-method
+conjugate-gradient-heavy-ball-with-optimal-parameters
+nesterov-accelerated-gradient
+coordinate-optimization
+definition-and-examples
+analyzing-coordinate-descent
+randomized-cd-progress
+gauss-southwell-greedy-coordinate-descent
+stochastic-gradient-methods
+introduction
+progress-bound-for-sgd

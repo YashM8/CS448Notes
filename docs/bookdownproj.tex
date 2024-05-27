@@ -106,15 +106,15 @@ w^t = w^{t-1} - \alpha_t \nabla f(w^t) \\
 
 Where we are trying to find a set of parameters \(w\) that minimize the function \(f\), also called the objective function. \(\nabla f\) is the gradient of \(f\) with respect to \(w\) and the subscript \(t\) is the iteration number.
 
-The main idea is to move in the opposite direction of the steepest ascent of the function \(f\). How much you move during each iteration. is controlled by two things. The first is the steepness of gradient which we cannot control after we have chosen the objective function. The second is the parameter \(\alpha_t\). It is also called th learning rate.
+The main idea is to move in the opposite direction of the steepest ascent of the function \(f\). How much you move during each iteration is controlled by two things. The first is the steepness of gradient which we cannot control after we have chosen the objective function. The second is the parameter \(\alpha_t\). It is also called th learning rate.
 
-The time complexity of \textbf{each} iteration is only \(O(d)\) after computing the gradient. Where \(d\) is the number of parameters. We can stop if we have made very little progress \(||f(w^t) - f(w^{t-1})||\) is very small.
+The time complexity of \textbf{each} iteration is only \(O(d)\) after computing the gradient. Where \(d\) is the number of parameters. We can stop if we have made very little progress, \(||f(w^t) - f(w^{t-1})||\) is very small.
 
-Intuitively gradient descent can be thought of as standing on the top of a canyon while being blindfolded and using your leg to find the steepest slope downwards locally. Then taking a small step in that direction and repeating the process again. In this analogy the canyon can be thought of as modelled my as 3D objective function.
+Intuitively gradient descent can be thought of as standing on the top of a canyon while being blindfolded and using your leg to find the steepest slope downwards locally. Then, taking a small step in that direction and repeating the process until you reach the bottom. In this analogy the canyon can be thought of as modelled by a 3D objective function.
 
 \subsection{Showing gradient descent reduces the objective function.}\label{showing-gradient-descent-reduces-the-objective-function.}
 
-Let us assume that the objective function is Lipschitz continuous. Intuitively it means that a this function does not change in gradient arbitrarily fast. Formally it means that there has to be a a real values number \(L\) that satisfies:
+Let us assume that the objective function is Lipschitz continuous. Intuitively it means that a this function does not change in gradient arbitrarily fast. Formally it means that there has to be a a real valued number \(L\) that satisfies:
 
 \[
 \nabla f(w) − \nabla f(v) \le L||w − v||
@@ -177,6 +177,8 @@ f(w^t - \alpha \nabla f(w^{t})) \le f(w^t) - \alpha \gamma ||\nabla f(w^t)||^2 \
 
 This allows us to vary the learning rate in such a way that the new set of parameters \(w^{t+1}\) have sufficiently decreased the objective function going the current parameters \(w^t\).
 
+More to come later.
+
 \subsection{Convergence rate}\label{convergence-rate}
 
 Using the progress bound, \(f(w^t) \le f(w^{t-1}) - \frac{1}{2L} ||\nabla f(w^{t-1})||^2 \Longrightarrow ||\nabla f(w^{t-1})||^2 \le 2L[f(w^{t-1}) - f(w^t)]\)
@@ -186,8 +188,8 @@ Let's consider the smallest squared gradient norm \(\min_{\mathbf{j \in {[0, t-1
 Trivally, this will be smaller than the average squared gradient norm:
 
 \[
-\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{1}{t} \sum_{k=1}^t ||\nabla f({w^{k-1}})||^2 \le \frac{2L}{t} \sum_{k=1}^t [\nabla f({w^{k-1}}) - f(w^k)] \\
-\frac{2L}{t} \sum_{k=1}^t [\nabla f({w^{k-1}}) - f(w^k)] = \frac{2L}{t} [f(w^0) - f(w^t)] \\
+\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{1}{t} \sum_{k=1}^t ||\nabla f({w^{k-1}})||^2 \le \frac{2L}{t} \sum_{k=1}^t [f({w^{k-1}}) - f(w^k)] \\
+\frac{2L}{t} \sum_{k=1}^t [f({w^{k-1}}) - f(w^k)] = \frac{2L}{t} [f(w^0) - f(w^t)], \text{ Since this is a telescoping sum}\\
 \text{Also, } f(w^t) \ge f^* \text{ where } f^* \text{ is objective value for optimal } w^* \\
 \min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{2L}{t} [f(w^0) - f^*] = O(1/t)
 \]
@@ -206,7 +208,6 @@ Another way to measure the rate of convergence is by the limit of the ratio of s
 \[
 \lim_{k \to \infty} \frac{f(w_{k+1}) - f(w^*)}{f(w_k) - f(w^*)} = \rho.
 \]
-
 Different values of \(\rho\) give us different rates of convergence:
 
 \begin{enumerate}
@@ -222,6 +223,443 @@ Different values of \(\rho\) give us different rates of convergence:
 
 Having \(f(w_t) - f(w^*) = O(1/t)\) gives a sublinear convergence rate. The longer you run the algorithm, the less progress it makes.
 
-\section{Modifications fo Gradient Descent}\label{modifications-fo-gradient-descent}
+\textbf{Polyak-Lojasiewicz (PL) Inequality}
+
+Gradient descent with least squares has linear cost but a sublinear rate. For many ``nice'' functions, gradient descent actually has a linear rate. For example, functions satisfying the PL Inequality:
+
+\[
+\frac{1}{2} ||\nabla f(w)||^2 \ge \mu (f(w) - f^*)
+\]
+To get a linear convergence rate under the PL ineqaulity:
+
+\[
+f(w^{k+1}) \leq f(w^k) - \frac{1}{2L} \|\nabla f(w^k)\|^2. \\
+\text{Under the PL inequality, we have:} \\
+-\|\nabla f(w^k)\|^2 \leq -2\mu (f(w^k) - f^*). \\
+f(w^{k+1}) \leq f(w^k) - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq f(w^k) - f^* - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^k) - f^*). \\
+\]
+Using this inequality recursively:
+
+\[
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^{k-1}) - f^*). \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) \left(1 - \frac{\mu}{L}\right) [f(w^{k-2} - f^*]. \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^3 [f(w^{k-3} - f^*]. \\
+...\\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^k [f(w^{0} - f^*]. \\
+\]
+And since \(0 < \mu \le L\), we have \(\left(1 - \frac{\mu}{L} \right) \le 0\). This implies \(f(w^{k+1}) - f^* = O(\rho^k) \text{ when } \rho < 1\).
+
+Using the fact that \((1-x) \ge e^{-x}\) we can rewrite the above as:
+
+\[
+f(w^{k}) - f^* \leq exp\left(k\frac{\mu}{L}\right) [f(w^{0} - f^*]. \\
+\]
+Which is why linear convergence is sometimes also called ``exponential convergence''. For some \(f(w^{k}) - f^* \leq \epsilon\) we have \(k \ge \frac{L}{\mu} log (\frac{f(w^0 - f^*)}{\mu}) = O(log(1/\epsilon))\).
+
+PL is satisfied for many convex objective functions like least squares. PL is not satisfied for many other scenarios like neural network optimization. The PL constant \(\mu\) might be bad for some functions. It might be hard to show the PL satisfiability for many functions.
+
+\textbf{Strong Convexity}
+
+A function \(f\) is strong convex if the function:
+
+\[
+f(w) - \frac{\mu}{2} \|w\|^2
+\]
+Is also a convex function for any \(\mu > 0\). More informally, if you un-regularize with \(\mu\), the function is still convex. Strongly convex functions have some nice properties:
+
+A unique global minimizing point \(w^*\) exists.
+For \(C^1\) strongly convex functions satisfies the PL inequality.
+If \(g(w) = f(Aw)\) for a strongly convex \(f\) and a matrix \(A\), then \(g\) satisfies the PL inequality.
+
+Strong Convexity Implies PL Inequality. From Taylor's theorem we have for \(C^2\) functions:
+
+\[
+f(v) = f(w) + \nabla f(w)^\top (v - w) + \frac{1}{2} (v - w)^\top \nabla^2 f(u) (v - w).
+\]
+
+By strong convexity, \(d^\top \nabla^2 f(u) d \geq \mu \|d\|^2 \quad \text{for any } d \text{ and } u.\) we have:
+
+\[
+f(v) \geq f(w) + \nabla f(w)^\top (v - w) + \frac{\mu}{2} \|v - w\|^2
+\]
+
+Treating the right side as a function of \(v\), we get a quadratic lower bound on \(f\). After minimizing with respect to \(v\) we get:
+
+\[
+f(w) - f^* \leq \frac{1}{2\mu} \|\nabla f(w)\|^2\\
+\text{Which is the PL inequality.}
+\]
+\textbf{Combining Lipschitz Continuity and Strong Convexity} - Lipschitz continuity of gradient gives guaranteed progress. Strong convexity of functions gives maximum sub-optimality. Progress on each iteration will be at least a fixed fraction of the sub-optimality.
+
+\textbf{Effect of L2 Regularization on Convergence Rate.}
+
+If we have a convex loss \(f\), adding L2-regularization makes it strongly-convex.
+
+\[
+f(w) + \frac{\lambda}{2} ||w^2||, \text{ with } \mu \ge \lambda
+\]
+So adding the \(L2\) regulaizer improves rate from sub-linear and linear. We go from \(O(\frac{1}{\epsilon})\) to \(O(log(\frac{1}{\epsilon}))\) and guarantees a unique minimizer.
+
+\section{Improving Gradient Descent}\label{improving-gradient-descent}
+
+\subsection{Oracle Model of Computation}\label{oracle-model-of-computation}
+
+To analyze algorithms we need two ingredients:
+1. Assumptions about the function like Lipschitz, PL, convexity, and so on.
+2. Model of computation, restricting what the algorithm can do.
+
+\textbf{Standard model of computation is the first-order oracle model:}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  At each iteration the algorithm chooses a point \(w^k\).
+\item
+  The algorithm then gets \(f(w^k)\) and \(\nabla f(w^k)\).
+\end{enumerate}
+
+We analyze how many iterations are needed to make some quantity small.
+Usually \(\| \nabla f(w^k) \|\) or \(f(w^k) - f^*\) or \(\| w^k - w^* \|\).
+
+Given assumptions and oracle model, we can prove upper bounds on iteration complexity of specific algorithms and prove lower bounds on iteration complexity across algorithms.
+
+In first-order oracle model the algorithm itself is often unrestricted,
+but it can only learn about the function through evaluations at the chosen \(w^k\).
+Often prove lower bounds by designing a ``worst function'' under the assumptions.
+And show that you can only slowly discover the minimum location from oracle.
+
+\subsection{Heavy Ball Method}\label{heavy-ball-method}
+
+\[
+w^{k+1} = w^{k} - \alpha_k \nabla f(w^k) + \beta_k (w^k - w^{k-1}) \\
+\]
+Which adds a momentum term to each gradient descent iteration where \(k > 1\). Informally this term makes us go further in the previous direction. \(\beta_k \in [0, 1)\)
+
+Heavy-ball method can increase function and ``overshoot'' the optimum. But we will reach the optima quicker.
+
+Considering the heavy-ball method with the choices:
+\[
+\alpha_k = \frac{4}{(\sqrt{L} + \sqrt{\mu})^2}, \quad \beta_k = \left( \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}} \right)^2.
+\]
+
+Under these choices the heavy-ball method has:
+\[
+\|w_k - w^*\| \leq \left( \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}} + \epsilon_k \right)^k \|w_0 - w^*\|,
+\]
+where \(\epsilon_k \to 0\).
+
+Instead of directly bounding \(\|w_k - x^*\|\), the proof bounds \(\|w_k - w^*\|^2 + \|w_{k-1} - w^*\|^2\). Shows that a function that is ``bigger'' is converging at the right rate.
+
+The optimal dimension-independent rate in the first-order oracle model is:
+\[
+\frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}.
+\]
+
+So with this choice the heavy-ball method is close to optimal.
+
+\subsection{Conjugate Gradient: Heavy-Ball with Optimal Parameters}\label{conjugate-gradient-heavy-ball-with-optimal-parameters}
+
+For quadratics, we could optimize \(\alpha_k\) and \(\beta_k\) on each iteration. At each iteration, choose \(\alpha_k\) and \(\beta_k\) that maximally decrease \(f\). ``Plane search'' (``subspace optimization'') along two directions instead of ``line search''. This ``optimal heavy-ball'' method is called the conjugate gradient (CG) method:
+
+\(\alpha_k = \frac{\nabla f(w_k)^T d_k}{d_k^T A d_k}\) (step size for gradient direction)
+
+\(\beta_k = \frac{\alpha_k \beta_{\hat{k}-1}}{\alpha_{k-1}}\) (momentum parameter, \(\beta_0 = 0\))
+
+\(w_{k+1} = w_k - \alpha_k \nabla f(w_k) + \beta_k (w_k - w_{k-1})\) (heavy-ball update)
+
+\(\beta_{\hat{k}} = \frac{\nabla f(w_{k-1})^T A d_{k-1}}{d_{k-1}^T A d_{k-1}}\) (search direction, \(d_0 = -\nabla f(w_0)\))
+
+Gradients between iterations are orthogonal, \(\nabla f(w_k)^T \nabla f(w_{k-1}) = 0\).
+
+Achieves optimal \(\frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}\) dimension-independent rate.
+
+You can show that conjugate gradient minimizes a d-dimensional quadratic in \(d\) steps. Tends not to happen on computers due to floating point issues. Note that conjugate gradient does not need to know \(L\) or \(µ\).
+
+\subsection{Nesterov Accelerated Gradient}\label{nesterov-accelerated-gradient}
+
+We call a first-order method accelerated if it either has a \(O(1/k^2)\) rate for convex functions or have a linear rate depending on \(\sqrt{L}\) and \(\sqrt{\mu}\) for strongly-convex functions
+
+\[
+w^{k+1} = w^{k} - \alpha_k \nabla f(v^k) \\
+v^{k+1} = w^{k+1} + \beta_k (w^{k+1} - w^{k}) \\
+\]
+Nesterov's Acceleration computes gradient after applying the the momentum.
+
+Consider optimizing a one-dimensional convex function. If sign of gradient stays same, Nesterov's algorithm speeds up heavy-ball. If sign of gradient changes (overshooting the minima), it ``slows down'' faster.
+
+Nesterov's method is typically analyzed with \(\alpha_k = \frac{1}{L}\).
+
+For convex functions, accelerated rate can be achieved with - \(\beta_k = \frac{k - 1}{k + 2}\), a momentum that converges to 1.
+
+For strongly-convex functions, acceleration can be achieved with constant - \(\beta_k = \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}\), as in the heavy-ball method.
+
+Notice that you need different parameters for different problems. Using a momentum that converges to 1 for strongly-convex could be very slow. Unlike gradient descent which adapts to the problem with standard choices. Using \(\alpha_k = \frac{1}{L}\) maintains rate for convex, strongly-convex, and non-convex.
+
+\textbf{In practice}, we can maintain a accelerated rate without knowing \(L\).
+
+\begin{itemize}
+\item
+  Start with a guess \(\hat{L}\)
+\item
+  Given the momentum step \(v_k\), test the inequality
+  \(f(w_{k+1}) \leq f(v_k) - \frac{1}{2\hat{L}} \| \nabla f(v_k) \|^2\),
+  and double \(\hat{L}\) until it is satisfied.
+\end{itemize}
+
+As with gradient descent, this can work much better than knowing \(L\).
+
+Nesterov's method is often non-monotonic. We do not always have \$ f(w\_\{k+1\}) \textless{} f(w\_k) \$. As with momentum, this is not necessarily a bad thing.
+
+\textbf{TODO 2nd derivative method}
+
+\section{Coordinate Optimization}\label{coordinate-optimization}
+
+\subsection{Definition and examples}\label{definition-and-examples}
+
+During each iteration of coordinate optimization, only one variable (or coordinate) is updated. By updating only one variable at a time, the optimization process becomes simpler and more efficient.
+
+On iteration \(k\) we select a variable \(j_k\) and set
+\[
+w_{k+1}^{j_k} = w_k^{j_k} - \alpha_k \nabla_{j_k} f(w_k) 
+\]
+A gradient descent step for one coordinate \(j_k\) (other \(w_j\) stay the same).
+
+Theoretically, coordinate descent is a provably bad algorithm. The convergence rate is slower than gradient descent. The iteration cost can be similar to gradient descent. Computing 1 partial derivative may have same cost as computing gradient.
+
+But it is widely-used in practice. Nothing works better for certain problems. Certain fields think it is the ``ultimate'' algorithm.
+
+Global convergence rate can be showed for randomized coordinate selection. Coordinate descent is faster than gradient descent if iterations are \(d\) times cheaper. Sometimes called coordinate-friendly structures.
+
+\textbf{For what functions is coordinate descent \(d\) times faster than gradient descent?}
+
+The simplest example are separable functions:
+\[ 
+f(w) = \sum_{j=1}^{d} f_j(w_j) 
+\]
+Where \(f\) is the sum of \(f_j\) applied to each \(w_j\), like \(f(w) = \frac{\lambda}{2} \|w\|^2 = \sum_{j=1}^{d} \frac{\lambda}{2} w_j^2\).
+
+Gradient descent costs \(O(d)\) to compute each \(f'_j(w_k^j)\).
+Coordinate descent costs \(O(1)\) to compute the one \(f'_jk(w_k^{jk})\).
+
+For separable functions you should only use coordinate optimization. The variables \(w_j\) have ``separate'' effects, so can be minimized independently.
+
+A more interesting example is pairwise-separable functions:
+\[
+f(w) = \sum_{i=1}^{d} \sum_{j=1}^{d} f_{ij}(w_i, w_j),
+\]
+Which depend on a function of each pair of variables. This includes quadratic functions. An example is label propagation for semi-supervised learning. Here \(f_{ij}\) measures how similar labels are between neighbors.
+
+The double sum has \(O(d^2)\) terms. Gradient descent needs to compute the gradient of all these terms.
+Each \(w_j\) only appears in \(O(d)\) terms. Coordinate optimization only needs to use these terms.
+
+The label propagation example looks a bit more like this:
+
+\[
+f(w) = \sum_{j=1}^{d} f_j(w_j) + \sum_{(i,j) \in E} f_{ij}(w_i, w_j),
+\]
+
+where \(E\) is a set of \((i, j)\) edges in a graph. Adding a separable function doesn't change costs. We could just combine each \(f_j\) with one \(f_{ij}\). Restricting \((i, j)\) to \(E\) makes gradient descent cheaper. Now costs \(O(|E|)\) to compute gradient. Coordinate descent could also cost \(O(|E|)\) if the degree of \(j_k\) is \(O(|E|)\). Coordinate descent is still \(d\) times faster in expectation if you randomly update coordinates.
+
+Another coordinate-friendly structure is \textbf{linear compositions:}
+
+\[
+f(w) = g(Aw), \text{ for a } n \times d \text{ matrix and a sooth function } g
+\]
+It is still coordinate friendly if we add a separable function like an L2-regularizer.
+\[
+f(w) = g(Aw) + \sum_{j=1}^{d} f_j(w_j),
+\]
+
+The main idea is that you can track \(Aw_k\) as you go for a cost \(O(n)\) instead of \(O(nd)\).
+
+For linear compositions problems, the partial derivatives on iteration \(k\) have the form:
+\[
+\nabla_j f(w_k) = a_j^T g'(Aw_k),
+\]
+where \(a_j\) is column \(j\) of \(A\).
+
+If we have \(Aw^k\), this costs \(O(n)\) instead of \(O(nd)\) for the full gradient. (Assuming \(g'\) costs \(O(n)\))
+We can track the product \(Aw_k\) as we go with \(O(n)\) cost:
+
+\[
+Aw^{k+1} = A(w^k + \gamma_k e_{jk}) = Aw^k + \gamma_k a_j.
+\]
+This allows computing partial derivatives and implementing line-search steps in \(O(n)\).
+
+Neural networks are usually not coordinate friendly. Would need something like ``number of units after first hidden layer is tiny''. Updating just one parameter can lead to complex and non-local effects on the overall function of the network.
+
+\subsection{Analyzing Coordinate Descent}\label{analyzing-coordinate-descent}
+
+To analyze coordinate descent, we can write it as
+\[
+w_{k+1} = w_k - \alpha_k \nabla_{jk} f(w_k) e_{jk},
+\]
+where the ``elementary vector'' \(e_j\) has a zero in every position except \(j\),
+\[
+e_j^T =
+\begin{bmatrix}
+0 & \cdots & 1 & \cdots & 0
+\end{bmatrix}
+\]
+We usually assume that each \(\nabla_j f\) is \(L\)-Lipshitz (``coordinate-wise Lipschitz''),
+\[
+|\nabla_j f(w + \gamma e_j) - \nabla_j f(w)| \leq L|\gamma|
+\]
+which for \(C^2\) functions is equivalent to \(|\nabla_{jj}^2 f(w)| \leq L\) for all \(j\).
+
+This is not a stronger assumption than for gradient descent - If the gradient is \(L\)-Lipschitz then it is also coordinate-wise \(L\)-Lipschitz.
+
+Coordinate-wise Lipschitz assumption implies the descent lemma coordinate-wise:
+\[
+f(w^{k+1}) \leq f(w^k) + \nabla_j f(w^k)(w^{k+1} - w^k)_j + \frac{L}{2}(w^{k+1} - w^k)^2_j
+\]
+for any \(w^{k+1}\) and \(w_k\) that only differ in coordinate \(j\). With \(\alpha_k = \frac{1}{L}\) (for simplicity), plugging in \((w_{k+1} - w_k) = -\frac{1}{L}e_{jk}\nabla_{jk} f(w_k)\) gives
+
+\[
+f(w^{k+1}) \leq f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2,
+\]
+a progress bound based on only updating coordinate \(j_k\).
+
+\subsection{Randomized CD Progress}\label{randomized-cd-progress}
+
+The progress on a \textbf{randomized} coordinate descent depends on the random selection of \(j_k\). The expected progress is:
+
+\[
+\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given }w^k\\ 
+= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
+= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
+\]
+Expectation is conditioned on all steps up to time \(k\).
+
+Let's choose \(j_k\) uniformly at random in this bound, \(p(j_k = j) = \frac{1}{d}\).
+
+\[
+E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
+= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
+= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
+\]
+
+\textbf{Random-Shuffling Coordinate Selection}
+
+An alternative to random selection of \(j_k\) is cyclic selection:
+\[
+j_1 = 1, j_2 = 2, \ldots, j_d = d \\
+j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
+j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
+\]
+Cyclic often outperforms random in practice, but is worse in theory.
+
+For some problems, a bad ordering leads to provably-bad performance for cyclic.
+
+\textbf{Hybrid between cyclic and random is using random shuffling:}
+
+Choose random permutation \(r\) and set \(j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]\).
+
+Choose random permutation \(r\) and set \(j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]\).
+
+Choose random permutation \(r\) and set \(j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]\).
+
+Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.
+
+\subsection{Gauss-Southwell: Greedy Coordinate Descent}\label{gauss-southwell-greedy-coordinate-descent}
+
+Instead of cyclic or random, there are also greedy coordinate selection methods.
+
+The classic greedy method is the Gauss-Southwell rule,
+
+\[
+j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
+\]
+
+which chooses the coordinate with the largest directional derivative.
+
+This leads to a progress bound of
+
+\[
+f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
+\]
+
+Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of
+
+\[ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], \]
+
+Where \(\mu_1\) is the PL constant in the \(\infty\)-norm
+
+\[ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. \]
+
+This is faster than random because \(\mu_d \leq \mu_1 \leq \mu\) (by norm equivalences). The \(\mu_1\)-PL condition is implied by strong-convexity in the 1-norm.
+
+\textbf{TODO Greedy Lipschitz, strong convexity and PL}
+
+\section{Stochastic Gradient Methods}\label{stochastic-gradient-methods}
+
+\subsection{Introduction}\label{introduction}
+
+Stochastic gradient descent is primarily used when calculating the full gradient for \(t\) iterations is too costly. In a machine learning prespective, instead of calculating the gradient using the entire dataset, you calculate it using a randomly picked data point (or small batches of data points) instead.
+
+A couple of data points might point you in the wrong direction. But on average you will move towards the minima. This erractic nature is useful while optimizing non-convex landscapes like neural network where the stochasic nature can allow you to escape saddle points and local optimia and reach a better and deeper optima.
+
+Random selection of \(i_k\) from \(\{1, 2, \ldots, n\}\).
+\[ 
+w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k). 
+\]
+With \(p(i_k = i) = 1/n\), the stochastic gradient is an unbiased estimate of the gradient:
+\[ 
+\mathbb{E}[\nabla f_{i_k}(w)] = \frac{1}{n} \sum_{i=1}^{n} p(i_k = i) \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{n} \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \nabla f_i(w) = \nabla f(w). 
+\]
+Iteration cost is independent of \(n\). Convergence requires \(\alpha_k \to 0\). Stochastic has low iteration cost but slow convergence rate.
+
+\subsection{Progress Bound for SGD}\label{progress-bound-for-sgd}
+
+The stochastic gradient descent (SGD) update is
+\[ w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k) \]
+Recall the descent lemma applied to \(w_{k+1}\) and \(w_k\),
+\[ f(w_{k+1}) \leq f(w_k) + \nabla f(w_k)^\top (w_{k+1} - w_k) + \frac{L}{2} \| w_{k+1} - w_k \|_2^2\]
+Plugging in the SGD iteration \((w_{k+1} - w_k) = -\alpha_k \nabla f_{i_k}(w_k)\) gives
+\[f(w^{k+1}) \leq f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 \frac{ L}{2} \|\nabla f_{i_k}(w^k)\|^2 \]
+
+So far any choice of \(\alpha_k\) and \(i_k\) we have
+\[
+f(w_{k+1}) \leq f(w_k) - \alpha_k \nabla f(w_k)^\top \nabla f_{i_k}(w_k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w_k)\|^2.
+\]
+Let's take the expectation and assume \(\alpha_k\) does not depend on \(i_k\),
+\[
+\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}[f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w^k)\|^2] \\ = f(w^k) - \alpha_k \nabla f(w^k)^\top \mathbb{E}[\nabla f_{i_k}(w^k)] + \alpha_k^2 L_k^2 \mathbb{E}[\|\nabla f_{i_k}(w^k)\|^2]
+\]
+Under uniform sampling \(\mathbb{E}[\nabla f_{i_k}(w_k)] = \nabla f(w_k)\) (unbiased) so this gives
+\[
+\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha_k k \|\nabla f(w^k)\|^2 + \alpha_k^2 L_k^2 \mathbb{E}[k\|\nabla f_{i_k}(w^k)\|^2]
+\]
+
+Choosing \(\alpha_k = 1/L\) might not be small enough. If \(\alpha_k\) is small then \(\alpha_k << \alpha_k^2\). \(\alpha_k\) controls how much we move towards the solution at each iteration. \(\alpha_k^2\) controls how much the stochasic nature moves us away from the solution.
+
+Analyzing SGD assuming only that \$ f \$ is bounded below. So it could be non-convex. To bound the effect of the noise, we assume for some \$ \sigma \$ that:
+
+\[ \mathbb{E}[k\|\nabla f_i(w)\|^2] \leq \sigma^2 \].
+
+It implies gradients are bounded, and cannot hold for PL functions. Using our noise assumption inside the progress bound,
+\[\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha^k k\|\nabla f(w^k)\|^2 + \frac{\alpha_k^2 L\sigma^2}{2}
+\]
+As before, re-arrange to get the gradient norm on the left side:
+\[
+\alpha_k k\|\nabla f(w^k)\|^2 \leq f(w^k) - \mathbb{E}[f(w^{k+1})] + \frac{\alpha_k^2 L\sigma^2}{2}.
+\]
+Summing this up and using the iterated expectation to get:
+\[
+\sum_{k=1}^{t} \alpha_{k-1} \mathbb{E}_k\|\nabla f(w^{k-1})\|^2 \leq \sum_{k=1}^{t} [\mathbb{E}f(w^{k-1}) - \mathbb{E}f(w^k)] + \sum_{k=1}^{t} \alpha_{k-1}^2 L\sigma^2
+\]
+Applying the above operations gives
+\[
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \cdot \sum_{k=0}^{t-1} \alpha_k \leq f(w^0) - \mathbb{E}_f(w^t) + \frac{L\sigma^2}{2} \sum_{k=0}^{t-1} \alpha_k^2.
+\]
+Using \(\mathbb{E}_f(w_k) \geq f^*\) and dividing both sides by \(\sum_{k} \alpha_{k-1}\) gives
+\[
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \leq f(w^0) - f^* + \frac{\sum_{k=0}^{t-1} \alpha_k}{\sum_{k} \alpha_{k-1}} + \frac{L\sigma^2}{2} \frac{\sum_{k=0}^{t-1} \alpha_k^2}{\sum_{k} \alpha_{k-1}}.
+\]
+
+\textbf{TODO end with how the stochasticity converges}
 
 \end{document}

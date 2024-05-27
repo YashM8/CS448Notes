@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>CS448Notes</title>
-  <meta name="description" content="CS448Notes" />
+  <title>Chapter 5 Randomized CD Progress | CS448Notes</title>
+  <meta name="description" content="Chapter 5 Randomized CD Progress | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="CS448Notes" />
+  <meta property="og:title" content="Chapter 5 Randomized CD Progress | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="CS448Notes" />
+  <meta name="twitter:title" content="Chapter 5 Randomized CD Progress | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="gradient-descent-analysis.html"/>
+<link rel="prev" href="coordinate-optimization.html"/>
+<link rel="next" href="stochastic-gradient-methods.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -94,14 +94,9 @@
 <ul>
 <li class="chapter" data-level="4.1" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#definition-and-examples"><i class="fa fa-check"></i><b>4.1</b> Definition and examples</a></li>
 <li class="chapter" data-level="4.2" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#analyzing-coordinate-descent"><i class="fa fa-check"></i><b>4.2</b> Analyzing Coordinate Descent</a></li>
-<li class="chapter" data-level="4.3" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#randomized-cd-progress"><i class="fa fa-check"></i><b>4.3</b> Randomized CD Progress</a></li>
-<li class="chapter" data-level="4.4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent"><i class="fa fa-check"></i><b>4.4</b> Gauss-Southwell: Greedy Coordinate Descent</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>5</b> Stochastic Gradient Methods</a>
-<ul>
-<li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
-<li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
-</ul></li>
+<li class="chapter" data-level="5" data-path="randomized-cd-progress.html"><a href="randomized-cd-progress.html"><i class="fa fa-check"></i><b>5</b> Randomized CD Progress</a></li>
+<li class="chapter" data-level="6" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>6</b> Stochastic Gradient Methods</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 
@@ -122,13 +117,53 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">CS448Notes</h1>
-<p class="author"><em>Yash Mali</em></p>
-</div>
-<div id="cpsc-448-notes" class="section level1 hasAnchor" number="1">
-<h1><span class="header-section-number">Chapter 1</span> CPSC 448 Notes<a href="index.html#cpsc-448-notes" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Directed studies on optimization in ML and advanced deep learning architectures.</p>
+<div id="randomized-cd-progress" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Randomized CD Progress<a href="randomized-cd-progress.html#randomized-cd-progress" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>The progress on a <strong>randomized</strong> coordinate descent depends on the random selection of <span class="math inline">\(j_k\)</span>. The expected progress is:</p>
+<p><span class="math display">\[
+\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given w^k}\\
+= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
+= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
+\]</span>
+Expectation is conditioned on all steps up to time <span class="math inline">\(k\)</span>.</p>
+<p>Let’s choose <span class="math inline">\(j_k\)</span> uniformly at random in this bound, <span class="math inline">\(p(j_k = j) = \frac{1}{d}\)</span>.</p>
+<p><span class="math display">\[
+E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
+= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
+= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
+\]</span></p>
+<p><strong>Random-Shuffling Coordinate Selection</strong></p>
+<p>An alternative to random selection of <span class="math inline">\(j_k\)</span> is cyclic selection:
+<span class="math display">\[
+j_1 = 1, j_2 = 2, \ldots, j_d = d \\
+j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
+j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
+\]</span>
+Cyclic often outperforms random in practice, but is worse in theory.</p>
+<p>For some problems, a bad ordering leads to provably-bad performance for cyclic.</p>
+<p>A hybrid between cyclic and random is using random shuffling:</p>
+<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]\)</span>.
+Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]\)</span>.
+Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]\)</span>.</p>
+<p>Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.</p>
+<p><strong>Gauss-Southwell: Greedy Coordinate Descent</strong></p>
+<p>Instead of cyclic or random, there are also greedy coordinate selection methods.</p>
+<p>The classic greedy method is the Gauss-Southwell rule,</p>
+<p><span class="math display">\[
+j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
+\]</span></p>
+<p>which chooses the coordinate with the largest directional derivative.</p>
+<p>This leads to a progress bound of</p>
+<p><span class="math display">\[
+f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
+\]</span></p>
+<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of</p>
+<p><span class="math display">\[ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], \]</span></p>
+<p>Where <span class="math inline">\(\mu_1\)</span> is the PL constant in the <span class="math inline">\(\infty\)</span>-norm</p>
+<p><span class="math display">\[ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. \]</span></p>
+<p>This is faster than random because <span class="math inline">\(\mu_d \leq \mu_1 \leq \mu\)</span> (by norm equivalences). The <span class="math inline">\(\mu_1\)</span>-PL condition is implied by strong-convexity in the 1-norm.</p>
+<p><strong>TODO Greedy Lipschitz</strong></p>
+<p><strong>TODO strong convexity and PL</strong></p>
 
 </div>
             </section>
@@ -136,8 +171,8 @@
           </div>
         </div>
       </div>
-
-<a href="gradient-descent-analysis.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="coordinate-optimization.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="stochastic-gradient-methods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -168,7 +203,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/index.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -176,7 +211,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/index.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],

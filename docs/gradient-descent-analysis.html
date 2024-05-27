@@ -30,7 +30,7 @@
   
   
 <link rel="prev" href="index.html"/>
-<link rel="next" href="modifications-fo-gradient-descent.html"/>
+<link rel="next" href="improving-gradient-descent.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -83,7 +83,25 @@
 <li class="chapter" data-level="2.3" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#what-learning-rate-to-use"><i class="fa fa-check"></i><b>2.3</b> What learning rate to use?</a></li>
 <li class="chapter" data-level="2.4" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#convergence-rate"><i class="fa fa-check"></i><b>2.4</b> Convergence rate</a></li>
 </ul></li>
-<li class="chapter" data-level="3" data-path="modifications-fo-gradient-descent.html"><a href="modifications-fo-gradient-descent.html"><i class="fa fa-check"></i><b>3</b> Modifications fo Gradient Descent</a></li>
+<li class="chapter" data-level="3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html"><i class="fa fa-check"></i><b>3</b> Improving Gradient Descent</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#oracle-model-of-computation"><i class="fa fa-check"></i><b>3.1</b> Oracle Model of Computation</a></li>
+<li class="chapter" data-level="3.2" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#heavy-ball-method"><i class="fa fa-check"></i><b>3.2</b> Heavy Ball Method</a></li>
+<li class="chapter" data-level="3.3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#conjugate-gradient-heavy-ball-with-optimal-parameters"><i class="fa fa-check"></i><b>3.3</b> Conjugate Gradient: Heavy-Ball with Optimal Parameters</a></li>
+<li class="chapter" data-level="3.4" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#nesterov-accelerated-gradient"><i class="fa fa-check"></i><b>3.4</b> Nesterov Accelerated Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html"><i class="fa fa-check"></i><b>4</b> Coordinate Optimization</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#definition-and-examples"><i class="fa fa-check"></i><b>4.1</b> Definition and examples</a></li>
+<li class="chapter" data-level="4.2" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#analyzing-coordinate-descent"><i class="fa fa-check"></i><b>4.2</b> Analyzing Coordinate Descent</a></li>
+<li class="chapter" data-level="4.3" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#randomized-cd-progress"><i class="fa fa-check"></i><b>4.3</b> Randomized CD Progress</a></li>
+<li class="chapter" data-level="4.4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent"><i class="fa fa-check"></i><b>4.4</b> Gauss-Southwell: Greedy Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>5</b> Stochastic Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
+</ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 
@@ -206,16 +224,59 @@ Different values of <span class="math inline">\(\rho\)</span> give us different 
 <p><span class="math display">\[
 \frac{1}{2} ||\nabla f(w)||^2 \ge \mu (f(w) - f^*)
 \]</span>
-<span class="math display">\[
-\begin{aligned}
-&amp;f(w^{k+1}) \leq f(w^k) - \frac{1}{2L} \|\nabla f(w^k)\|^2. \\
-&amp;\text{Under the PL inequality, we have:} \\
-&amp;-\|\nabla f(w^k)\|^2 \leq -2\mu (f(w^k) - f^*). \\
-&amp;f(w^{k+1}) \leq f(w^k) - \frac{\mu}{L} (f(w^k) - f^*). \\
-&amp;f(w^{k+1}) - f^* \leq f(w^k) - f^* - \frac{\mu}{L} (f(w^k) - f^*). \\
-&amp;f(w^{k+1}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^k) - f^*). \\
-\end{aligned}
+To get a linear convergence rate under the PL ineqaulity:</p>
+<p><span class="math display">\[
+f(w^{k+1}) \leq f(w^k) - \frac{1}{2L} \|\nabla f(w^k)\|^2. \\
+\text{Under the PL inequality, we have:} \\
+-\|\nabla f(w^k)\|^2 \leq -2\mu (f(w^k) - f^*). \\
+f(w^{k+1}) \leq f(w^k) - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq f(w^k) - f^* - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^k) - f^*). \\
+\]</span>
+Using this inequality recursively:</p>
+<p><span class="math display">\[
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^{k-1}) - f^*). \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) \left(1 - \frac{\mu}{L}\right) [f(w^{k-2} - f^*]. \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^3 [f(w^{k-3} - f^*]. \\
+...\\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^k [f(w^{0} - f^*]. \\
+\]</span>
+And since <span class="math inline">\(0 &lt; \mu \le L\)</span>, we have <span class="math inline">\(\left(1 - \frac{\mu}{L} \right) \le 0\)</span>. This implies <span class="math inline">\(f(w^{k+1}) - f^* = O(\rho^k) \text{ when } \rho &lt; 1\)</span>.</p>
+<p>Using the fact that <span class="math inline">\((1-x) \ge e^{-x}\)</span> we can rewrite the above as:</p>
+<p><span class="math display">\[
+f(w^{k}) - f^* \leq exp\left(k\frac{\mu}{L}\right) [f(w^{0} - f^*]. \\
+\]</span>
+Which is why linear convergence is sometimes also called “exponential convergence”. For some <span class="math inline">\(f(w^{k}) - f^* \leq \epsilon\)</span> we have <span class="math inline">\(k \ge \frac{L}{\mu} log (\frac{f(w^0 - f^*)}{\mu}) = O(log(1/\epsilon))\)</span>.</p>
+<p>PL is satisfied for many convex objective functions like least squares. PL is not satisfied for many other scenarios like neural network optimization. The PL constant <span class="math inline">\(\mu\)</span> might be bad for some functions. It might be hard to show the PL satisfiability for many functions.</p>
+<p><strong>Strong Convexity</strong></p>
+<p>A function <span class="math inline">\(f\)</span> is strong convex if the function:</p>
+<p><span class="math display">\[
+f(w) - \frac{\mu}{2} \|w\|^2
+\]</span>
+Is also a convex function for any <span class="math inline">\(\mu &gt; 0\)</span>. More informally, if you un-regularize with <span class="math inline">\(\mu\)</span>, the function is still convex. Strongly convex functions have some nice properties:</p>
+<p>A unique global minimizing point <span class="math inline">\(w^*\)</span> exists.
+For <span class="math inline">\(C^1\)</span> strongly convex functions satisfies the PL inequality.
+If <span class="math inline">\(g(w) = f(Aw)\)</span> for a strongly convex <span class="math inline">\(f\)</span> and a matrix <span class="math inline">\(A\)</span>, then <span class="math inline">\(g\)</span> satisfies the PL inequality.</p>
+<p>Strong Convexity Implies PL Inequality. From Taylor’s theorem we have for <span class="math inline">\(C^2\)</span> functions:</p>
+<p><span class="math display">\[
+f(v) = f(w) + \nabla f(w)^\top (v - w) + \frac{1}{2} (v - w)^\top \nabla^2 f(u) (v - w).
 \]</span></p>
+<p>By strong convexity, <span class="math inline">\(d^\top \nabla^2 f(u) d \geq \mu \|d\|^2 \quad \text{for any } d \text{ and } u.\)</span> we have:</p>
+<p><span class="math display">\[
+f(v) \geq f(w) + \nabla f(w)^\top (v - w) + \frac{\mu}{2} \|v - w\|^2
+\]</span></p>
+<p>Treating the right side as a function of <span class="math inline">\(v\)</span>, we get a quadratic lower bound on <span class="math inline">\(f\)</span>. After minimizing with respect to <span class="math inline">\(v\)</span> we get:</p>
+<p><span class="math display">\[
+f(w) - f^* \leq \frac{1}{2\mu} \|\nabla f(w)\|^2\\
+\text{Which is the PL inequality.}
+\]</span>
+<strong>Combining Lipschitz Continuity and Strong Convexity</strong> - Lipschitz continuity of gradient gives guaranteed progress. Strong convexity of functions gives maximum sub-optimality. Progress on each iteration will be at least a fixed fraction of the sub-optimality.</p>
+<p><strong>Effect of L2 Regularization on Convergence Rate.</strong></p>
+<p>If we have a convex loss <span class="math inline">\(f\)</span>, adding L2-regularization makes it strongly-convex.</p>
+<p><span class="math display">\[
+f(w) + \frac{\lambda}{2} ||w^2||, \text{ with } \mu \ge \lambda
+\]</span>
+So adding the <span class="math inline">\(L2\)</span> regulaizer improves rate from sub-linear and linear. We go from <span class="math inline">\(O(\frac{1}{\epsilon})\)</span> to <span class="math inline">\(O(log(\frac{1}{\epsilon}))\)</span> and guarantees a unique minimizer.</p>
 
 </div>
 </div>
@@ -225,7 +286,7 @@ Different values of <span class="math inline">\(\rho\)</span> give us different 
         </div>
       </div>
 <a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="modifications-fo-gradient-descent.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="improving-gradient-descent.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

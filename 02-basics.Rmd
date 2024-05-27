@@ -124,41 +124,75 @@ Gradient descent with least squares has linear cost but a sublinear rate. For ma
 $$
 \frac{1}{2} ||\nabla f(w)||^2 \ge \mu (f(w) - f^*)
 $$
+To get a linear convergence rate under the PL ineqaulity:
+
 $$
-\begin{aligned}
-&f(w^{k+1}) \leq f(w^k) - \frac{1}{2L} \|\nabla f(w^k)\|^2. \\
-&\text{Under the PL inequality, we have:} \\
-&-\|\nabla f(w^k)\|^2 \leq -2\mu (f(w^k) - f^*). \\
-&f(w^{k+1}) \leq f(w^k) - \frac{\mu}{L} (f(w^k) - f^*). \\
-&f(w^{k+1}) - f^* \leq f(w^k) - f^* - \frac{\mu}{L} (f(w^k) - f^*). \\
-&f(w^{k+1}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^k) - f^*). \\
-\end{aligned}
+f(w^{k+1}) \leq f(w^k) - \frac{1}{2L} \|\nabla f(w^k)\|^2. \\
+\text{Under the PL inequality, we have:} \\
+-\|\nabla f(w^k)\|^2 \leq -2\mu (f(w^k) - f^*). \\
+f(w^{k+1}) \leq f(w^k) - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq f(w^k) - f^* - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^k) - f^*). \\
+$$
+Using this inequality recursively:
+
+$$
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^{k-1}) - f^*). \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) \left(1 - \frac{\mu}{L}\right) [f(w^{k-2} - f^*]. \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^3 [f(w^{k-3} - f^*]. \\
+...\\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^k [f(w^{0} - f^*]. \\
+$$
+And since $0 < \mu \le L$, we have $\left(1 - \frac{\mu}{L} \right) \le 0$. This implies $f(w^{k+1}) - f^* = O(\rho^k) \text{ when } \rho < 1$. 
+
+Using the fact that $(1-x) \ge e^{-x}$ we can rewrite the above as:
+
+$$
+f(w^{k}) - f^* \leq exp\left(k\frac{\mu}{L}\right) [f(w^{0} - f^*]. \\
+$$
+Which is why linear convergence is sometimes also called “exponential convergence". For some $f(w^{k}) - f^* \leq \epsilon$ we have $k \ge \frac{L}{\mu} log (\frac{f(w^0 - f^*)}{\mu}) = O(log(1/\epsilon))$.
+
+PL is satisfied for many convex objective functions like least squares. PL is not satisfied for many other scenarios like neural network optimization. The PL constant $\mu$ might be bad for some functions. It might be hard to show the PL satisfiability for many functions.
+
+**Strong Convexity**
+
+A function $f$ is strong convex if the function:
+  
+$$
+f(w) - \frac{\mu}{2} \|w\|^2
+$$
+Is also a convex function for any $\mu > 0$. More informally, if you un-regularize with $\mu$, the function is still convex. Strongly convex functions have some nice properties:
+
+A unique global minimizing point $w^*$ exists.
+For $C^1$ strongly convex functions satisfies the PL inequality.
+If $g(w) = f(Aw)$ for a strongly convex $f$ and a matrix $A$, then $g$ satisfies the PL inequality.
+
+Strong Convexity Implies PL Inequality. From Taylor’s theorem we have for \(C^2\) functions:
+
+$$
+f(v) = f(w) + \nabla f(w)^\top (v - w) + \frac{1}{2} (v - w)^\top \nabla^2 f(u) (v - w).
 $$
 
+By strong convexity, $d^\top \nabla^2 f(u) d \geq \mu \|d\|^2 \quad \text{for any } d \text{ and } u.$ we have:
 
+$$
+f(v) \geq f(w) + \nabla f(w)^\top (v - w) + \frac{\mu}{2} \|v - w\|^2
+$$
 
+Treating the right side as a function of \(v\), we get a quadratic lower bound on \(f\). After minimizing with respect to $v$ we get:
 
+$$
+f(w) - f^* \leq \frac{1}{2\mu} \|\nabla f(w)\|^2\\
+\text{Which is the PL inequality.}
+$$
+**Combining Lipschitz Continuity and Strong Convexity** - Lipschitz continuity of gradient gives guaranteed progress. Strong convexity of functions gives maximum sub-optimality. Progress on each iteration will be at least a fixed fraction of the sub-optimality.
 
+**Effect of L2 Regularization on Convergence Rate.**
 
+If we have a convex loss $f$, adding L2-regularization makes it strongly-convex.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+$$
+f(w) + \frac{\lambda}{2} ||w^2||, \text{ with } \mu \ge \lambda
+$$
+So adding the $L2$ regulaizer improves rate from sub-linear and linear. We go from $O(\frac{1}{\epsilon})$ to $O(log(\frac{1}{\epsilon}))$ and guarantees a unique minimizer.
 

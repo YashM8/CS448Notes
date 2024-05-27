@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>CS448Notes</title>
-  <meta name="description" content="CS448Notes" />
+  <title>Chapter 5 Stochastic Gradient Methods | CS448Notes</title>
+  <meta name="description" content="Chapter 5 Stochastic Gradient Methods | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="CS448Notes" />
+  <meta property="og:title" content="Chapter 5 Stochastic Gradient Methods | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="CS448Notes" />
+  <meta name="twitter:title" content="Chapter 5 Stochastic Gradient Methods | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
+<link rel="prev" href="coordinate-optimization.html"/>
 
-<link rel="next" href="gradient-descent-analysis.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -122,22 +122,75 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">CS448Notes</h1>
-<p class="author"><em>Yash Mali</em></p>
+<div id="stochastic-gradient-methods" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Stochastic Gradient Methods<a href="stochastic-gradient-methods.html#stochastic-gradient-methods" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introduction" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> Introduction<a href="stochastic-gradient-methods.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Stochastic gradient descent is primarily used when calculating the full gradient for <span class="math inline">\(t\)</span> iterations is too costly. In a machine learning prespective, instead of calculating the gradient using the entire dataset, you calculate it using a randomly picked data point (or small batches of data points) instead.</p>
+<p>A couple of data points might point you in the wrong direction. But on average you will move towards the minima. This erractic nature is useful while optimizing non-convex landscapes like neural network where the stochasic nature can allow you to escape saddle points and local optimia and reach a better and deeper optima.</p>
+<p>Random selection of <span class="math inline">\(i_k\)</span> from <span class="math inline">\(\{1, 2, \ldots, n\}\)</span>.
+<span class="math display">\[
+w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k).
+\]</span>
+With <span class="math inline">\(p(i_k = i) = 1/n\)</span>, the stochastic gradient is an unbiased estimate of the gradient:
+<span class="math display">\[
+\mathbb{E}[\nabla f_{i_k}(w)] = \frac{1}{n} \sum_{i=1}^{n} p(i_k = i) \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{n} \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \nabla f_i(w) = \nabla f(w).
+\]</span>
+Iteration cost is independent of <span class="math inline">\(n\)</span>. Convergence requires <span class="math inline">\(\alpha_k \to 0\)</span>. Stochastic has low iteration cost but slow convergence rate.</p>
 </div>
-<div id="cpsc-448-notes" class="section level1 hasAnchor" number="1">
-<h1><span class="header-section-number">Chapter 1</span> CPSC 448 Notes<a href="index.html#cpsc-448-notes" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Directed studies on optimization in ML and advanced deep learning architectures.</p>
+<div id="progress-bound-for-sgd" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Progress Bound for SGD<a href="stochastic-gradient-methods.html#progress-bound-for-sgd" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The stochastic gradient descent (SGD) update is
+<span class="math display">\[ w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k) \]</span>
+Recall the descent lemma applied to <span class="math inline">\(w_{k+1}\)</span> and <span class="math inline">\(w_k\)</span>,
+<span class="math display">\[ f(w_{k+1}) \leq f(w_k) + \nabla f(w_k)^\top (w_{k+1} - w_k) + \frac{L}{2} \| w_{k+1} - w_k \|_2^2\]</span>
+Plugging in the SGD iteration <span class="math inline">\((w_{k+1} - w_k) = -\alpha_k \nabla f_{i_k}(w_k)\)</span> gives
+<span class="math display">\[f(w^{k+1}) \leq f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 \frac{ L}{2} \|\nabla f_{i_k}(w^k)\|^2 \]</span></p>
+<p>So far any choice of <span class="math inline">\(\alpha_k\)</span> and <span class="math inline">\(i_k\)</span> we have
+<span class="math display">\[
+f(w_{k+1}) \leq f(w_k) - \alpha_k \nabla f(w_k)^\top \nabla f_{i_k}(w_k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w_k)\|^2.
+\]</span>
+Let’s take the expectation and assume <span class="math inline">\(\alpha_k\)</span> does not depend on <span class="math inline">\(i_k\)</span>,
+<span class="math display">\[
+\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}[f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w^k)\|^2] \\ = f(w^k) - \alpha_k \nabla f(w^k)^\top \mathbb{E}[\nabla f_{i_k}(w^k)] + \alpha_k^2 L_k^2 \mathbb{E}[\|\nabla f_{i_k}(w^k)\|^2]
+\]</span>
+Under uniform sampling <span class="math inline">\(\mathbb{E}[\nabla f_{i_k}(w_k)] = \nabla f(w_k)\)</span> (unbiased) so this gives
+<span class="math display">\[
+\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha_k k \|\nabla f(w^k)\|^2 + \alpha_k^2 L_k^2 \mathbb{E}[k\|\nabla f_{i_k}(w^k)\|^2]
+\]</span></p>
+<p>Choosing <span class="math inline">\(\alpha_k = 1/L\)</span> might not be small enough. If <span class="math inline">\(\alpha_k\)</span> is small then <span class="math inline">\(\alpha_k &lt;&lt; \alpha_k^2\)</span>. <span class="math inline">\(\alpha_k\)</span> controls how much we move towards the solution at each iteration. <span class="math inline">\(\alpha_k^2\)</span> controls how much the stochasic nature moves us away from the solution.</p>
+<p>Analyzing SGD assuming only that $ f $ is bounded below. So it could be non-convex. To bound the effect of the noise, we assume for some $ $ that:</p>
+<p><span class="math display">\[ \mathbb{E}[k\|\nabla f_i(w)\|^2] \leq \sigma^2 \]</span>.</p>
+<p>It implies gradients are bounded, and cannot hold for PL functions. Using our noise assumption inside the progress bound,
+<span class="math display">\[\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha^k k\|\nabla f(w^k)\|^2 + \frac{\alpha_k^2 L\sigma^2}{2}
+\]</span>
+As before, re-arrange to get the gradient norm on the left side:
+<span class="math display">\[
+\alpha_k k\|\nabla f(w^k)\|^2 \leq f(w^k) - \mathbb{E}[f(w^{k+1})] + \frac{\alpha_k^2 L\sigma^2}{2}.
+\]</span>
+Summing this up and using the iterated expectation to get:
+<span class="math display">\[
+\sum_{k=1}^{t} \alpha_{k-1} \mathbb{E}_k\|\nabla f(w^{k-1})\|^2 \leq \sum_{k=1}^{t} [\mathbb{E}f(w^{k-1}) - \mathbb{E}f(w^k)] + \sum_{k=1}^{t} \alpha_{k-1}^2 L\sigma^2
+\]</span>
+Applying the above operations gives
+<span class="math display">\[
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \cdot \sum_{k=0}^{t-1} \alpha_k \leq f(w^0) - \mathbb{E}_f(w^t) + \frac{L\sigma^2}{2} \sum_{k=0}^{t-1} \alpha_k^2.
+\]</span>
+Using <span class="math inline">\(\mathbb{E}_f(w_k) \geq f^*\)</span> and dividing both sides by <span class="math inline">\(\sum_{k} \alpha_{k-1}\)</span> gives
+<span class="math display">\[
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \leq f(w^0) - f^* + \frac{\sum_{k=0}^{t-1} \alpha_k}{\sum_{k} \alpha_{k-1}} + \frac{L\sigma^2}{2} \frac{\sum_{k=0}^{t-1} \alpha_k^2}{\sum_{k} \alpha_{k-1}}.
+\]</span></p>
+<p><strong>TODO end with how the stochasticity converges</strong></p>
 
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
+<a href="coordinate-optimization.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
-<a href="gradient-descent-analysis.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -168,7 +221,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/index.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/05-stochastic.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -176,7 +229,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/index.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/05-stochastic.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],
