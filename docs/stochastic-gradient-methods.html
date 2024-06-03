@@ -30,7 +30,7 @@
   
   
 <link rel="prev" href="coordinate-optimization.html"/>
-
+<link rel="next" href="overparameterization.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -101,6 +101,29 @@
 <ul>
 <li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
 <li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
+<li class="chapter" data-level="5.3" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions"><i class="fa fa-check"></i><b>5.3</b> Convergence of SGD for PL functions</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#when-to-stop"><i class="fa fa-check"></i><b>5.3.1</b> When to stop?</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing"><i class="fa fa-check"></i><b>5.4</b> Mini Batches and Batch Growing</a></li>
+<li class="chapter" data-level="5.5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation"><i class="fa fa-check"></i><b>5.5</b> Variation in Mini-Batch Approximation</a></li>
+<li class="chapter" data-level="5.6" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#overparameterization-and-sgd"><i class="fa fa-check"></i><b>5.6</b> Overparameterization and SGD</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="overparameterization.html"><a href="overparameterization.html"><i class="fa fa-check"></i><b>6</b> Overparameterization</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="overparameterization.html"><a href="overparameterization.html#overparameterization-and-sgd-1"><i class="fa fa-check"></i><b>6.1</b> Overparameterization and SGD</a></li>
+<li class="chapter" data-level="6.2" data-path="overparameterization.html"><a href="overparameterization.html#faster-sgd-for-overparameterized-models"><i class="fa fa-check"></i><b>6.2</b> Faster SGD for Overparameterized Models</a></li>
+<li class="chapter" data-level="6.3" data-path="overparameterization.html"><a href="overparameterization.html#stochastic-line-search"><i class="fa fa-check"></i><b>6.3</b> Stochastic Line Search</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html"><i class="fa fa-check"></i><b>7</b> Approximating the Hessian</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-1---diagonal-hessian"><i class="fa fa-check"></i><b>7.1</b> Cheap Hessian Approximation 1 - Diagonal Hessian</a></li>
+<li class="chapter" data-level="7.2" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-2---preconditioning"><i class="fa fa-check"></i><b>7.2</b> Cheap Hessian Approximation 2 - Preconditioning</a></li>
+<li class="chapter" data-level="7.3" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-3---mini-batch-hessian"><i class="fa fa-check"></i><b>7.3</b> Cheap Hessian Approximation 3 - Mini Batch Hessian</a></li>
+<li class="chapter" data-level="7.4" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#hessian-free-newton-methods-truncated-newton"><i class="fa fa-check"></i><b>7.4</b> Hessian Free Newton Methods (Truncated Newton)</a></li>
+<li class="chapter" data-level="7.5" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#quasi-newton-methods"><i class="fa fa-check"></i><b>7.5</b> Quasi-Newton Methods</a></li>
+<li class="chapter" data-level="7.6" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#barzilai-borwein-method"><i class="fa fa-check"></i><b>7.6</b> Barzilai-Borwein Method</a></li>
+<li class="chapter" data-level="7.7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#bfgs-quasi-newton-method"><i class="fa fa-check"></i><b>7.7</b> BFGS Quasi-Newton Method</a></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -162,9 +185,10 @@ Under uniform sampling <span class="math inline">\(\mathbb{E}[\nabla f_{i_k}(w_k
 <p>Analyzing SGD assuming only that $ f $ is bounded below. So it could be non-convex. To bound the effect of the noise, we assume for some $ $ that:</p>
 <p><span class="math display">\[ \mathbb{E}[k\|\nabla f_i(w)\|^2] \leq \sigma^2 \]</span>.</p>
 <p>It implies gradients are bounded, and cannot hold for PL functions. Using our noise assumption inside the progress bound,
-<span class="math display">\[\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha^k k\|\nabla f(w^k)\|^2 + \frac{\alpha_k^2 L\sigma^2}{2}
+<span class="math display">\[
+\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha^k k\|\nabla f(w^k)\|^2 + \frac{\alpha_k^2 L\sigma^2}{2}
 \]</span>
-As before, re-arrange to get the gradient norm on the left side:
+Rearranging to get the gradient norm on the left side:
 <span class="math display">\[
 \alpha_k k\|\nabla f(w^k)\|^2 \leq f(w^k) - \mathbb{E}[f(w^{k+1})] + \frac{\alpha_k^2 L\sigma^2}{2}.
 \]</span>
@@ -178,9 +202,113 @@ Applying the above operations gives
 \]</span>
 Using <span class="math inline">\(\mathbb{E}_f(w_k) \geq f^*\)</span> and dividing both sides by <span class="math inline">\(\sum_{k} \alpha_{k-1}\)</span> gives
 <span class="math display">\[
-\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \leq f(w^0) - f^* + \frac{\sum_{k=0}^{t-1} \alpha_k}{\sum_{k} \alpha_{k-1}} + \frac{L\sigma^2}{2} \frac{\sum_{k=0}^{t-1} \alpha_k^2}{\sum_{k} \alpha_{k-1}}.
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \leq \frac{f(w^0) - f^*}{\sum_{k} \alpha_{k} (1 - \alpha_{k} L/2)} + \frac{L\sigma^2}{2} \frac{\sum_{k=0}^{t-1} \alpha_k^2}{\sum_{k} \alpha_{k-1}}.
 \]</span></p>
-<p><strong>TODO end with how the stochasticity converges</strong></p>
+</div>
+<div id="convergence-of-sgd-for-pl-functions" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> Convergence of SGD for PL functions<a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><span class="math display">\[
+\text{Starting with the SGD progress bound -} \\
+E[f(w_{k+1})] \leq f(w_k) - \alpha_k \| \nabla f(w_k) \|^2 + \frac{\alpha_k^2 L}{2} E[\|\nabla f_i(w_k) \|^2] \\
+\text{Bounding that with the PL inequality (} \| \nabla f(w_k) \|^2 \geq 2\mu(f(w_k) - f^*) \text{)} \\
+E[f(w_{k+1})] \leq f(w_k) - \alpha_k 2\mu (f(w_k) - f^*) + \frac{\alpha_k^2 L \sigma^2}{2}. \\
+E[f(w_{k+1})] - f^* \leq (1 - 2\alpha_k \mu)(f(w_k) - f^*) + \frac{\alpha_k^2 L \sigma^2}{2}. \\
+\leq (1 - 2\alpha\mu) \left((1 - 2\alpha\mu)(f(w_{k-1}) - f^*) + \frac{\alpha^2 L \sigma^2}{2}\right) + \frac{\alpha^2 L \sigma^2}{2} \\
+= (1 - 2\alpha\mu)^2 (f(w_{k-1}) - f^*) + \frac{\alpha^2 L \sigma^2}{2} (1 + (1 - 2\alpha\mu)) \\
+\text{Applying recursively from } k \text{ to } 0, \text{ we get -} \\
+E[f(w_k)] - f^* \leq (1 - 2\alpha\mu)^k (f(w_0) - f^*) + \frac{\alpha^2 L \sigma^2}{2} \sum_{t=0}^k (1 - 2\alpha\mu)^t \\
+\sum_{t=0}^k (1 - 2\alpha\mu)^t &lt; \sum_{t=0}^\infty (1 - 2\alpha\mu)^t = \frac{1}{2\alpha\mu} \text{ ( This is a geometric series)}.
+\]</span>
+Convergence rate of SGD with constant step size for PL functions - \</p>
+<p><span class="math display">\[
+E[f(w_k) - f^*] \leq (1 - 2\alpha\mu)^k (f(w_0) - f^*) + \frac{\alpha \sigma^2 L}{4\mu}
+\]</span></p>
+<p>Thie first term is linear convergence but the 2nd term does not drop to 0. This leads to erratic behavior after making good progress. This aligns with the stochastic nature of SGD. The probability of a random data point pointing you, at least in some part, toward the minima is higher the further away you are. SGD gets confused close to the minima. If that happens, we can half the the step size reducing the space where the optimization is erratic. Halving <span class="math inline">\(\alpha\)</span> divides bound on distance to <span class="math inline">\(f^*\)</span> in half.</p>
+<div id="when-to-stop" class="section level3 hasAnchor" number="5.3.1">
+<h3><span class="header-section-number">5.3.1</span> When to stop?<a href="stochastic-gradient-methods.html#when-to-stop" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>In Gradient Descent we stopped when we are not making enough progress or the gradient is close to zero. But in EGD, the gradients are not guaranteed to go to zero and we cannot see the full gradient. What we can do instead is for every day iterations measure the validation area and if the validation starts to go up, that is when we stop this is also called early stopping</p>
+</div>
+</div>
+<div id="mini-batches-and-batch-growing" class="section level2 hasAnchor" number="5.4">
+<h2><span class="header-section-number">5.4</span> Mini Batches and Batch Growing<a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Deterministic gradient descent uses all <span class="math inline">\(n\)</span> samples to calculate gradient.
+<span class="math display">\[
+\nabla f(w_k) = \frac{1}{n} \sum_{i=1}^n \nabla f_i(w_k)\\
+\]</span></p>
+<p>Stochastic gradient descent approximates gradient with only 1 sample.
+<span class="math display">\[
+\nabla f(w_k) \approx \nabla f_{i_k}(w_k)\\
+\]</span>
+A common variant is to use <span class="math inline">\(m\)</span> samples as a mini-batch <span class="math inline">\(B_k\)</span>
+<span class="math display">\[
+\nabla f(w_k) \approx \frac{1}{m} \sum_{i \in B_k} \nabla f_i(w_k)
+\]</span>
+Using a batch of data points from our data reduces the probability that the gradient points in a “worse” direction than what the full gradient would point to if we calculate it. Mini-batches are useful for parallelization. For example, with 16 cores set <span class="math inline">\(m = 16\)</span> and compute 16 gradients at once.</p>
+<p>The mini-batch gradient, in expectation, is the full gradient in the same way it was for SGD.</p>
+</div>
+<div id="variation-in-mini-batch-approximation" class="section level2 hasAnchor" number="5.5">
+<h2><span class="header-section-number">5.5</span> Variation in Mini-Batch Approximation<a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>To analyze variation in gradients, we use a variance-like identity:
+If random variable g is an unbiased approximation of vector μ, then</p>
+<p><span class="math display">\[
+E[\|g - \mu\|^2] = E[\|g\|^2 - 2g^T \mu + \|\mu\|^2] \quad \\
+= E[\|g\|^2] - 2E[g]^T \mu + \|\mu\|^2 \quad \\
+= E[\|g\|^2] - 2\mu^T \mu + \|\mu\|^2 \quad (\text{unbiased}) \\
+= E[\|g\|^2] - \|\mu\|^2.
+\]</span></p>
+<p>Expectation of inner product between independent samples -</p>
+<p><span class="math display">\[
+E[\nabla f_i(w)^T \nabla f_j(w)] = \sum_{i=1}^n \sum_{j=1}^n \frac{1}{n^2} \nabla f_i(w)^T \nabla f_j(w) \\
+= \frac{1}{n} \sum_{i=1}^n \nabla f_i(w)^T \left(\frac{1}{n} \sum_{j=1}^n \nabla f_j(w)\right) \\
+= \frac{1}{n} \sum_{i=1}^n \nabla f_i(w)^T \nabla f(w) \quad (\text{gradient of } f) \\
+= \left(\frac{1}{n} \sum_{i=1}^n \nabla f_i(w)\right)^T \nabla f(w)  \\
+= \nabla f(w)^T \nabla f(w) = \|\nabla f(w)\|^2 .
+\]</span></p>
+<p>Let us see why the error goes down as we use more points in our batch.</p>
+<p>Let <span class="math inline">\(g_2(w) = \frac{1}{2} (\nabla f_i(w) + \nabla f_j(w))\)</span> be mini-batch approximation with 2 samples.
+<span class="math display">\[
+E[\|g_2(w) - \nabla f(w)\|^2] = E\left[\left\|\frac{1}{2} (\nabla f_i(w) + \nabla f_j(w))\right\|^2\right] - \|\nabla f(w)\|^2  \\
+= \frac{1}{4} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} E[\nabla f_i(w)^T \nabla f_j(w)] + \frac{1}{4} E[\|\nabla f_j(w)\|^2] - \|\nabla f(w)\|^2 \quad  \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} E[\nabla f_i(w)^T \nabla f_j(w)] - \|\nabla f(w)\|^2 \quad (E[\nabla f_i] = E[\nabla f_j]) \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} \|\nabla f(w)\|^2 - \|\nabla f(w)\|^2 \quad (E[\nabla f_i \nabla f_j] = \|\nabla f(w)\|^2) \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] - \frac{1}{2} \|\nabla f(w)\|^2 \\
+= \frac{1}{2} \left(E[\|\nabla f_i(w)\|^2] - \|\nabla f(w)\|^2\right)  \\
+= \frac{1}{2} E[\|\nabla f_i(w) - \nabla f(w)\|^2] \quad  \\
+= \frac{\sigma(w)^2}{2} \quad (\sigma^2 \text{ is 1-sample variation}) \\
+\]</span></p>
+<p>So SGD error <span class="math inline">\(E[\|e_k\|^2]\)</span> is cut in half compared to using 1 sample.</p>
+<p>With <span class="math inline">\(m\)</span> samples we can show that -</p>
+<p><span class="math display">\[
+E[\|e_k\|^2] = \frac{\sigma(w^k)^2}{m}
+\]</span></p>
+<p>Where <span class="math inline">\(\sigma(w^k)^2\)</span> is the variance of the individual gradients at <span class="math inline">\(w^k\)</span>. With a larger batch size of size <span class="math inline">\(m\)</span>, the the effect of stochasticity is reduced by <span class="math inline">\(m\)</span>. With a larger batch size of size <span class="math inline">\(m\)</span>, we cause use a step size that is <span class="math inline">\(m\)</span> times larger. Doubling batch size has the same effect as halving the step size.</p>
+</div>
+<div id="overparameterization-and-sgd" class="section level2 hasAnchor" number="5.6">
+<h2><span class="header-section-number">5.6</span> Overparameterization and SGD<a href="stochastic-gradient-methods.html#overparameterization-and-sgd" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Overparameterization means that the model can fit the entire training data. Modern machine learning models like neural networks tend to do very well in overparameterized settings. Typically, over complicated models, you tend to overfit.</p>
+<p>In the overparameterized regime we have <span class="math inline">\(\nabla f_i (w_*) = 0\)</span> for all <span class="math inline">\(i\)</span>. The variance is 0 at minimizers and SGD converges with a small enough step size.</p>
+<p>One way to characterize over-parameterization: strong growth condition (SGC) -</p>
+<p><span class="math display">\[
+E[\|\nabla f_i(w)\|^2] \leq \rho \|\nabla f(w)\|^2, \\
+\text{This implies the interpolation property that } \nabla f(w) = 0 \Rightarrow \nabla f_i(w) = 0 \text{ for all } i.
+\]</span>
+<strong>Bound on Error under the SGC -</strong></p>
+<p>Under the SGC, the SGD error is bounded by the full gradient size</p>
+<p><span class="math display">\[
+E[\|e_k\|^2] = E[\|\nabla f_i(w_k) - \nabla f(w_k)\|^2] \\
+= \|\nabla f(w_k)\|^2 - \|\nabla f_i(w_k)\|^2 \\
+= \frac{1}{n} \sum_{i=1}^n \|\nabla f_i(w_k)\|^2 - \|\nabla f_i(w_k)\|^2 \\
+\leq \frac{1}{n} \sum_{i=1}^n \rho \|\nabla f(w_k)\|^2 - \|\nabla f(w_k)\|^2 \quad (\text{using SGC}) \\
+= (\rho - 1) \|\nabla f(w_k)\|^2 \\
+\text{So under the SGC, we do not need an assumption like } E[\|e_k\|^2] \leq \sigma^2.
+\]</span></p>
+<p>Using SGD in descent lemma with <span class="math inline">\(\alpha_k = \frac{1}{L\rho}\)</span> with SGC we obtain -</p>
+<p><span class="math display">\[
+E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L\rho} \|\nabla f(w_k)\|^2, \\
+\text{See bonus slide for the case of a general step size.} \\
+\text{Any step size } \alpha &lt; \frac{2}{L\rho} \text{ guarantees descent.}
+\]</span></p>
+<p>The function decrease of deterministic gradient descent up to a factor of <span class="math inline">\(\rho\)</span>. Any step size <span class="math inline">\(\alpha &lt; \frac{2}{L\rho\)</span> guarantees descent.</p>
 
 </div>
 </div>
@@ -189,8 +317,8 @@ Using <span class="math inline">\(\mathbb{E}_f(w_k) \geq f^*\)</span> and dividi
           </div>
         </div>
       </div>
-<a href="coordinate-optimization.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="coordinate-optimization.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="overparameterization.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
