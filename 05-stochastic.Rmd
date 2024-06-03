@@ -162,41 +162,6 @@ $$
 
 Where $\sigma(w^k)^2$ is the variance of the individual gradients at $w^k$. With a larger batch size of size $m$, the the effect of stochasticity is reduced by $m$. With a larger batch size of size $m$, we cause use a step size that is $m$ times larger. Doubling batch size has the same effect as halving the step size.
 
-## Overparameterization and SGD
-
-Overparameterization means that the model can fit the entire training data. Modern machine learning models like neural networks tend to do very well in overparameterized settings. Typically, over complicated models, you tend to overfit.
-
-
-In the overparameterized regime we have $\nabla f_i (w_*) = 0$ for all $i$. The variance is 0 at minimizers and SGD converges with a small enough step size.
-
-One way to characterize over-parameterization: strong growth condition (SGC) -
-
-$$
-E[\|\nabla f_i(w)\|^2] \leq \rho \|\nabla f(w)\|^2, \\
-\text{This implies the interpolation property that } \nabla f(w) = 0 \Rightarrow \nabla f_i(w) = 0 \text{ for all } i.
-$$
-**Bound on Error under the SGC -**
-
-Under the SGC, the SGD error is bounded by the full gradient size
-
-$$
-E[\|e_k\|^2] = E[\|\nabla f_i(w_k) - \nabla f(w_k)\|^2] \\
-= \|\nabla f(w_k)\|^2 - \|\nabla f_i(w_k)\|^2 \\
-= \frac{1}{n} \sum_{i=1}^n \|\nabla f_i(w_k)\|^2 - \|\nabla f_i(w_k)\|^2 \\
-\leq \frac{1}{n} \sum_{i=1}^n \rho \|\nabla f(w_k)\|^2 - \|\nabla f(w_k)\|^2 \quad (\text{using SGC}) \\
-= (\rho - 1) \|\nabla f(w_k)\|^2 \\
-\text{So under the SGC, we do not need an assumption like } E[\|e_k\|^2] \leq \sigma^2.
-$$
-
-Using SGD in descent lemma with $\alpha_k = \frac{1}{L\rho}$ with SGC we obtain -
-
-$$
-E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L\rho} \|\nabla f(w_k)\|^2, \\
-\text{See bonus slide for the case of a general step size.} \\
-\text{Any step size } \alpha < \frac{2}{L\rho} \text{ guarantees descent.}
-$$
-
-The function decrease of deterministic gradient descent up to a factor of $\rho$. Any step size $\alpha < \frac{2}{L\rho$ guarantees descent.
 
 
 

@@ -21,11 +21,13 @@ convergence-of-sgd-for-pl-functions
 when-to-stop
 mini-batches-and-batch-growing
 variation-in-mini-batch-approximation
-overparameterization-and-sgd
 overparameterization
-overparameterization-and-sgd-1
+overparameterization-and-sgd
 faster-sgd-for-overparameterized-models
 stochastic-line-search
+variations-on-sgd
+stochastic-average-gradient
+variance-reduced-stochastic-gradient
 approximating-the-hessian
 cheap-hessian-approximation-1---diagonal-hessian
 cheap-hessian-approximation-2---preconditioning

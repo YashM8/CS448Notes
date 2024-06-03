@@ -32,22 +32,28 @@ $$
 E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L\rho} \|\nabla f(w_k)\|^2, \\
 $$
 
-The function decrease of deterministic gradient descent up to a factor of $\rho$. Any step size $\alpha < \frac{2}{L\rho$ guarantees descent.
+The function decrease of deterministic gradient descent up to a factor of $\rho$. Any step size $\alpha < \frac{2}{L}\rho$ guarantees descent.
 
 ## Faster SGD for Overparameterized Models
  
 Over-parameterization leads to faster convergence rates for SGD. There now exist methods that go faster in over-parameterized setting. Under over-parameterization, you can also use SGD with a line-search.
 
-There are a huge number of papers on setting SGD step size as we go:
+The setting of SGD step size as we go works broadly as -
 
 - “Update step size based on some simple statistics”.
+
 - “Do gradient descent on the step size”.
+
 - “Use a line-search/trust-region based on the mini-batch”.
 
-Most of these methods have at least one of these problems:
+Most of these methods have problems like -
+
 - Introduces new hyper-parameters that are just as hard to tune as the step size.
-- Do not converge theoretically (and can catastrophically fail).
+
+- Do not converge theoretically.
+
 - Converges theoretically, but works badly in practice.
+
 - Needs to assume that $\sigma_k$ goes to 0 to work
 
 ## Stochastic Line Search

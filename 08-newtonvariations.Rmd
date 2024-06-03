@@ -80,8 +80,8 @@ $$
 $$
 
 Cost of computing gradient is $O(nd)$ due to the matrix-vector product. Cost of computing Hessian is $O(nd^2)$ due to the matrix-matrix product.
-$$
 
+$$
 \text{But cost of computing Hessian-vector product is only } O(nd) - \\
 \nabla^2 f(w) d = X^T D(w) Xd = X^T (D(w) (Xd)), \\
 \text{due to the matrix-vector products.}
