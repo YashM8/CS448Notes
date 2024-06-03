@@ -172,10 +172,12 @@ w_{k+1} = w_k - \frac{\alpha_k}{n} \sum_{i=1}^n v_k^i, \\
 \]</span>
 Where <span class="math inline">\(v_k^i\)</span> is the gradient <span class="math inline">\(\nabla f_i(w_k)\)</span> from the last <span class="math inline">\(k\)</span> where <span class="math inline">\(i\)</span> was selected.</p>
 <p>On each iteration we -</p>
-<ol style="list-style-type: decimal">
-<li>Randomly choose one of the <span class="math inline">\(v_i\)</span> and update it to the current gradient.</li>
-<li>We take a step in the direction of the average of these <span class="math inline">\(v_i\)</span></li>
-</ol>
+<ul>
+<li><p>Randomly select an index <span class="math inline">\(i_k\)</span> from <span class="math inline">\(\{1, 2, ..., n\}\)</span>.</p></li>
+<li><p>Compute the gradient <span class="math inline">\(\nabla f_{i_k}(w_k)\)</span> using only the data point corresponding to index <span class="math inline">\(i_k\)</span>.</p></li>
+<li><p>Update the corresponding entry in <span class="math inline">\(v_k\)</span> to <span class="math inline">\(\nabla f_{i_k}(w_k)\)</span>.</p></li>
+<li><p>Update the parameter vector <span class="math inline">\(w_{k+1}\)</span> using the average of the gradients stored in <span class="math inline">\(v_k\)</span>.</p></li>
+</ul>
 <p>Unlike batches, we use a gradient for every example. But the gradients are out of date.</p>
 </div>
 <div id="variance-reduced-stochastic-gradient" class="section level2 hasAnchor" number="7.2">

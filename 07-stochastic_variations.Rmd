@@ -28,8 +28,13 @@ Where $v_k^i$ is the gradient $\nabla f_i(w_k)$ from the last $k$ where $i$ was 
 
 On each iteration we -
 
-1. Randomly choose one of the $v_i$ and update it to the current gradient.
-2. We take a step in the direction of the average of these $v_i$
+- Randomly select an index $i_k$ from $\{1, 2, ..., n\}$.
+
+- Compute the gradient $\nabla f_{i_k}(w_k)$ using only the data point corresponding to index $i_k$.
+
+- Update the corresponding entry in $v_k$ to $\nabla f_{i_k}(w_k)$.
+
+- Update the parameter vector $w_{k+1}$ using the average of the gradients stored in $v_k$.
 
 Unlike batches, we use a gradient for every example. But the gradients are out of date.
 
