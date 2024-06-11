@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Coordinate Optimization | CS448Notes</title>
-  <meta name="description" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <title>Chapter 10 Global Optimization and Subgradients | CS448Notes</title>
+  <meta name="description" content="Chapter 10 Global Optimization and Subgradients | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta property="og:title" content="Chapter 10 Global Optimization and Subgradients | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta name="twitter:title" content="Chapter 10 Global Optimization and Subgradients | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="improving-gradient-descent.html"/>
-<link rel="next" href="stochastic-gradient-methods.html"/>
+<link rel="prev" href="projected-gradient-based-algorithms.html"/>
+<link rel="next" href="proximal-gradient-methods.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -172,139 +172,164 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="coordinate-optimization" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Coordinate Optimization<a href="coordinate-optimization.html#coordinate-optimization" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="definition-and-examples" class="section level2 hasAnchor" number="4.1">
-<h2><span class="header-section-number">4.1</span> Definition and examples<a href="coordinate-optimization.html#definition-and-examples" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>During each iteration of coordinate optimization, only one variable (or coordinate) is updated. By updating only one variable at a time, the optimization process becomes simpler and more efficient.</p>
-<p>On iteration <span class="math inline">\(k\)</span> we select a variable <span class="math inline">\(j_k\)</span> and set
+<div id="global-optimization-and-subgradients" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Global Optimization and Subgradients<a href="global-optimization-and-subgradients.html#global-optimization-and-subgradients" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Real valued functions are extremely tricky to optimize globally.</p>
+<p>Consider minimizing a function over the unit hyper-cube:
 <span class="math display">\[
-w_{k+1}^{j_k} = w_k^{j_k} - \alpha_k \nabla_{j_k} f(w_k)
-\]</span>
-A gradient descent step for one coordinate <span class="math inline">\(j_k\)</span> (other <span class="math inline">\(w_j\)</span> stay the same).</p>
-<p>Theoretically, coordinate descent is a provably bad algorithm. The convergence rate is slower than gradient descent. The iteration cost can be similar to gradient descent. Computing 1 partial derivative may have same cost as computing gradient.</p>
-<p>But it is widely-used in practice. Nothing works better for certain problems. Certain fields think it is the “ultimate” algorithm.</p>
-<p>Global convergence rate can be showed for randomized coordinate selection. Coordinate descent is faster than gradient descent if iterations are <span class="math inline">\(d\)</span> times cheaper. Sometimes called coordinate-friendly structures.</p>
-<p><strong>For what functions is coordinate descent <span class="math inline">\(d\)</span> times faster than gradient descent?</strong></p>
-<p>The simplest example are separable functions:
-<span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j)
-\]</span>
-Where <span class="math inline">\(f\)</span> is the sum of <span class="math inline">\(f_j\)</span> applied to each <span class="math inline">\(w_j\)</span>, like <span class="math inline">\(f(w) = \frac{\lambda}{2} \|w\|^2 = \sum_{j=1}^{d} \frac{\lambda}{2} w_j^2\)</span>.</p>
-<p>Gradient descent costs <span class="math inline">\(O(d)\)</span> to compute each <span class="math inline">\(f&#39;_j(w_k^j)\)</span>.
-Coordinate descent costs <span class="math inline">\(O(1)\)</span> to compute the one <span class="math inline">\(f&#39;_jk(w_k^{jk})\)</span>.</p>
-<p>For separable functions you should only use coordinate optimization. The variables <span class="math inline">\(w_j\)</span> have “separate” effects, so can be minimized independently.</p>
-<p>A more interesting example is pairwise-separable functions:
-<span class="math display">\[
-f(w) = \sum_{i=1}^{d} \sum_{j=1}^{d} f_{ij}(w_i, w_j),
-\]</span>
-Which depend on a function of each pair of variables. This includes quadratic functions. An example is label propagation for semi-supervised learning. Here <span class="math inline">\(f_{ij}\)</span> measures how similar labels are between neighbors.</p>
-<p>The double sum has <span class="math inline">\(O(d^2)\)</span> terms. Gradient descent needs to compute the gradient of all these terms.
-Each <span class="math inline">\(w_j\)</span> only appears in <span class="math inline">\(O(d)\)</span> terms. Coordinate optimization only needs to use these terms.</p>
-<p>The label propagation example looks a bit more like this:</p>
-<p><span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j) + \sum_{(i,j) \in E} f_{ij}(w_i, w_j),
+\min_{w \in [0,1]^d} f(w),
 \]</span></p>
-<p>where <span class="math inline">\(E\)</span> is a set of <span class="math inline">\((i, j)\)</span> edges in a graph. Adding a separable function doesn’t change costs. We could just combine each <span class="math inline">\(f_j\)</span> with one <span class="math inline">\(f_{ij}\)</span>. Restricting <span class="math inline">\((i, j)\)</span> to <span class="math inline">\(E\)</span> makes gradient descent cheaper. Now costs <span class="math inline">\(O(|E|)\)</span> to compute gradient. Coordinate descent could also cost <span class="math inline">\(O(|E|)\)</span> if the degree of <span class="math inline">\(j_k\)</span> is <span class="math inline">\(O(|E|)\)</span>. Coordinate descent is still <span class="math inline">\(d\)</span> times faster in expectation if you randomly update coordinates.</p>
-<p>Another coordinate-friendly structure is <strong>linear compositions:</strong></p>
+<p>Using any algorithm, you can construct <span class="math inline">\(f(w_k) - f(w^*) &gt; \epsilon\)</span> forever due to there being infinite real numbers between any two real numbers.</p>
+<div id="considering-minimizing-lipschitz-continuous-functions" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> Considering Minimizing Lipschitz-Continuous Functions<a href="global-optimization-and-subgradients.html#considering-minimizing-lipschitz-continuous-functions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><span class="math display">\[
-f(w) = g(Aw), \text{ for a } n \times d \text{ matrix and a sooth function } g
-\]</span>
-It is still coordinate friendly if we add a separable function like an L2-regularizer.
-<span class="math display">\[
-f(w) = g(Aw) + \sum_{j=1}^{d} f_j(w_j),
+\vert f(w) - f(v) \vert \leq L \lVert w - v \rVert
 \]</span></p>
-<p>The main idea is that you can track <span class="math inline">\(Aw_k\)</span> as you go for a cost <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span>.</p>
-<p>For linear compositions problems, the partial derivatives on iteration <span class="math inline">\(k\)</span> have the form:
-<span class="math display">\[
-\nabla_j f(w_k) = a_j^T g&#39;(Aw_k),
-\]</span>
-where <span class="math inline">\(a_j\)</span> is column <span class="math inline">\(j\)</span> of <span class="math inline">\(A\)</span>.</p>
-<p>If we have <span class="math inline">\(Aw^k\)</span>, this costs <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span> for the full gradient. (Assuming <span class="math inline">\(g&#39;\)</span> costs <span class="math inline">\(O(n)\)</span>)
-We can track the product <span class="math inline">\(Aw_k\)</span> as we go with <span class="math inline">\(O(n)\)</span> cost:</p>
-<p><span class="math display">\[
-Aw^{k+1} = A(w^k + \gamma_k e_{jk}) = Aw^k + \gamma_k a_j.
-\]</span>
-This allows computing partial derivatives and implementing line-search steps in <span class="math inline">\(O(n)\)</span>.</p>
-<p>Neural networks are usually not coordinate friendly. Would need something like “number of units after first hidden layer is tiny”. Updating just one parameter can lead to complex and non-local effects on the overall function of the network.</p>
+<p>Functions that don’t change arbitrarily fast as you change <span class="math inline">\(x\)</span>.</p>
+<p>Considering the unit hypercube again, it becomes easier to optimize. A worst case of <span class="math inline">\(O(\frac{1}{\epsilon^d})\)</span> is achieved by a simple grid search.</p>
+<p>You can go faster if you use random guesses. Lipschitz-continuity implies there is a ball of <span class="math inline">\(\epsilon\)</span> optimal solutions around <span class="math inline">\(w^*\)</span>. The radius of the ball is <span class="math inline">\(\Omega(\epsilon)\)</span>so its “volume” is <span class="math inline">\(\Omega(\epsilon^d)\)</span>.</p>
 </div>
-<div id="analyzing-coordinate-descent" class="section level2 hasAnchor" number="4.2">
-<h2><span class="header-section-number">4.2</span> Analyzing Coordinate Descent<a href="coordinate-optimization.html#analyzing-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To analyze coordinate descent, we can write it as
-<span class="math display">\[
-w_{k+1} = w_k - \alpha_k \nabla_{jk} f(w_k) e_{jk},
-\]</span>
-where the “elementary vector” <span class="math inline">\(e_j\)</span> has a zero in every position except <span class="math inline">\(j\)</span>,
-<span class="math display">\[
-e_j^T =
-\begin{bmatrix}
-0 &amp; \cdots &amp; 1 &amp; \cdots &amp; 0
-\end{bmatrix}
-\]</span>
-We usually assume that each <span class="math inline">\(\nabla_j f\)</span> is <span class="math inline">\(L\)</span>-Lipshitz (“coordinate-wise Lipschitz”),
-<span class="math display">\[
-|\nabla_j f(w + \gamma e_j) - \nabla_j f(w)| \leq L|\gamma|
-\]</span>
-which for <span class="math inline">\(C^2\)</span> functions is equivalent to <span class="math inline">\(|\nabla_{jj}^2 f(w)| \leq L\)</span> for all <span class="math inline">\(j\)</span>.</p>
-<p>This is not a stronger assumption than for gradient descent - If the gradient is <span class="math inline">\(L\)</span>-Lipschitz then it is also coordinate-wise <span class="math inline">\(L\)</span>-Lipschitz.</p>
-<p>Coordinate-wise Lipschitz assumption implies the descent lemma coordinate-wise:
-<span class="math display">\[
-f(w^{k+1}) \leq f(w^k) + \nabla_j f(w^k)(w^{k+1} - w^k)_j + \frac{L}{2}(w^{k+1} - w^k)^2_j
-\]</span>
-for any <span class="math inline">\(w^{k+1}\)</span> and <span class="math inline">\(w_k\)</span> that only differ in coordinate <span class="math inline">\(j\)</span>. With <span class="math inline">\(\alpha_k = \frac{1}{L}\)</span> (for simplicity), plugging in <span class="math inline">\((w_{k+1} - w_k) = -\frac{1}{L}e_{jk}\nabla_{jk} f(w_k)\)</span> gives</p>
+<div id="subgradient-methods" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> Subgradient Methods<a href="global-optimization-and-subgradients.html#subgradient-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>What is a subgradient?</strong></p>
+<p>Differentiable convex functions are always above their tangent lines:</p>
 <p><span class="math display">\[
-f(w^{k+1}) \leq f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2,
+f(v) \geq f(w) + \nabla f(w)^\top (v - w), \quad \forall w, v.
+\
 \]</span>
-a progress bound based on only updating coordinate <span class="math inline">\(j_k\)</span>.</p>
+<span class="math display">\[
+\text{A vector } d \text{ is a subgradient of a convex function } f \text{ at } w \text{ if}\\
+f(v) \geq f(w) + d^\top (v - w), \quad \forall v.
+\]</span>
+For example, sub-differential of absolute value function:
+<span class="math display">\[
+\partial |w| =
+\begin{cases}
+1 &amp; \text{if } w &gt; 0 \\
+-1 &amp; \text{if } w &lt; 0 \\
+[-1, 1] &amp; \text{if } w = 0
+\end{cases}
+\]</span></p>
+<p><strong>Why does L1 regularization give sparsity?</strong></p>
+<p>Considering L2-regularized least squares:
+<span class="math display">\[
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \frac{\lambda}{2} \| w \|_2^2.
+\]</span>
+Element <span class="math inline">\(j\)</span> of the gradient at <span class="math inline">\(w_j = 0\)</span> is given by
+<span class="math display">\[
+\nabla_j f(w) = x_j^\top (Xw - y) \big| + \lambda w
+\]</span>
+For <span class="math inline">\(w_j = 0\)</span> to be a solution we need <span class="math inline">\(\nabla_j f(w^*) = 0\)</span> or that <span class="math inline">\(0 = x_j^\top r^*\)</span>
+where <span class="math inline">\(r^* = Xw^* - y\)</span> for the solution <span class="math inline">\(w^*\)</span> that column <span class="math inline">\(j\)</span>is orthogonal to the final residual.</p>
+<p>This is possible, but it is very unlikely. Increasing <span class="math inline">\(\lambda\)</span> doesn’t help.</p>
+<p>Considering L1-regularized least squares:
+<span class="math display">\[
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \lambda \| w \|_1.
+\]</span>
+Element <span class="math inline">\(j\)</span> of the subdifferential at <span class="math inline">\(w_j = 0\)</span> is given by
+<span class="math display">\[
+\partial_j f(w) \equiv x_j^\top (Xw - y) \big| + \lambda [-1, 1] .
+\]</span>
+For <span class="math inline">\(w_j = 0\)</span> to be a solution, we need <span class="math inline">\(0 \in \partial_j f(w^*)\)</span> or that
+<span class="math display">\[
+0 \in x_j^\top r^* + \lambda [-1, 1] \\
+-x_j^\top r^* \in \lambda [-1, 1] \\
+|x_j^\top r^*| \leq \lambda,
+\]</span>
+So features <span class="math inline">\(j\)</span> that have little to do with <span class="math inline">\(y\)</span> will often lead to <span class="math inline">\(w_j = 0\)</span>. Increasing <span class="math inline">\(\lambda\)</span> makes this more likely to happen.</p>
+<p>The subgradient method:</p>
+<p><span class="math display">\[
+w_{k+1} = w_k - \alpha_k g_k,
+\]</span>
+For any <span class="math inline">\(g_k \in \partial f(w_k)\)</span>.</p>
+<p>At a non-differentiable point, some subgradients may reduce the objective. At differentiable points, subgradient is the gradient and reduces the objective.</p>
+<p>For the subgradient method applied to Lipschitz and convex <span class="math inline">\(f\)</span> we have
+<span class="math display">\[
+\|w_{k+1} - w^*\|^2 = \|w_k - w^*\|^2 - 2\alpha_k g_k^\top (w_k - w^*) + \alpha_k^2 ||g_k||^2\\
+\leq \|w_k - w^*\|^2 - 2\alpha_k[f(w_k) - f(w^*)] + \alpha_k^2 L^2.\\\\
+\rightarrow 2\alpha_k[f(w_k) - f(w^*)] \leq \|w_k - w^*\|^2 - \|w_{k+1} - w^*\|^2 + \alpha_k^2 L^2
+\]</span>
+And summing the telescoping values from <span class="math inline">\(k = 1\)</span> to <span class="math inline">\(t\)</span> we get
+<span class="math display">\[
+2 \sum_{k=1}^t \alpha_k[f(w_k) - f(w^*)] \leq \|w_0 - w^*\|^2 - \|w_{k+1} - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k.
+\]</span></p>
+<p>Using <span class="math inline">\(f_b\)</span> as the lowest <span class="math inline">\(f(w_k)\)</span> and <span class="math inline">\(\|w_{k+1} - w^*\|^2 \geq 0\)</span> we can re-arrange to get a bound that is very similar to what we showed for SGD:
+<span class="math display">\[
+f(w_b) - f(w^*) \leq \frac{\|w_1 - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k^2}{2 \sum_{k=1}^t \alpha_k}
+= O \left( \frac{1}{\sum_{k} \alpha_k} \right) + O \left( \frac{\sum_{k} \alpha_k^2}{\sum_{k} \alpha_k} \right)
+\]</span>
+## Smooth Approximations</p>
+<p>Non smooth functions can be approximated using smooth functions. Non smooth regions can be smoothed leaving the rest of the function untouched. Like Huber loss for the absolute value function.</p>
+<p>The advantage is to smoothing can be faster conversions than sub gradient methods. You can use line search and momentum or acceleration for faster convergence. Huber smoothed objective functions often have similar test error.</p>
+<p>Some reasons not to smooth are that smoothing can destroy the structure of the solution. For example, L1 regularization leads to sparse solutions because it is not smooth Huber loss does not lead to sparse solutions. Smooth approximations can be expensive to evaluate and they don’t converge faster when you add stochasticity.</p>
 </div>
-<div id="randomized-cd-progress" class="section level2 hasAnchor" number="4.3">
-<h2><span class="header-section-number">4.3</span> Randomized CD Progress<a href="coordinate-optimization.html#randomized-cd-progress" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The progress on a <strong>randomized</strong> coordinate descent depends on the random selection of <span class="math inline">\(j_k\)</span>. The expected progress is:</p>
-<p><span class="math display">\[
-\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given }w^k\\
-= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
-= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
-\]</span>
-Expectation is conditioned on all steps up to time <span class="math inline">\(k\)</span>.</p>
-<p>Let’s choose <span class="math inline">\(j_k\)</span> uniformly at random in this bound, <span class="math inline">\(p(j_k = j) = \frac{1}{d}\)</span>.</p>
-<p><span class="math display">\[
-E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
-\]</span></p>
-<p><strong>Random-Shuffling Coordinate Selection</strong></p>
-<p>An alternative to random selection of <span class="math inline">\(j_k\)</span> is cyclic selection:
-<span class="math display">\[
-j_1 = 1, j_2 = 2, \ldots, j_d = d \\
-j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
-j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
-\]</span>
-Cyclic often outperforms random in practice, but is worse in theory.</p>
-<p>For some problems, a bad ordering leads to provably-bad performance for cyclic.</p>
-<p><strong>Hybrid between cyclic and random is using random shuffling:</strong></p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]\)</span>.</p>
-<p>Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.</p>
+<div id="linear-convergence" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Linear convergence<a href="global-optimization-and-subgradients.html#linear-convergence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bisection: Linear convergence in 1 dimension -</p>
+<p>Consider the following method for finding a minimizer:</p>
+<ol style="list-style-type: decimal">
+<li>At each iteration, compute a subgradient at the middle of the interval.</li>
+<li>Set the lower/upper bound of the interval to the midpoint (using subgradient sign)</li>
+</ol>
+<p>Maximum distance to <span class="math inline">\(w^*\)</span> is cut in half giving iteration complexity of <span class="math inline">\(O(log(1/\epsilon))\)</span></p>
+<p>Cutting Plane: Linear Convergence in <span class="math inline">\(d\)</span> dimensions -</p>
+<p>This generalizes bijections to higher dimensions. Can be used to optimize convex functions over bounded polygons.</p>
+<ol style="list-style-type: decimal">
+<li><p>At each iteration, compute a subgradient at the center of the polygon. From the definition of subgradient we have for any <span class="math inline">\(w\)</span> that <span class="math inline">\(f(w) \geq f(w_k) +g_k^\top (w - w_k)\)</span>. So any <span class="math inline">\(w\)</span> satisfying <span class="math inline">\(g_k^\top (w - w_k) &gt; 0\)</span> will be greater than <span class="math inline">\(f(w_k)\)</span>.</p></li>
+<li><p>This constraint is analogous to a plane that cuts the polygon.</p></li>
+</ol>
+<p>Worst-case theoretical rates for convex optimization with subgradients are:</p>
+<p>Best subgradient methods require <span class="math inline">\(O(1/\epsilon^2)\)</span> iterations.
+Best cutting plane methods require <span class="math inline">\(O(d log(1/\epsilon))\)</span> iterations</p>
 </div>
-<div id="gauss-southwell-greedy-coordinate-descent" class="section level2 hasAnchor" number="4.4">
-<h2><span class="header-section-number">4.4</span> Gauss-Southwell: Greedy Coordinate Descent<a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Instead of cyclic or random, there are also greedy coordinate selection methods.</p>
-<p>The classic greedy method is the Gauss-Southwell rule,</p>
-<p><span class="math display">\[
-j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
-\]</span></p>
-<p>which chooses the coordinate with the largest directional derivative.</p>
-<p>This leads to a progress bound of</p>
-<p><span class="math display">\[
-f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
-\]</span></p>
-<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of</p>
-<p><span class="math display">\[ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], \]</span></p>
-<p>Where <span class="math inline">\(\mu_1\)</span> is the PL constant in the <span class="math inline">\(\infty\)</span>-norm</p>
-<p><span class="math display">\[ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. \]</span></p>
-<p>This is faster than random because <span class="math inline">\(\mu_d \leq \mu_1 \leq \mu\)</span> (by norm equivalences). The <span class="math inline">\(\mu_1\)</span>-PL condition is implied by strong-convexity in the 1-norm.</p>
-<p><strong>TODO Greedy Lipschitz, strong convexity and PL</strong></p>
+<div id="using-multiple-subgradients" class="section level2 hasAnchor" number="10.4">
+<h2><span class="header-section-number">10.4</span> Using Multiple Subgradients<a href="global-optimization-and-subgradients.html#using-multiple-subgradients" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We get a tighter bound by using all previous function and subgradient values:
+<span class="math display">\[
+f(w) \geq \max_{t \in \{1, \ldots, k\}} f(w_t) + g_t^\top (w - w_t)
+\]</span>
+We can also choose the “best” subgradient?
+Convex functions have directional derivatives everywhere. Direction <span class="math inline">\(-g_t\)</span> that minimizes directional derivative is minimum-norm subgradient:
+<span class="math display">\[
+g_k \in \arg\min_{g \in \partial f(w_k)} \|g\|
+\]</span>
+This is the steepest descent direction for non-smooth convex optimization problems.</p>
+<p>Some advantages are that the solution is a fixed point: <span class="math inline">\(w^* = w^* - \alpha g^*\)</span> since <span class="math inline">\(g^* = 0\)</span>. We can satisfy line-search criteria since <span class="math inline">\(-g_k\)</span> is a descent direction.
+- And line searches work with directional derivatives, which exist.</p>
+<p>Some issues are that he minimum-norm subgradient may be difficult to find. Convergence not well understood and it is not shown to improve worst-case rate over subgradient method. Counter-examples exist where line search causes convergence to sub-optimal values.</p>
+<p>Optimizing a smooth <span class="math inline">\(f\)</span> with (non-smooth) L1-regularization,
+<span class="math display">\[
+\text{argmin}_w f(w) + \lambda \|w\|_1.
+\]</span>
+The subdifferential with respect to coordinate <span class="math inline">\(j\)</span> has the form:
+<span class="math display">\[
+\nabla_j f(w) + \lambda \begin{cases}
+\text{sign}(w_j) &amp; w_j \neq 0 \\
+[-1, 1] &amp; w_j = 0
+\end{cases}.
+\]</span>
+The part of the subdifferential with smallest absolute value is given by
+<span class="math display">\[
+\begin{cases}
+\nabla_j f(w) + \lambda \text{sign}(w_j) &amp; \text{for } w_j \neq 0 \\
+\nabla_j f(w) - \lambda \text{sign}(\nabla_j f(w)) &amp; \text{for } w_j = 0, |\nabla_j f(w)| &gt; \lambda \\
+0 &amp; \text{for } w_j = 0, |\nabla_j f(w)| \leq \lambda
+\end{cases}.
+\]</span>
+This can be viewed as the steepest descent direction for L1-regularization. This keeps variables at 0 if the partial derivative at zero is small enough. However, the min-norm subgradient does not automatically set variables to 0.</p>
+<p><strong>Orthant-Projected Min-Norm Subgradient for L1-regularization</strong></p>
+<p>Min-norm subgradient method with orthant projection for L1-regularization is:
+<span class="math display">\[
+w_{k+1} = \text{proj}_O(w_k) [w_k - \alpha_k g_k]\\
+\text{Where, } g_k \in \arg\min_{g \in \partial f(w_k)} \|g\|
+\]</span>
+<span class="math inline">\(\text{proj}_O(w_k) [z]\)</span> sets <span class="math inline">\(z_j = 0\)</span> if $(z_j) (w_j) $.</p>
+<p>So <span class="math inline">\(w_{k+1}\)</span> stays in the same orthant as <span class="math inline">\(w_k\)</span>.</p>
+<p>This has a lot of appealing properties:
+- Orthant-project can result in sparse solutions.
+- Min-norm subgradient keeps values at 0.
+- Can be combined with line-search.
+- Can use clever step sizes like Barzilai Borwein.</p>
 
 </div>
 </div>
@@ -313,8 +338,8 @@ f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
           </div>
         </div>
       </div>
-<a href="improving-gradient-descent.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="stochastic-gradient-methods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="projected-gradient-based-algorithms.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="proximal-gradient-methods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -345,7 +370,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/10-global.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -353,7 +378,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/10-global.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],

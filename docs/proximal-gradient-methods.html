@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Coordinate Optimization | CS448Notes</title>
-  <meta name="description" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <title>Chapter 11 Proximal Gradient Methods | CS448Notes</title>
+  <meta name="description" content="Chapter 11 Proximal Gradient Methods | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta property="og:title" content="Chapter 11 Proximal Gradient Methods | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta name="twitter:title" content="Chapter 11 Proximal Gradient Methods | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="improving-gradient-descent.html"/>
-<link rel="next" href="stochastic-gradient-methods.html"/>
+<link rel="prev" href="global-optimization-and-subgradients.html"/>
+<link rel="next" href="optimization-demo.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -172,139 +172,119 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="coordinate-optimization" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Coordinate Optimization<a href="coordinate-optimization.html#coordinate-optimization" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="definition-and-examples" class="section level2 hasAnchor" number="4.1">
-<h2><span class="header-section-number">4.1</span> Definition and examples<a href="coordinate-optimization.html#definition-and-examples" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>During each iteration of coordinate optimization, only one variable (or coordinate) is updated. By updating only one variable at a time, the optimization process becomes simpler and more efficient.</p>
-<p>On iteration <span class="math inline">\(k\)</span> we select a variable <span class="math inline">\(j_k\)</span> and set
-<span class="math display">\[
-w_{k+1}^{j_k} = w_k^{j_k} - \alpha_k \nabla_{j_k} f(w_k)
-\]</span>
-A gradient descent step for one coordinate <span class="math inline">\(j_k\)</span> (other <span class="math inline">\(w_j\)</span> stay the same).</p>
-<p>Theoretically, coordinate descent is a provably bad algorithm. The convergence rate is slower than gradient descent. The iteration cost can be similar to gradient descent. Computing 1 partial derivative may have same cost as computing gradient.</p>
-<p>But it is widely-used in practice. Nothing works better for certain problems. Certain fields think it is the “ultimate” algorithm.</p>
-<p>Global convergence rate can be showed for randomized coordinate selection. Coordinate descent is faster than gradient descent if iterations are <span class="math inline">\(d\)</span> times cheaper. Sometimes called coordinate-friendly structures.</p>
-<p><strong>For what functions is coordinate descent <span class="math inline">\(d\)</span> times faster than gradient descent?</strong></p>
-<p>The simplest example are separable functions:
-<span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j)
-\]</span>
-Where <span class="math inline">\(f\)</span> is the sum of <span class="math inline">\(f_j\)</span> applied to each <span class="math inline">\(w_j\)</span>, like <span class="math inline">\(f(w) = \frac{\lambda}{2} \|w\|^2 = \sum_{j=1}^{d} \frac{\lambda}{2} w_j^2\)</span>.</p>
-<p>Gradient descent costs <span class="math inline">\(O(d)\)</span> to compute each <span class="math inline">\(f&#39;_j(w_k^j)\)</span>.
-Coordinate descent costs <span class="math inline">\(O(1)\)</span> to compute the one <span class="math inline">\(f&#39;_jk(w_k^{jk})\)</span>.</p>
-<p>For separable functions you should only use coordinate optimization. The variables <span class="math inline">\(w_j\)</span> have “separate” effects, so can be minimized independently.</p>
-<p>A more interesting example is pairwise-separable functions:
-<span class="math display">\[
-f(w) = \sum_{i=1}^{d} \sum_{j=1}^{d} f_{ij}(w_i, w_j),
-\]</span>
-Which depend on a function of each pair of variables. This includes quadratic functions. An example is label propagation for semi-supervised learning. Here <span class="math inline">\(f_{ij}\)</span> measures how similar labels are between neighbors.</p>
-<p>The double sum has <span class="math inline">\(O(d^2)\)</span> terms. Gradient descent needs to compute the gradient of all these terms.
-Each <span class="math inline">\(w_j\)</span> only appears in <span class="math inline">\(O(d)\)</span> terms. Coordinate optimization only needs to use these terms.</p>
-<p>The label propagation example looks a bit more like this:</p>
+<div id="proximal-gradient-methods" class="section level1 hasAnchor" number="11">
+<h1><span class="header-section-number">Chapter 11</span> Proximal Gradient Methods<a href="proximal-gradient-methods.html#proximal-gradient-methods" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Proximal-gradient methods apply to functions of the form:</p>
 <p><span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j) + \sum_{(i,j) \in E} f_{ij}(w_i, w_j),
+F(w) = f(w) + r(w)\\
+\text{Where } f \text{ simple and } r \text{ is simple and can be non-smooth.}
 \]</span></p>
-<p>where <span class="math inline">\(E\)</span> is a set of <span class="math inline">\((i, j)\)</span> edges in a graph. Adding a separable function doesn’t change costs. We could just combine each <span class="math inline">\(f_j\)</span> with one <span class="math inline">\(f_{ij}\)</span>. Restricting <span class="math inline">\((i, j)\)</span> to <span class="math inline">\(E\)</span> makes gradient descent cheaper. Now costs <span class="math inline">\(O(|E|)\)</span> to compute gradient. Coordinate descent could also cost <span class="math inline">\(O(|E|)\)</span> if the degree of <span class="math inline">\(j_k\)</span> is <span class="math inline">\(O(|E|)\)</span>. Coordinate descent is still <span class="math inline">\(d\)</span> times faster in expectation if you randomly update coordinates.</p>
-<p>Another coordinate-friendly structure is <strong>linear compositions:</strong></p>
-<p><span class="math display">\[
-f(w) = g(Aw), \text{ for a } n \times d \text{ matrix and a sooth function } g
-\]</span>
-It is still coordinate friendly if we add a separable function like an L2-regularizer.
+<p>The function to minimize:
 <span class="math display">\[
-f(w) = g(Aw) + \sum_{j=1}^{d} f_j(w_j),
+\arg\min_{w \in \mathbb{R}^d} f(w) + r(w).
+\]</span>
+Iteration <span class="math inline">\(w_k\)</span> works with a quadratic approximation to <span class="math inline">\(f\)</span>:
+<span class="math display">\[
+f(v) + r(v) \approx f(w_k) + \nabla f(w_k)^\top (v - w_k) + \frac{1}{2\alpha_k} \|v - w_k\|^2 + r(v),
+\]</span>
+<span class="math display">\[
+w_{k+1} \in \arg\min_{v \in \mathbb{R}^d} \left[ f(w_k) + \nabla f(w_k)^\top (v - w_k) + \frac{1}{2\alpha_k} \|v - w_k\|^2 + r(v) \right]
+\]</span>
+Writing this as the proximal optimization:
+<span class="math display">\[
+w_{k+1} \in \arg\min_{v \in \mathbb{R}^d} \left[ \frac{1}{2} \|v - (w_k - \alpha_k \nabla f(w_k))\|^2 + \alpha_k r(v) \right]\\
+w_{k+1} = \text{prox}_{\alpha_k r} [w_k - \alpha_k \nabla f(w_k)]
+\]</span>
+The proximal-gradient algorithm:
+<span class="math display">\[
+w_{k+\frac{1}{2}} = w_k - \alpha_k \nabla f(w_k), \quad w_{k+1} = \arg\min_{v \in \mathbb{R}^d} \left[ \frac{1}{2} \|v - w_{k+\frac{1}{2}}\|^2 + \alpha_k r(v) \right]
+\]</span>
+The right equation is called the proximal operator with respect to a convex function <span class="math inline">\(\alpha_k r\)</span>. If you can efficiently compute the proximal operator, <span class="math inline">\(r\)</span> is “simple”.</p>
+<p>L1-regularization can be optimized using Proximal-Gradient:
+<span class="math display">\[
+\text{prox}_{\alpha_k \lambda \|\cdot\|_1} [w] \in \arg\min_{v \in \mathbb{R}^d} \left[ \frac{1}{2} \|v - w\|^2 + \alpha_k \lambda \|v\|_1 \right]\\
+w_j \in \arg\min_{v_j \in \mathbb{R}} \left[ \frac{1}{2} (v_j - w_j)^2 + \alpha_k \lambda |v_j| \right]
 \]</span></p>
-<p>The main idea is that you can track <span class="math inline">\(Aw_k\)</span> as you go for a cost <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span>.</p>
-<p>For linear compositions problems, the partial derivatives on iteration <span class="math inline">\(k\)</span> have the form:
+<div id="convergence-rate-1" class="section level2 hasAnchor" number="11.1">
+<h2><span class="header-section-number">11.1</span> Convergence Rate<a href="proximal-gradient-methods.html#convergence-rate-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Proximal-Gradient Linear Convergence Rate</p>
+<p>Simplest linear convergence proofs are based on the proximal-PL inequality,
 <span class="math display">\[
-\nabla_j f(w_k) = a_j^T g&#39;(Aw_k),
+\frac{1}{2} D_r(w, L) \geq \mu(F(w) - F^*)\\
+\text{where } \|\nabla f(w)\|^2 \text{ in the PL inequality is generalized }\\
+D_r(w, L) = -2\alpha \min_v \left[ \nabla f(w)^\top (v - w) + \frac{L}{2} \|v - w\|^2 + r(v) - r(w) \right]
 \]</span>
-where <span class="math inline">\(a_j\)</span> is column <span class="math inline">\(j\)</span> of <span class="math inline">\(A\)</span>.</p>
-<p>If we have <span class="math inline">\(Aw^k\)</span>, this costs <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span> for the full gradient. (Assuming <span class="math inline">\(g&#39;\)</span> costs <span class="math inline">\(O(n)\)</span>)
-We can track the product <span class="math inline">\(Aw_k\)</span> as we go with <span class="math inline">\(O(n)\)</span> cost:</p>
-<p><span class="math display">\[
-Aw^{k+1} = A(w^k + \gamma_k e_{jk}) = Aw^k + \gamma_k a_j.
-\]</span>
-This allows computing partial derivatives and implementing line-search steps in <span class="math inline">\(O(n)\)</span>.</p>
-<p>Neural networks are usually not coordinate friendly. Would need something like “number of units after first hidden layer is tiny”. Updating just one parameter can lead to complex and non-local effects on the overall function of the network.</p>
+Linear convergence if <span class="math inline">\(\nabla f\)</span> is Lipschitz and <span class="math inline">\(F\)</span> is proximal-PL:
+<span class="math display">\[
+F(w_{k+1}) = f(w_{k+1}) + r(w_{k+1})\\
+\leq f(w_k) + \langle \nabla f(w_k), w_{k+1} - w_k \rangle + \frac{L}{2} \|w_{k+1} - w_k\|^2 + r(w_{k+1})\\
+= F(w_k) + \langle \nabla f(w_k), w_{k+1} - w_k \rangle + \frac{L}{2} \|w_{k+1} - w_k\|^2 + r(w_{k+1}) - r(w_k)\\
+\leq F(w_k) - \frac{\mu}{L} [F(w_k) - F^*] \quad \text{from proximal-PL}
+\]</span></p>
 </div>
-<div id="analyzing-coordinate-descent" class="section level2 hasAnchor" number="4.2">
-<h2><span class="header-section-number">4.2</span> Analyzing Coordinate Descent<a href="coordinate-optimization.html#analyzing-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To analyze coordinate descent, we can write it as
+<div id="dualty" class="section level2 hasAnchor" number="11.2">
+<h2><span class="header-section-number">11.2</span> Dualty<a href="proximal-gradient-methods.html#dualty" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Considering the support vector machine optimization problem:
 <span class="math display">\[
-w_{k+1} = w_k - \alpha_k \nabla_{jk} f(w_k) e_{jk},
+\arg\min_{w \in \mathbb{R}^d} C \sum_{i=1}^{n} \max\{0, 1 - y_i w^\top x_i\} + \frac{1}{2} \|w\|^2
 \]</span>
-where the “elementary vector” <span class="math inline">\(e_j\)</span> has a zero in every position except <span class="math inline">\(j\)</span>,
-<span class="math display">\[
-e_j^T =
-\begin{bmatrix}
-0 &amp; \cdots &amp; 1 &amp; \cdots &amp; 0
-\end{bmatrix}
-\]</span>
-We usually assume that each <span class="math inline">\(\nabla_j f\)</span> is <span class="math inline">\(L\)</span>-Lipshitz (“coordinate-wise Lipschitz”),
-<span class="math display">\[
-|\nabla_j f(w + \gamma e_j) - \nabla_j f(w)| \leq L|\gamma|
-\]</span>
-which for <span class="math inline">\(C^2\)</span> functions is equivalent to <span class="math inline">\(|\nabla_{jj}^2 f(w)| \leq L\)</span> for all <span class="math inline">\(j\)</span>.</p>
-<p>This is not a stronger assumption than for gradient descent - If the gradient is <span class="math inline">\(L\)</span>-Lipschitz then it is also coordinate-wise <span class="math inline">\(L\)</span>-Lipschitz.</p>
-<p>Coordinate-wise Lipschitz assumption implies the descent lemma coordinate-wise:
-<span class="math display">\[
-f(w^{k+1}) \leq f(w^k) + \nabla_j f(w^k)(w^{k+1} - w^k)_j + \frac{L}{2}(w^{k+1} - w^k)^2_j
-\]</span>
-for any <span class="math inline">\(w^{k+1}\)</span> and <span class="math inline">\(w_k\)</span> that only differ in coordinate <span class="math inline">\(j\)</span>. With <span class="math inline">\(\alpha_k = \frac{1}{L}\)</span> (for simplicity), plugging in <span class="math inline">\((w_{k+1} - w_k) = -\frac{1}{L}e_{jk}\nabla_{jk} f(w_k)\)</span> gives</p>
+Where <span class="math inline">\(C\)</span> is the regularization parameter (<span class="math inline">\(\lambda = 1/C\)</span>).</p>
+<p>This problem is non-smooth but strongly-convex, and the proximal operator is not simple. We could use stochastic subgradient, but it converges slowly. It is hard to set step size.</p>
+<p>A Fenchel dual to SVM optimization is given by:</p>
 <p><span class="math display">\[
-f(w^{k+1}) \leq f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2,
+\arg\max_{z \in \mathbb{R}^n \,|\, 0 \leq z \leq C} \sum_{i=1}^{n} z_i - \frac{1}{2} \|X^\top Y z\|^2,
 \]</span>
-a progress bound based on only updating coordinate <span class="math inline">\(j_k\)</span>.</p>
+Where <span class="math inline">\(X\)</span> has vectors <span class="math inline">\(x_i^T\)</span> as rows and <span class="math inline">\(Y\)</span> is diagonal with the <span class="math inline">\(y_i\)</span> along the diagonal.</p>
+<p>For a <span class="math inline">\(d \times n\)</span> matrix <span class="math inline">\(A = X^\top Y\)</span>, the SVM dual problem can be written as:</p>
+<p><span class="math display">\[
+\arg\max_{0 \leq z \leq C} z^\top 1 - \frac{1}{2} \|Az\|^2
+\]</span>
+The dual transforms the problem to a space where the optimization is easier. We can use a faster method with an optimal step size.</p>
+<p>For any dual solution <span class="math inline">\(z*\)</span>, the primal solution is <span class="math inline">\(w* = Az*\)</span>. Solving the dual problem allows us to solve the primal problem efficiently. The dual is Lipschitz-smooth, with L being the maximum eigenvalue of <span class="math inline">\(A^TA\)</span>. Additionally, since the constraints are simple, we can apply projected gradient methods. The dual problem satisfies the proximal-PL condition, where µ is the minimum non-zero singular value of <span class="math inline">\(A^TA\)</span>, enabling linear convergence rates. Moreover, as the constraints are separable, and the dual is amenable to random coordinate optimization, projected randomized coordinate optimization achieves a linear convergence rate. Optimal step sizes can be derived straightforwardly, eliminating the need for backtracking.</p>
 </div>
-<div id="randomized-cd-progress" class="section level2 hasAnchor" number="4.3">
-<h2><span class="header-section-number">4.3</span> Randomized CD Progress<a href="coordinate-optimization.html#randomized-cd-progress" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The progress on a <strong>randomized</strong> coordinate descent depends on the random selection of <span class="math inline">\(j_k\)</span>. The expected progress is:</p>
-<p><span class="math display">\[
-\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given }w^k\\
-= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
-= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
-\]</span>
-Expectation is conditioned on all steps up to time <span class="math inline">\(k\)</span>.</p>
-<p>Let’s choose <span class="math inline">\(j_k\)</span> uniformly at random in this bound, <span class="math inline">\(p(j_k = j) = \frac{1}{d}\)</span>.</p>
-<p><span class="math display">\[
-E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
-\]</span></p>
-<p><strong>Random-Shuffling Coordinate Selection</strong></p>
-<p>An alternative to random selection of <span class="math inline">\(j_k\)</span> is cyclic selection:
+<div id="supremum-and-infimum" class="section level2 hasAnchor" number="11.3">
+<h2><span class="header-section-number">11.3</span> Supremum and Infimum<a href="proximal-gradient-methods.html#supremum-and-infimum" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Infimum is a generalization of min that also includes limits:
 <span class="math display">\[
-j_1 = 1, j_2 = 2, \ldots, j_d = d \\
-j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
-j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
+\min_{x \in \mathbb{R}} x^2 = 0, \quad \inf_{x \in \mathbb{R}} x^2 = 0\\
+\min_{x \in \mathbb{R}} e^x = \text{DNE}, \quad \inf_{x \in \mathbb{R}} e^x = 0
 \]</span>
-Cyclic often outperforms random in practice, but is worse in theory.</p>
-<p>For some problems, a bad ordering leads to provably-bad performance for cyclic.</p>
-<p><strong>Hybrid between cyclic and random is using random shuffling:</strong></p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]\)</span>.</p>
-<p>Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.</p>
-</div>
-<div id="gauss-southwell-greedy-coordinate-descent" class="section level2 hasAnchor" number="4.4">
-<h2><span class="header-section-number">4.4</span> Gauss-Southwell: Greedy Coordinate Descent<a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Instead of cyclic or random, there are also greedy coordinate selection methods.</p>
-<p>The classic greedy method is the Gauss-Southwell rule,</p>
+Formally, the infimum of a function <span class="math inline">\(f\)</span> is its largest lower bound:
+<span class="math display">\[
+\inf f(x) = \max_{y} \left\{ y \,|\, y \leq f(x) \right\}.
+\]</span>
+And the Supremum is the smallest upper bound.</p>
+<p><strong>Convex Conjugate</strong></p>
+<p>The convex conjugate <span class="math inline">\(f^*\)</span> of a function <span class="math inline">\(f\)</span> is given by
+<span class="math display">\[
+f^*(y) = \sup_{x \in X} \{ y^Tx - f(x) \},
+\]</span>
+where <span class="math inline">\(X\)</span> is the set of values where the supremum is finite. It’s the maximum that the linear function above <span class="math inline">\(f(x)\)</span>.</p>
+<p>In ML our primal problem is usually:
+<span class="math display">\[
+\arg\min_{w \in \mathbb{R}^d} P(w) = f(Xw) + r(w).
+\]</span>
+If we introduce equality constraints,
+<span class="math display">\[
+\arg\min_{v=Xw} f(v) + r(w).
+\]</span>
+then the Lagrangian dual has a special form called the Fenchel dual.
+<span class="math display">\[
+\arg\max_{z \in \mathbb{R}^n} D(z) = -f^*(-z) - r^*(X^\top z)
+\]</span>
+Primal and dual functions in a nutshell:</p>
 <p><span class="math display">\[
-j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
-\]</span></p>
-<p>which chooses the coordinate with the largest directional derivative.</p>
-<p>This leads to a progress bound of</p>
-<p><span class="math display">\[
-f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
-\]</span></p>
-<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of</p>
-<p><span class="math display">\[ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], \]</span></p>
-<p>Where <span class="math inline">\(\mu_1\)</span> is the PL constant in the <span class="math inline">\(\infty\)</span>-norm</p>
-<p><span class="math display">\[ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. \]</span></p>
-<p>This is faster than random because <span class="math inline">\(\mu_d \leq \mu_1 \leq \mu\)</span> (by norm equivalences). The <span class="math inline">\(\mu_1\)</span>-PL condition is implied by strong-convexity in the 1-norm.</p>
-<p><strong>TODO Greedy Lipschitz, strong convexity and PL</strong></p>
+P(w) = f(Xw) + r(w) \\
+D(z) = -f^*(-z) - r^*(X^\top z)
+\]</span>
+Number of dual variables is <span class="math inline">\(n\)</span> instead of <span class="math inline">\(d\)</span>.
+- Dual may be a lower-dimensional problem.
+- Weak duality is that <span class="math inline">\(P(w) \geq D(z)\)</span> for all <span class="math inline">\(w\)</span> and <span class="math inline">\(z\)</span> (assuming <span class="math inline">\(P\)</span> is bounded below). So any value of dual objective gives a lower bound on <span class="math inline">\(P(w^*)\)</span>.
+- Lipschitz-smoothness and strong-convexity relationship.
+- Dual is Lipschitz-smooth if primal is strongly convex (as in SVMs).
+- Dual of loss <span class="math inline">\(f^*\)</span> is separable if <span class="math inline">\(f\)</span> is a finite-sum problem. This allows us to use dual coordinate optimization for many problems.
+- Strong duality holds when <span class="math inline">\(P(w^*) = D(z^*)\)</span>. This requires an additional assumption.
+Example: <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> convex, exists feasible <span class="math inline">\(w\)</span> with <span class="math inline">\(z = Xw\)</span> where <span class="math inline">\(g\)</span> is continuous at <span class="math inline">\(z\)</span>. When true, we can use the duality gap <span class="math inline">\(P(w) - D(z)\)</span> to certify the optimality of <span class="math inline">\(w\)</span> and <span class="math inline">\(z\)</span>.</p>
 
 </div>
 </div>
@@ -313,8 +293,8 @@ f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
           </div>
         </div>
       </div>
-<a href="improving-gradient-descent.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="stochastic-gradient-methods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="global-optimization-and-subgradients.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="optimization-demo.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -345,7 +325,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/11-proximal_grad.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -353,7 +333,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/11-proximal_grad.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],

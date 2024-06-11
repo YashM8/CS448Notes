@@ -30,7 +30,7 @@
   
   
 <link rel="prev" href="variations-on-sgd.html"/>
-
+<link rel="next" href="projected-gradient-based-algorithms.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -129,6 +129,29 @@
 <li class="chapter" data-level="8.6" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#barzilai-borwein-method"><i class="fa fa-check"></i><b>8.6</b> Barzilai-Borwein Method</a></li>
 <li class="chapter" data-level="8.7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#bfgs-quasi-newton-method"><i class="fa fa-check"></i><b>8.7</b> BFGS Quasi-Newton Method</a></li>
 </ul></li>
+<li class="chapter" data-level="9" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html"><i class="fa fa-check"></i><b>9</b> Projected Gradient Based Algorithms</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-gradient"><i class="fa fa-check"></i><b>9.1</b> Projected Gradient</a></li>
+<li class="chapter" data-level="9.2" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#l1-regularization-to-a-constrained-problem"><i class="fa fa-check"></i><b>9.2</b> L1 Regularization to a Constrained Problem</a></li>
+<li class="chapter" data-level="9.3" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#active-set-identification-and-backtracking"><i class="fa fa-check"></i><b>9.3</b> Active Set Identification and Backtracking</a></li>
+<li class="chapter" data-level="9.4" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#accelerating-projection-methods"><i class="fa fa-check"></i><b>9.4</b> Accelerating Projection Methods</a></li>
+<li class="chapter" data-level="9.5" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd"><i class="fa fa-check"></i><b>9.5</b> Projected SGD and CD</a></li>
+<li class="chapter" data-level="9.6" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#frank-wolfe-method"><i class="fa fa-check"></i><b>9.6</b> Frank-Wolfe Method</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html"><i class="fa fa-check"></i><b>10</b> Global Optimization and Subgradients</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
+<li class="chapter" data-level="10.2" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
+<li class="chapter" data-level="10.3" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
+<li class="chapter" data-level="10.4" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#using-multiple-subgradients"><i class="fa fa-check"></i><b>10.4</b> Using Multiple Subgradients</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html"><i class="fa fa-check"></i><b>11</b> Proximal Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#convergence-rate-1"><i class="fa fa-check"></i><b>11.1</b> Convergence Rate</a></li>
+<li class="chapter" data-level="11.2" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#dualty"><i class="fa fa-check"></i><b>11.2</b> Dualty</a></li>
+<li class="chapter" data-level="11.3" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#supremum-and-infimum"><i class="fa fa-check"></i><b>11.3</b> Supremum and Infimum</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>12</b> Optimization Demo</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 
@@ -269,8 +292,8 @@ B_{k+1} = B_k - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} + \frac{y_k y_k^T}{y_k^T
           </div>
         </div>
       </div>
-<a href="variations-on-sgd.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="variations-on-sgd.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="projected-gradient-based-algorithms.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

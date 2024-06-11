@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Coordinate Optimization | CS448Notes</title>
-  <meta name="description" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <title>Chapter 12 Optimization Demo | CS448Notes</title>
+  <meta name="description" content="Chapter 12 Optimization Demo | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta property="og:title" content="Chapter 12 Optimization Demo | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta name="twitter:title" content="Chapter 12 Optimization Demo | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="improving-gradient-descent.html"/>
-<link rel="next" href="stochastic-gradient-methods.html"/>
+<link rel="prev" href="proximal-gradient-methods.html"/>
+
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -172,149 +172,25 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="coordinate-optimization" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Coordinate Optimization<a href="coordinate-optimization.html#coordinate-optimization" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="definition-and-examples" class="section level2 hasAnchor" number="4.1">
-<h2><span class="header-section-number">4.1</span> Definition and examples<a href="coordinate-optimization.html#definition-and-examples" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>During each iteration of coordinate optimization, only one variable (or coordinate) is updated. By updating only one variable at a time, the optimization process becomes simpler and more efficient.</p>
-<p>On iteration <span class="math inline">\(k\)</span> we select a variable <span class="math inline">\(j_k\)</span> and set
-<span class="math display">\[
-w_{k+1}^{j_k} = w_k^{j_k} - \alpha_k \nabla_{j_k} f(w_k)
-\]</span>
-A gradient descent step for one coordinate <span class="math inline">\(j_k\)</span> (other <span class="math inline">\(w_j\)</span> stay the same).</p>
-<p>Theoretically, coordinate descent is a provably bad algorithm. The convergence rate is slower than gradient descent. The iteration cost can be similar to gradient descent. Computing 1 partial derivative may have same cost as computing gradient.</p>
-<p>But it is widely-used in practice. Nothing works better for certain problems. Certain fields think it is the “ultimate” algorithm.</p>
-<p>Global convergence rate can be showed for randomized coordinate selection. Coordinate descent is faster than gradient descent if iterations are <span class="math inline">\(d\)</span> times cheaper. Sometimes called coordinate-friendly structures.</p>
-<p><strong>For what functions is coordinate descent <span class="math inline">\(d\)</span> times faster than gradient descent?</strong></p>
-<p>The simplest example are separable functions:
-<span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j)
-\]</span>
-Where <span class="math inline">\(f\)</span> is the sum of <span class="math inline">\(f_j\)</span> applied to each <span class="math inline">\(w_j\)</span>, like <span class="math inline">\(f(w) = \frac{\lambda}{2} \|w\|^2 = \sum_{j=1}^{d} \frac{\lambda}{2} w_j^2\)</span>.</p>
-<p>Gradient descent costs <span class="math inline">\(O(d)\)</span> to compute each <span class="math inline">\(f&#39;_j(w_k^j)\)</span>.
-Coordinate descent costs <span class="math inline">\(O(1)\)</span> to compute the one <span class="math inline">\(f&#39;_jk(w_k^{jk})\)</span>.</p>
-<p>For separable functions you should only use coordinate optimization. The variables <span class="math inline">\(w_j\)</span> have “separate” effects, so can be minimized independently.</p>
-<p>A more interesting example is pairwise-separable functions:
-<span class="math display">\[
-f(w) = \sum_{i=1}^{d} \sum_{j=1}^{d} f_{ij}(w_i, w_j),
-\]</span>
-Which depend on a function of each pair of variables. This includes quadratic functions. An example is label propagation for semi-supervised learning. Here <span class="math inline">\(f_{ij}\)</span> measures how similar labels are between neighbors.</p>
-<p>The double sum has <span class="math inline">\(O(d^2)\)</span> terms. Gradient descent needs to compute the gradient of all these terms.
-Each <span class="math inline">\(w_j\)</span> only appears in <span class="math inline">\(O(d)\)</span> terms. Coordinate optimization only needs to use these terms.</p>
-<p>The label propagation example looks a bit more like this:</p>
-<p><span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j) + \sum_{(i,j) \in E} f_{ij}(w_i, w_j),
-\]</span></p>
-<p>where <span class="math inline">\(E\)</span> is a set of <span class="math inline">\((i, j)\)</span> edges in a graph. Adding a separable function doesn’t change costs. We could just combine each <span class="math inline">\(f_j\)</span> with one <span class="math inline">\(f_{ij}\)</span>. Restricting <span class="math inline">\((i, j)\)</span> to <span class="math inline">\(E\)</span> makes gradient descent cheaper. Now costs <span class="math inline">\(O(|E|)\)</span> to compute gradient. Coordinate descent could also cost <span class="math inline">\(O(|E|)\)</span> if the degree of <span class="math inline">\(j_k\)</span> is <span class="math inline">\(O(|E|)\)</span>. Coordinate descent is still <span class="math inline">\(d\)</span> times faster in expectation if you randomly update coordinates.</p>
-<p>Another coordinate-friendly structure is <strong>linear compositions:</strong></p>
-<p><span class="math display">\[
-f(w) = g(Aw), \text{ for a } n \times d \text{ matrix and a sooth function } g
-\]</span>
-It is still coordinate friendly if we add a separable function like an L2-regularizer.
-<span class="math display">\[
-f(w) = g(Aw) + \sum_{j=1}^{d} f_j(w_j),
-\]</span></p>
-<p>The main idea is that you can track <span class="math inline">\(Aw_k\)</span> as you go for a cost <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span>.</p>
-<p>For linear compositions problems, the partial derivatives on iteration <span class="math inline">\(k\)</span> have the form:
-<span class="math display">\[
-\nabla_j f(w_k) = a_j^T g&#39;(Aw_k),
-\]</span>
-where <span class="math inline">\(a_j\)</span> is column <span class="math inline">\(j\)</span> of <span class="math inline">\(A\)</span>.</p>
-<p>If we have <span class="math inline">\(Aw^k\)</span>, this costs <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span> for the full gradient. (Assuming <span class="math inline">\(g&#39;\)</span> costs <span class="math inline">\(O(n)\)</span>)
-We can track the product <span class="math inline">\(Aw_k\)</span> as we go with <span class="math inline">\(O(n)\)</span> cost:</p>
-<p><span class="math display">\[
-Aw^{k+1} = A(w^k + \gamma_k e_{jk}) = Aw^k + \gamma_k a_j.
-\]</span>
-This allows computing partial derivatives and implementing line-search steps in <span class="math inline">\(O(n)\)</span>.</p>
-<p>Neural networks are usually not coordinate friendly. Would need something like “number of units after first hidden layer is tiny”. Updating just one parameter can lead to complex and non-local effects on the overall function of the network.</p>
+<div id="optimization-demo" class="section level1 hasAnchor" number="12">
+<h1><span class="header-section-number">Chapter 12</span> Optimization Demo<a href="optimization-demo.html#optimization-demo" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div class="float">
+<img src="%22images/gradient_descent.png%22" alt="Gradient Descent" />
+<div class="figcaption">Gradient Descent</div>
 </div>
-<div id="analyzing-coordinate-descent" class="section level2 hasAnchor" number="4.2">
-<h2><span class="header-section-number">4.2</span> Analyzing Coordinate Descent<a href="coordinate-optimization.html#analyzing-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To analyze coordinate descent, we can write it as
-<span class="math display">\[
-w_{k+1} = w_k - \alpha_k \nabla_{jk} f(w_k) e_{jk},
-\]</span>
-where the “elementary vector” <span class="math inline">\(e_j\)</span> has a zero in every position except <span class="math inline">\(j\)</span>,
-<span class="math display">\[
-e_j^T =
-\begin{bmatrix}
-0 &amp; \cdots &amp; 1 &amp; \cdots &amp; 0
-\end{bmatrix}
-\]</span>
-We usually assume that each <span class="math inline">\(\nabla_j f\)</span> is <span class="math inline">\(L\)</span>-Lipshitz (“coordinate-wise Lipschitz”),
-<span class="math display">\[
-|\nabla_j f(w + \gamma e_j) - \nabla_j f(w)| \leq L|\gamma|
-\]</span>
-which for <span class="math inline">\(C^2\)</span> functions is equivalent to <span class="math inline">\(|\nabla_{jj}^2 f(w)| \leq L\)</span> for all <span class="math inline">\(j\)</span>.</p>
-<p>This is not a stronger assumption than for gradient descent - If the gradient is <span class="math inline">\(L\)</span>-Lipschitz then it is also coordinate-wise <span class="math inline">\(L\)</span>-Lipschitz.</p>
-<p>Coordinate-wise Lipschitz assumption implies the descent lemma coordinate-wise:
-<span class="math display">\[
-f(w^{k+1}) \leq f(w^k) + \nabla_j f(w^k)(w^{k+1} - w^k)_j + \frac{L}{2}(w^{k+1} - w^k)^2_j
-\]</span>
-for any <span class="math inline">\(w^{k+1}\)</span> and <span class="math inline">\(w_k\)</span> that only differ in coordinate <span class="math inline">\(j\)</span>. With <span class="math inline">\(\alpha_k = \frac{1}{L}\)</span> (for simplicity), plugging in <span class="math inline">\((w_{k+1} - w_k) = -\frac{1}{L}e_{jk}\nabla_{jk} f(w_k)\)</span> gives</p>
-<p><span class="math display">\[
-f(w^{k+1}) \leq f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2,
-\]</span>
-a progress bound based on only updating coordinate <span class="math inline">\(j_k\)</span>.</p>
+<div class="float">
+<img src="%22images/gradient_descent_armijo.png%22" alt="Gradient Descent + Backtracking" />
+<div class="figcaption">Gradient Descent + Backtracking</div>
 </div>
-<div id="randomized-cd-progress" class="section level2 hasAnchor" number="4.3">
-<h2><span class="header-section-number">4.3</span> Randomized CD Progress<a href="coordinate-optimization.html#randomized-cd-progress" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The progress on a <strong>randomized</strong> coordinate descent depends on the random selection of <span class="math inline">\(j_k\)</span>. The expected progress is:</p>
-<p><span class="math display">\[
-\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given }w^k\\
-= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
-= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
-\]</span>
-Expectation is conditioned on all steps up to time <span class="math inline">\(k\)</span>.</p>
-<p>Let’s choose <span class="math inline">\(j_k\)</span> uniformly at random in this bound, <span class="math inline">\(p(j_k = j) = \frac{1}{d}\)</span>.</p>
-<p><span class="math display">\[
-E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
-\]</span></p>
-<p><strong>Random-Shuffling Coordinate Selection</strong></p>
-<p>An alternative to random selection of <span class="math inline">\(j_k\)</span> is cyclic selection:
-<span class="math display">\[
-j_1 = 1, j_2 = 2, \ldots, j_d = d \\
-j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
-j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
-\]</span>
-Cyclic often outperforms random in practice, but is worse in theory.</p>
-<p>For some problems, a bad ordering leads to provably-bad performance for cyclic.</p>
-<p><strong>Hybrid between cyclic and random is using random shuffling:</strong></p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]\)</span>.</p>
-<p>Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.</p>
-</div>
-<div id="gauss-southwell-greedy-coordinate-descent" class="section level2 hasAnchor" number="4.4">
-<h2><span class="header-section-number">4.4</span> Gauss-Southwell: Greedy Coordinate Descent<a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Instead of cyclic or random, there are also greedy coordinate selection methods.</p>
-<p>The classic greedy method is the Gauss-Southwell rule,</p>
-<p><span class="math display">\[
-j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
-\]</span></p>
-<p>which chooses the coordinate with the largest directional derivative.</p>
-<p>This leads to a progress bound of</p>
-<p><span class="math display">\[
-f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
-\]</span></p>
-<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of</p>
-<p><span class="math display">\[ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], \]</span></p>
-<p>Where <span class="math inline">\(\mu_1\)</span> is the PL constant in the <span class="math inline">\(\infty\)</span>-norm</p>
-<p><span class="math display">\[ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. \]</span></p>
-<p>This is faster than random because <span class="math inline">\(\mu_d \leq \mu_1 \leq \mu\)</span> (by norm equivalences). The <span class="math inline">\(\mu_1\)</span>-PL condition is implied by strong-convexity in the 1-norm.</p>
-<p><strong>TODO Greedy Lipschitz, strong convexity and PL</strong></p>
 
-</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="improving-gradient-descent.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="stochastic-gradient-methods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="proximal-gradient-methods.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -345,7 +221,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/12-demo_optimization.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -353,7 +229,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/12-demo_optimization.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],

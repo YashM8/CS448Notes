@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Coordinate Optimization | CS448Notes</title>
-  <meta name="description" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <title>Chapter 9 Projected Gradient Based Algorithms | CS448Notes</title>
+  <meta name="description" content="Chapter 9 Projected Gradient Based Algorithms | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta property="og:title" content="Chapter 9 Projected Gradient Based Algorithms | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta name="twitter:title" content="Chapter 9 Projected Gradient Based Algorithms | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="improving-gradient-descent.html"/>
-<link rel="next" href="stochastic-gradient-methods.html"/>
+<link rel="prev" href="approximating-the-hessian.html"/>
+<link rel="next" href="global-optimization-and-subgradients.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -172,139 +172,161 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="coordinate-optimization" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Coordinate Optimization<a href="coordinate-optimization.html#coordinate-optimization" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="definition-and-examples" class="section level2 hasAnchor" number="4.1">
-<h2><span class="header-section-number">4.1</span> Definition and examples<a href="coordinate-optimization.html#definition-and-examples" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>During each iteration of coordinate optimization, only one variable (or coordinate) is updated. By updating only one variable at a time, the optimization process becomes simpler and more efficient.</p>
-<p>On iteration <span class="math inline">\(k\)</span> we select a variable <span class="math inline">\(j_k\)</span> and set
+<div id="projected-gradient-based-algorithms" class="section level1 hasAnchor" number="9">
+<h1><span class="header-section-number">Chapter 9</span> Projected Gradient Based Algorithms<a href="projected-gradient-based-algorithms.html#projected-gradient-based-algorithms" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="projected-gradient" class="section level2 hasAnchor" number="9.1">
+<h2><span class="header-section-number">9.1</span> Projected Gradient<a href="projected-gradient-based-algorithms.html#projected-gradient" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The main premise here to to optimize when we have a constraint as to what our solution can be. For example, we might want sparse solutions for model space complexity or a non-negative solutions between 0 and 1 while optimizing probabilities.</p>
+<p>The Projected-Gradient for non-negative solutions is:
 <span class="math display">\[
-w_{k+1}^{j_k} = w_k^{j_k} - \alpha_k \nabla_{j_k} f(w_k)
+w_{k+1} = max\{0, w_k - \alpha_k \nabla f(w_k)\}
 \]</span>
-A gradient descent step for one coordinate <span class="math inline">\(j_k\)</span> (other <span class="math inline">\(w_j\)</span> stay the same).</p>
-<p>Theoretically, coordinate descent is a provably bad algorithm. The convergence rate is slower than gradient descent. The iteration cost can be similar to gradient descent. Computing 1 partial derivative may have same cost as computing gradient.</p>
-<p>But it is widely-used in practice. Nothing works better for certain problems. Certain fields think it is the “ultimate” algorithm.</p>
-<p>Global convergence rate can be showed for randomized coordinate selection. Coordinate descent is faster than gradient descent if iterations are <span class="math inline">\(d\)</span> times cheaper. Sometimes called coordinate-friendly structures.</p>
-<p><strong>For what functions is coordinate descent <span class="math inline">\(d\)</span> times faster than gradient descent?</strong></p>
-<p>The simplest example are separable functions:
+Here the max is taken element wise. Sets negative values after gradient descent to 0.</p>
+<p>Regular projected gradient computes the vanilla gradient descent iteration then projects the intermediate <span class="math inline">\(w\)</span> value to the closest point that satisfies your constraints. Formally this is:</p>
+<p>The projected-gradient algorithm has two steps:</p>
+<ol style="list-style-type: decimal">
+<li><p>Perform an unconstrained gradient descent step:
 <span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j)
-\]</span>
-Where <span class="math inline">\(f\)</span> is the sum of <span class="math inline">\(f_j\)</span> applied to each <span class="math inline">\(w_j\)</span>, like <span class="math inline">\(f(w) = \frac{\lambda}{2} \|w\|^2 = \sum_{j=1}^{d} \frac{\lambda}{2} w_j^2\)</span>.</p>
-<p>Gradient descent costs <span class="math inline">\(O(d)\)</span> to compute each <span class="math inline">\(f&#39;_j(w_k^j)\)</span>.
-Coordinate descent costs <span class="math inline">\(O(1)\)</span> to compute the one <span class="math inline">\(f&#39;_jk(w_k^{jk})\)</span>.</p>
-<p>For separable functions you should only use coordinate optimization. The variables <span class="math inline">\(w_j\)</span> have “separate” effects, so can be minimized independently.</p>
-<p>A more interesting example is pairwise-separable functions:
+w_{k+1/2} = w_k - \alpha_k \nabla f(w_k).
+\]</span></p></li>
+<li><p>Compute projection onto the set <span class="math inline">\(C\)</span>:
 <span class="math display">\[
-f(w) = \sum_{i=1}^{d} \sum_{j=1}^{d} f_{ij}(w_i, w_j),
+w_{k+1} \in \arg \min_{v \in C} \|v - w_{k+1/2}\|.
 \]</span>
-Which depend on a function of each pair of variables. This includes quadratic functions. An example is label propagation for semi-supervised learning. Here <span class="math inline">\(f_{ij}\)</span> measures how similar labels are between neighbors.</p>
-<p>The double sum has <span class="math inline">\(O(d^2)\)</span> terms. Gradient descent needs to compute the gradient of all these terms.
-Each <span class="math inline">\(w_j\)</span> only appears in <span class="math inline">\(O(d)\)</span> terms. Coordinate optimization only needs to use these terms.</p>
-<p>The label propagation example looks a bit more like this:</p>
+Deriving Projected-Gradient using a quadratic approximation over the set <span class="math inline">\(C\)</span>:
+<span class="math display">\[
+w_{k+1} \in \arg \min_{v \in C} \left\{ f(w_k) + \nabla f(w_k)^\top (v - w_k) + \frac{1}{2\alpha_k} \| v - w_k \|^2 \right\} \\
+\equiv \arg \min_{v \in C} \left\{ \alpha_k f(w_k) + \alpha_k \nabla f(w_k)^\top (v - w_k) + \frac{1}{2} \| v - w_k \|^2 \right\} \quad \\
+\equiv \arg \min_{v \in C} \left\{ \frac{\alpha_k^2}{2} \| \nabla f(w_k) \|^2 + \alpha_k \nabla f(w_k)^\top (v - w_k) + \frac{1}{2} \| v - w_k \|^2 \right\} \\
+\equiv \arg \min_{v \in C} \left\{ \| (v - w_k) + \alpha_k \nabla f(w_k) \|^2 \right\} \quad (\text{completing the square}) \\
+\equiv \arg \min_{v \in C} \left\{ \| v - (w_k - \alpha_k \nabla f(w_k)) \| \right\} \quad \text{(regular gradient descent)} \\
+w_{k+1} = \text{proj}_C [w_k - \alpha_k \nabla f(w_k)]
+\]</span></p></li>
+</ol>
+<p>We can rewrite <span class="math inline">\(w_{k+1} = \text{proj}_C [w_k - \alpha_k \nabla f(w_k)]\)</span> as <span class="math inline">\(w_{k+1} = \text{proj}_C [w_k - \alpha_k g(w^k, \alpha_k)]\)</span> where <span class="math inline">\(g\)</span> is the gradient mapping defined as:</p>
 <p><span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j) + \sum_{(i,j) \in E} f_{ij}(w_i, w_j),
-\]</span></p>
-<p>where <span class="math inline">\(E\)</span> is a set of <span class="math inline">\((i, j)\)</span> edges in a graph. Adding a separable function doesn’t change costs. We could just combine each <span class="math inline">\(f_j\)</span> with one <span class="math inline">\(f_{ij}\)</span>. Restricting <span class="math inline">\((i, j)\)</span> to <span class="math inline">\(E\)</span> makes gradient descent cheaper. Now costs <span class="math inline">\(O(|E|)\)</span> to compute gradient. Coordinate descent could also cost <span class="math inline">\(O(|E|)\)</span> if the degree of <span class="math inline">\(j_k\)</span> is <span class="math inline">\(O(|E|)\)</span>. Coordinate descent is still <span class="math inline">\(d\)</span> times faster in expectation if you randomly update coordinates.</p>
-<p>Another coordinate-friendly structure is <strong>linear compositions:</strong></p>
-<p><span class="math display">\[
-f(w) = g(Aw), \text{ for a } n \times d \text{ matrix and a sooth function } g
+g(w^k, \alpha_k) = \frac{1}{\alpha_k} (w_k - \text{proj}_C [w_k - \alpha_k \nabla f(w_k))
 \]</span>
-It is still coordinate friendly if we add a separable function like an L2-regularizer.
-<span class="math display">\[
-f(w) = g(Aw) + \sum_{j=1}^{d} f_j(w_j),
-\]</span></p>
-<p>The main idea is that you can track <span class="math inline">\(Aw_k\)</span> as you go for a cost <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span>.</p>
-<p>For linear compositions problems, the partial derivatives on iteration <span class="math inline">\(k\)</span> have the form:
-<span class="math display">\[
-\nabla_j f(w_k) = a_j^T g&#39;(Aw_k),
-\]</span>
-where <span class="math inline">\(a_j\)</span> is column <span class="math inline">\(j\)</span> of <span class="math inline">\(A\)</span>.</p>
-<p>If we have <span class="math inline">\(Aw^k\)</span>, this costs <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span> for the full gradient. (Assuming <span class="math inline">\(g&#39;\)</span> costs <span class="math inline">\(O(n)\)</span>)
-We can track the product <span class="math inline">\(Aw_k\)</span> as we go with <span class="math inline">\(O(n)\)</span> cost:</p>
-<p><span class="math display">\[
-Aw^{k+1} = A(w^k + \gamma_k e_{jk}) = Aw^k + \gamma_k a_j.
-\]</span>
-This allows computing partial derivatives and implementing line-search steps in <span class="math inline">\(O(n)\)</span>.</p>
-<p>Neural networks are usually not coordinate friendly. Would need something like “number of units after first hidden layer is tiny”. Updating just one parameter can lead to complex and non-local effects on the overall function of the network.</p>
+Projected gradient is only efficient if the cost of projection is cheap. If it costs <span class="math inline">\(O(d)\)</span> then it adds no cost to the iteration. Taking the max over 2 values is just <span class="math inline">\(O(1)\)</span> making projected-gradient for non-negative constraints is simple.</p>
 </div>
-<div id="analyzing-coordinate-descent" class="section level2 hasAnchor" number="4.2">
-<h2><span class="header-section-number">4.2</span> Analyzing Coordinate Descent<a href="coordinate-optimization.html#analyzing-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To analyze coordinate descent, we can write it as
+<div id="l1-regularization-to-a-constrained-problem" class="section level2 hasAnchor" number="9.2">
+<h2><span class="header-section-number">9.2</span> L1 Regularization to a Constrained Problem<a href="projected-gradient-based-algorithms.html#l1-regularization-to-a-constrained-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>For a smooth objective with L1 regularization:
 <span class="math display">\[
-w_{k+1} = w_k - \alpha_k \nabla_{jk} f(w_k) e_{jk},
+\arg \min_{w \in \mathbb{R}^d} \left\{ f(w) + \lambda \| w \|_1 \right\}
 \]</span>
-where the “elementary vector” <span class="math inline">\(e_j\)</span> has a zero in every position except <span class="math inline">\(j\)</span>,
+Can be transformed to a smooth problem with non-negative constraints:
 <span class="math display">\[
-e_j^T =
-\begin{bmatrix}
-0 &amp; \cdots &amp; 1 &amp; \cdots &amp; 0
-\end{bmatrix}
-\]</span>
-We usually assume that each <span class="math inline">\(\nabla_j f\)</span> is <span class="math inline">\(L\)</span>-Lipshitz (“coordinate-wise Lipschitz”),
-<span class="math display">\[
-|\nabla_j f(w + \gamma e_j) - \nabla_j f(w)| \leq L|\gamma|
-\]</span>
-which for <span class="math inline">\(C^2\)</span> functions is equivalent to <span class="math inline">\(|\nabla_{jj}^2 f(w)| \leq L\)</span> for all <span class="math inline">\(j\)</span>.</p>
-<p>This is not a stronger assumption than for gradient descent - If the gradient is <span class="math inline">\(L\)</span>-Lipschitz then it is also coordinate-wise <span class="math inline">\(L\)</span>-Lipschitz.</p>
-<p>Coordinate-wise Lipschitz assumption implies the descent lemma coordinate-wise:
-<span class="math display">\[
-f(w^{k+1}) \leq f(w^k) + \nabla_j f(w^k)(w^{k+1} - w^k)_j + \frac{L}{2}(w^{k+1} - w^k)^2_j
-\]</span>
-for any <span class="math inline">\(w^{k+1}\)</span> and <span class="math inline">\(w_k\)</span> that only differ in coordinate <span class="math inline">\(j\)</span>. With <span class="math inline">\(\alpha_k = \frac{1}{L}\)</span> (for simplicity), plugging in <span class="math inline">\((w_{k+1} - w_k) = -\frac{1}{L}e_{jk}\nabla_{jk} f(w_k)\)</span> gives</p>
-<p><span class="math display">\[
-f(w^{k+1}) \leq f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2,
-\]</span>
-a progress bound based on only updating coordinate <span class="math inline">\(j_k\)</span>.</p>
+\arg \min_{w^+ \geq 0, w^- \geq 0} \left\{ f(w^+ - w^-) + \lambda \sum_{j=1}^d (w^+_j + w^-_j) \right\}
+\]</span></p>
+<p>Essentially splitting <span class="math inline">\(w\)</span> into the difference of 2 non-negative vectors. Turning the non-smooth objective, smooth. We can now apply projected gradient to this transformed yet equivalent objective.</p>
 </div>
-<div id="randomized-cd-progress" class="section level2 hasAnchor" number="4.3">
-<h2><span class="header-section-number">4.3</span> Randomized CD Progress<a href="coordinate-optimization.html#randomized-cd-progress" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The progress on a <strong>randomized</strong> coordinate descent depends on the random selection of <span class="math inline">\(j_k\)</span>. The expected progress is:</p>
-<p><span class="math display">\[
-\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given }w^k\\
-= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
-= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
-\]</span>
-Expectation is conditioned on all steps up to time <span class="math inline">\(k\)</span>.</p>
-<p>Let’s choose <span class="math inline">\(j_k\)</span> uniformly at random in this bound, <span class="math inline">\(p(j_k = j) = \frac{1}{d}\)</span>.</p>
-<p><span class="math display">\[
-E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
-\]</span></p>
-<p><strong>Random-Shuffling Coordinate Selection</strong></p>
-<p>An alternative to random selection of <span class="math inline">\(j_k\)</span> is cyclic selection:
+<div id="active-set-identification-and-backtracking" class="section level2 hasAnchor" number="9.3">
+<h2><span class="header-section-number">9.3</span> Active Set Identification and Backtracking<a href="projected-gradient-based-algorithms.html#active-set-identification-and-backtracking" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>L1 regularization identifies an “active-set” with projected gradient. An active set selects features leaving weights that seem relevant non-zero.</p>
+<p>For all sufficiently large <span class="math inline">\(k\)</span>, the sparsity pattern of <span class="math inline">\(w_k\)</span> matches the sparsity pattern of <span class="math inline">\(w^*\)</span>.
 <span class="math display">\[
-j_1 = 1, j_2 = 2, \ldots, j_d = d \\
-j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
-j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
+w^0 =
+\begin{pmatrix}
+w^0_1 \\
+w^0_2 \\
+w^0_3 \\
+w^0_4 \\
+w^0_5
+\end{pmatrix}
+\text{after finite } k \text{ iterations} \quad
+w^k =
+\begin{pmatrix}
+w^k_1 \\
+0 \\
+0 \\
+w^k_4 \\
+0
+\end{pmatrix},
+\quad \text{where} \quad
+w^* =
+\begin{pmatrix}
+w^*_1 \\
+0 \\
+0 \\
+w^*_4 \\
+0
+\end{pmatrix}
+\]</span></p>
+<p>We can also use <strong>2 step sizes</strong>:</p>
+<p>Consider introducing a second step size <span class="math inline">\(\eta_k \leq 1\)</span>,
+<span class="math display">\[
+w_{k+1} = w_k - \eta_k \alpha_k g(w_k, \alpha_k)
 \]</span>
-Cyclic often outperforms random in practice, but is worse in theory.</p>
-<p>For some problems, a bad ordering leads to provably-bad performance for cyclic.</p>
-<p><strong>Hybrid between cyclic and random is using random shuffling:</strong></p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]\)</span>.</p>
-<p>Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.</p>
+Which affects how far we move in the gradient mapping direction.</p>
+<p>2 Backtracking Strategies:</p>
+<ul>
+<li><p>Backtracking along the feasible direction. Fix <span class="math inline">\(\alpha_k\)</span> and backtrack by reducing <span class="math inline">\(\eta_k\)</span>. 1 projection per iteration (good if projection is expensive). But not guaranteed to identify active set.</p></li>
+<li><p>Backtracking along the projection. Fix <span class="math inline">\(\eta_k\)</span> at 1 and backtrack by reducing <span class="math inline">\(\alpha_k\)</span>. 1 projection per backtracking step (bad if projection is expensive). But identifies active set after finite number of iterations.</p></li>
+</ul>
 </div>
-<div id="gauss-southwell-greedy-coordinate-descent" class="section level2 hasAnchor" number="4.4">
-<h2><span class="header-section-number">4.4</span> Gauss-Southwell: Greedy Coordinate Descent<a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Instead of cyclic or random, there are also greedy coordinate selection methods.</p>
-<p>The classic greedy method is the Gauss-Southwell rule,</p>
-<p><span class="math display">\[
-j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
+<div id="accelerating-projection-methods" class="section level2 hasAnchor" number="9.4">
+<h2><span class="header-section-number">9.4</span> Accelerating Projection Methods<a href="projected-gradient-based-algorithms.html#accelerating-projection-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The accelerated projected-gradient method has the form:
+<span class="math display">\[
+w_{k+1} = \text{proj}_C [v_k - \alpha_k \nabla f(w_k)] \\
+v_{k+1} = w_{k+1} + \beta_k (w_{k+1} - w_k).
 \]</span></p>
-<p>which chooses the coordinate with the largest directional derivative.</p>
-<p>This leads to a progress bound of</p>
-<p><span class="math display">\[
-f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
+<p>This achieves the accelerated rate as the unconstrained case. But <span class="math inline">\(v_k\)</span> might not satisfy constraints.</p>
+<p>Using Newton’s method:</p>
+<p>The naive Newton-like methods with the Hessian <span class="math inline">\(H_k\)</span>:
+<span class="math display">\[
+w_{k+1} = \text{proj}_C \left[ w_k - \alpha_k (H_k)^{-1} \nabla f(w_k) \right].
+\]</span>
+This does not work and can point you in the wrong directions.</p>
+<p>The correct projected-Newton method uses
+<span class="math display">\[
+w_{k+1/2} = w_k - \alpha_k (H_k)^{-1} \nabla f(w_k) \\
+w_{k+1} = \arg \min_{v \in C} \| v - w_{k+1/2} \|_{H_k} \quad (\text{projection under Hessian metric})
 \]</span></p>
-<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of</p>
-<p><span class="math display">\[ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], \]</span></p>
-<p>Where <span class="math inline">\(\mu_1\)</span> is the PL constant in the <span class="math inline">\(\infty\)</span>-norm</p>
-<p><span class="math display">\[ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. \]</span></p>
-<p>This is faster than random because <span class="math inline">\(\mu_d \leq \mu_1 \leq \mu\)</span> (by norm equivalences). The <span class="math inline">\(\mu_1\)</span>-PL condition is implied by strong-convexity in the 1-norm.</p>
-<p><strong>TODO Greedy Lipschitz, strong convexity and PL</strong></p>
+<p>Projected-gradient minimizes quadratic approximation:
+<span class="math display">\[
+w_{k+1} = \arg \min_{v \in C} \left\{ f(w_k) + \nabla f(w_k)(v - w_k) + \frac{1}{2\alpha_k} \| v - w_k \|^2 \right\}\\
+w_{k+1} = \arg \min_{v \in \mathbb{R}^d} \left\{ f(w_k) + \nabla f(w_k)(v - w_k) + \frac{1}{2\alpha_k} (v - w_k)H_k(v - w_k) \right\}\\
+w_{k+1} = \arg \min_{v \in C} \left\{ f(w_k) + \nabla f(w_k)(v - w_k) + \frac{1}{2\alpha_k} (v - w_k)H_k(v - w_k) \right\}
+\]</span>
+Equivalently, we project Newton step under the Hessian-defined norm:
+<span class="math display">\[
+w_{k+1} = \arg \min_{v \in C} \left\| v - \left(w_k - \alpha_t H_k^{-1} \nabla f(w_k)\right) \right\|_{H_k}
+\]</span>
+This is expensive and can be dealt with by approximating the step. If <span class="math inline">\(H_k\)</span> is diagonal, it is simple. We can also make the matrix “more diagonal” using two metric projection (below).</p>
+<p><strong>Two-Metric Projection</strong></p>
+<p>Consider again optimizing with non-negative constraints, <span class="math display">\[ \min_{w \in C} f(w) \]</span>.
+The two-metric projection method splits the variables into two sets:
+<span class="math display">\[
+A_k \equiv \{ i \mid w_k^i = 0, \nabla_i f(w_k) &gt; 0 \}\\
+I_k \equiv \{ i \mid w_k^i \neq 0 \text{ or } \nabla_i f(w_k) \leq 0 \},
+\]</span>
+The active variables (constrained) and “inactive variables”. Then use projected-gradient step on <span class="math inline">\(A_k\)</span> and naive projected-Newton on <span class="math inline">\(I_k\)</span>.
+<span class="math display">\[
+w_{k+1}^{A_k} = \text{proj}_C \left[ w_k^{A_k} - \alpha_k \nabla_{A_k} f(w_k) \right] \\
+w_{k+1}^{I_k} = \text{proj}_C \left[ w_k^{I_k} - \alpha_k \left( \nabla_{I_k}^2 f(w_k) \right)^{-1} \nabla_{I_k} f(w_k) \right]
+\]</span>
+Eventually switches to unconstrained Newton on unconstrained variables.</p>
+</div>
+<div id="projected-sgd-and-cd" class="section level2 hasAnchor" number="9.5">
+<h2><span class="header-section-number">9.5</span> Projected SGD and CD<a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Projected Stochastic Gradient Descent:
+<span class="math display">\[
+w_{k+1} = \text{proj}_C \left[ w_k - \alpha_k \nabla f_{i_k}(w_k) \right]
+\]</span>
+Is where we do projected gradient on a random training example <span class="math inline">\(i_k\)</span>.</p>
+<p>Some properties of SGD and projected-gradient that do not hold:
+- Lose fast convergence for over-parameterized models as we no longer even have <span class="math inline">\(\nabla f(w^*) = 0\)</span>
+- Lose active set identification property of projected gradient.</p>
+<p>Variant that restores this property is dual averaging:
+<span class="math display">\[
+w_{k+1} = \text{proj}_C \left[ w_0 - \alpha_k \sum_{t=1}^k \nabla f(w_k) \right],
+\]</span></p>
+<p>Since it uses the average of the previous gradients as variance of the direction goes to 0.</p>
+</div>
+<div id="frank-wolfe-method" class="section level2 hasAnchor" number="9.6">
+<h2><span class="header-section-number">9.6</span> Frank-Wolfe Method<a href="projected-gradient-based-algorithms.html#frank-wolfe-method" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 
 </div>
 </div>
@@ -313,8 +335,8 @@ f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
           </div>
         </div>
       </div>
-<a href="improving-gradient-descent.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="stochastic-gradient-methods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="approximating-the-hessian.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="global-optimization-and-subgradients.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -345,7 +367,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/09-projected_gradient.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -353,7 +375,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/09-projected_gradient.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],

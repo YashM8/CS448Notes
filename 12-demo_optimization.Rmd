@@ -1,0 +1,6 @@
+# Optimization Demo
+
+![Gradient Descent]("images/gradient_descent.png")
+
+![Gradient Descent + Backtracking]("images/gradient_descent_armijo.png")
+

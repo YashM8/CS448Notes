@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 Improving Gradient Descent | CS448Notes</title>
-  <meta name="description" content="Chapter 3 Improving Gradient Descent | CS448Notes" />
+  <title>Chapter 10 Global Optimization | CS448Notes</title>
+  <meta name="description" content="Chapter 10 Global Optimization | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 Improving Gradient Descent | CS448Notes" />
+  <meta property="og:title" content="Chapter 10 Global Optimization | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 Improving Gradient Descent | CS448Notes" />
+  <meta name="twitter:title" content="Chapter 10 Global Optimization | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="gradient-descent-analysis.html"/>
-<link rel="next" href="coordinate-optimization.html"/>
+<link rel="prev" href="projected-gradient-based-algorithms.html"/>
+<link rel="next" href="optimization-demo.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -138,20 +138,13 @@
 <li class="chapter" data-level="9.5" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd"><i class="fa fa-check"></i><b>9.5</b> Projected SGD and CD</a></li>
 <li class="chapter" data-level="9.6" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#frank-wolfe-method"><i class="fa fa-check"></i><b>9.6</b> Frank-Wolfe Method</a></li>
 </ul></li>
-<li class="chapter" data-level="10" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html"><i class="fa fa-check"></i><b>10</b> Global Optimization and Subgradients</a>
+<li class="chapter" data-level="10" data-path="global-optimization.html"><a href="global-optimization.html"><i class="fa fa-check"></i><b>10</b> Global Optimization</a>
 <ul>
-<li class="chapter" data-level="10.1" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
-<li class="chapter" data-level="10.2" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
-<li class="chapter" data-level="10.3" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
-<li class="chapter" data-level="10.4" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#using-multiple-subgradients"><i class="fa fa-check"></i><b>10.4</b> Using Multiple Subgradients</a></li>
+<li class="chapter" data-level="10.1" data-path="global-optimization.html"><a href="global-optimization.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
+<li class="chapter" data-level="10.2" data-path="global-optimization.html"><a href="global-optimization.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
+<li class="chapter" data-level="10.3" data-path="global-optimization.html"><a href="global-optimization.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
 </ul></li>
-<li class="chapter" data-level="11" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html"><i class="fa fa-check"></i><b>11</b> Proximal Gradient Methods</a>
-<ul>
-<li class="chapter" data-level="11.1" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#convergence-rate-1"><i class="fa fa-check"></i><b>11.1</b> Convergence Rate</a></li>
-<li class="chapter" data-level="11.2" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#dualty"><i class="fa fa-check"></i><b>11.2</b> Dualty</a></li>
-<li class="chapter" data-level="11.3" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#supremum-and-infimum"><i class="fa fa-check"></i><b>11.3</b> Supremum and Infimum</a></li>
-</ul></li>
-<li class="chapter" data-level="12" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>12</b> Optimization Demo</a></li>
+<li class="chapter" data-level="11" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>11</b> Optimization Demo</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 
@@ -172,83 +165,129 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="improving-gradient-descent" class="section level1 hasAnchor" number="3">
-<h1><span class="header-section-number">Chapter 3</span> Improving Gradient Descent<a href="improving-gradient-descent.html#improving-gradient-descent" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="oracle-model-of-computation" class="section level2 hasAnchor" number="3.1">
-<h2><span class="header-section-number">3.1</span> Oracle Model of Computation<a href="improving-gradient-descent.html#oracle-model-of-computation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To analyze algorithms we need two ingredients:
-1. Assumptions about the function like Lipschitz, PL, convexity, and so on.
-2. Model of computation, restricting what the algorithm can do.</p>
-<p><strong>Standard model of computation is the first-order oracle model:</strong></p>
+<div id="global-optimization" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Global Optimization<a href="global-optimization.html#global-optimization" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Real valued functions are extremely tricky to optimize globally.</p>
+<p>Consider minimizing a function over the unit hyper-cube:
+<span class="math display">\[
+\min_{w \in [0,1]^d} f(w),
+\]</span></p>
+<p>Using any algorithm, you can construct <span class="math inline">\(f(w_k) - f(w^*) &gt; \epsilon\)</span> forever due to there being infinite real numbers between any two real numbers.</p>
+<div id="considering-minimizing-lipschitz-continuous-functions" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> Considering Minimizing Lipschitz-Continuous Functions<a href="global-optimization.html#considering-minimizing-lipschitz-continuous-functions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><span class="math display">\[
+\vert f(w) - f(v) \vert \leq L \lVert w - v \rVert
+\]</span></p>
+<p>Functions that don’t change arbitrarily fast as you change <span class="math inline">\(x\)</span>.</p>
+<p>Considering the unit hypercube again, it becomes easier to optimize. A worst case of <span class="math inline">\(O(\frac{1}{\epsilon^d})\)</span> is achieved by a simple grid search.</p>
+<p>You can go faster if you use random guesses. Lipschitz-continuity implies there is a ball of <span class="math inline">\(\epsilon\)</span> optimal solutions around <span class="math inline">\(w^*\)</span>. The radius of the ball is <span class="math inline">\(\Omega(\epsilon)\)</span>so its “volume” is <span class="math inline">\(\Omega(\epsilon^d)\)</span>.</p>
+</div>
+<div id="subgradient-methods" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> Subgradient Methods<a href="global-optimization.html#subgradient-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>What is a subgradient?</strong></p>
+<p>Differentiable convex functions are always above their tangent lines:</p>
+<p><span class="math display">\[
+f(v) \geq f(w) + \nabla f(w)^\top (v - w), \quad \forall w, v.
+\
+\]</span>
+<span class="math display">\[
+\text{A vector } d \text{ is a subgradient of a convex function } f \text{ at } w \text{ if}\\
+f(v) \geq f(w) + d^\top (v - w), \quad \forall v.
+\]</span>
+For example, sub-differential of absolute value function:
+<span class="math display">\[
+\partial |w| =
+\begin{cases}
+1 &amp; \text{if } w &gt; 0 \\
+-1 &amp; \text{if } w &lt; 0 \\
+[-1, 1] &amp; \text{if } w = 0
+\end{cases}
+\]</span></p>
+<p><strong>Why does L1 regularization give sparsity?</strong></p>
+<p>Considering L2-regularized least squares:
+<span class="math display">\[
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \frac{\lambda}{2} \| w \|_2^2.
+\]</span>
+Element <span class="math inline">\(j\)</span> of the gradient at <span class="math inline">\(w_j = 0\)</span> is given by
+<span class="math display">\[
+\nabla_j f(w) = x_j^\top (Xw - y) \big| + \lambda w
+\]</span>
+For <span class="math inline">\(w_j = 0\)</span> to be a solution we need <span class="math inline">\(\nabla_j f(w^*) = 0\)</span> or that <span class="math inline">\(0 = x_j^\top r^*\)</span>
+where <span class="math inline">\(r^* = Xw^* - y\)</span> for the solution <span class="math inline">\(w^*\)</span> that column <span class="math inline">\(j\)</span>is orthogonal to the final residual.</p>
+<p>This is possible, but it is very unlikely. Increasing <span class="math inline">\(\lambda\)</span> doesn’t help.</p>
+<p>Considering L1-regularized least squares:
+<span class="math display">\[
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \lambda \| w \|_1.
+\]</span>
+Element <span class="math inline">\(j\)</span> of the subdifferential at <span class="math inline">\(w_j = 0\)</span> is given by
+<span class="math display">\[
+\partial_j f(w) \equiv x_j^\top (Xw - y) \big| + \lambda [-1, 1] .
+\]</span>
+For <span class="math inline">\(w_j = 0\)</span> to be a solution, we need <span class="math inline">\(0 \in \partial_j f(w^*)\)</span> or that
+<span class="math display">\[
+0 \in x_j^\top r^* + \lambda [-1, 1] \\
+-x_j^\top r^* \in \lambda [-1, 1] \\
+|x_j^\top r^*| \leq \lambda,
+\]</span>
+So features <span class="math inline">\(j\)</span> that have little to do with <span class="math inline">\(y\)</span> will often lead to <span class="math inline">\(w_j = 0\)</span>. Increasing <span class="math inline">\(\lambda\)</span> makes this more likely to happen.</p>
+<p>The subgradient method:</p>
+<p><span class="math display">\[
+w_{k+1} = w_k - \alpha_k g_k,
+\]</span>
+For any <span class="math inline">\(g_k \in \partial f(w_k)\)</span>.</p>
+<p>At a non-differentiable point, some subgradients may reduce the objective. At differentiable points, subgradient is the gradient and reduces the objective.</p>
+<p>For the subgradient method applied to Lipschitz and convex <span class="math inline">\(f\)</span> we have
+<span class="math display">\[
+\|w_{k+1} - w^*\|^2 = \|w_k - w^*\|^2 - 2\alpha_k g_k^\top (w_k - w^*) + \alpha_k^2 ||g_k||^2\\
+\leq \|w_k - w^*\|^2 - 2\alpha_k[f(w_k) - f(w^*)] + \alpha_k^2 L^2.\\\\
+\rightarrow 2\alpha_k[f(w_k) - f(w^*)] \leq \|w_k - w^*\|^2 - \|w_{k+1} - w^*\|^2 + \alpha_k^2 L^2
+\]</span>
+And summing the telescoping values from <span class="math inline">\(k = 1\)</span> to <span class="math inline">\(t\)</span> we get
+<span class="math display">\[
+2 \sum_{k=1}^t \alpha_k[f(w_k) - f(w^*)] \leq \|w_0 - w^*\|^2 - \|w_{k+1} - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k.
+\]</span></p>
+<p>Using <span class="math inline">\(f_b\)</span> as the lowest <span class="math inline">\(f(w_k)\)</span> and <span class="math inline">\(\|w_{k+1} - w^*\|^2 \geq 0\)</span> we can re-arrange to get a bound that is very similar to what we showed for SGD:
+<span class="math display">\[
+f(w_b) - f(w^*) \leq \frac{\|w_1 - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k^2}{2 \sum_{k=1}^t \alpha_k}
+= O \left( \frac{1}{\sum_{k} \alpha_k} \right) + O \left( \frac{\sum_{k} \alpha_k^2}{\sum_{k} \alpha_k} \right)
+\]</span>
+## Smooth Approximations</p>
+<p>Non smooth functions can be approximated using smooth functions. Non smooth regions can be smoothed leaving the rest of the function untouched. Like Huber loss for the absolute value function.</p>
+<p>The advantage is to smoothing can be faster conversions than sub gradient methods. You can use line search and momentum or acceleration for faster convergence. Huber smoothed objective functions often have similar test error.</p>
+<p>Some reasons not to smooth are that smoothing can destroy the structure of the solution. For example, L1 regularization leads to sparse solutions because it is not smooth Huber loss does not lead to sparse solutions. Smooth approximations can be expensive to evaluate and they don’t converge faster when you add stochasticity.</p>
+</div>
+<div id="linear-convergence" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Linear convergence<a href="global-optimization.html#linear-convergence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bisection: Linear convergence in 1 dimension -</p>
+<p>Consider the following method for finding a minimizer:</p>
 <ol style="list-style-type: decimal">
-<li>At each iteration the algorithm chooses a point <span class="math inline">\(w^k\)</span>.</li>
-<li>The algorithm then gets <span class="math inline">\(f(w^k)\)</span> and <span class="math inline">\(\nabla f(w^k)\)</span>.</li>
+<li>At each iteration, compute a subgradient at the middle of the interval.</li>
+<li>Set the lower/upper bound of the interval to the midpoint (using subgradient sign)</li>
 </ol>
-<p>We analyze how many iterations are needed to make some quantity small.
-Usually <span class="math inline">\(\| \nabla f(w^k) \|\)</span> or <span class="math inline">\(f(w^k) - f^*\)</span> or <span class="math inline">\(\| w^k - w^* \|\)</span>.</p>
-<p>Given assumptions and oracle model, we can prove upper bounds on iteration complexity of specific algorithms and prove lower bounds on iteration complexity across algorithms.</p>
-<p>In first-order oracle model the algorithm itself is often unrestricted,
-but it can only learn about the function through evaluations at the chosen <span class="math inline">\(w^k\)</span>.
-Often prove lower bounds by designing a “worst function” under the assumptions.
-And show that you can only slowly discover the minimum location from oracle.</p>
-</div>
-<div id="heavy-ball-method" class="section level2 hasAnchor" number="3.2">
-<h2><span class="header-section-number">3.2</span> Heavy Ball Method<a href="improving-gradient-descent.html#heavy-ball-method" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><span class="math display">\[
-w^{k+1} = w^{k} - \alpha_k \nabla f(w^k) + \beta_k (w^k - w^{k-1}) \\
-\]</span>
-Which adds a momentum term to each gradient descent iteration where <span class="math inline">\(k &gt; 1\)</span>. Informally this term makes us go further in the previous direction. <span class="math inline">\(\beta_k \in [0, 1)\)</span></p>
-<p>Heavy-ball method can increase function and “overshoot” the optimum. But we will reach the optima quicker.</p>
-<p>Considering the heavy-ball method with the choices:
+<p>Maximum distance to <span class="math inline">\(w^*\)</span> is cut in half giving iteration complexity of <span class="math inline">\(O(log(1/\epsilon))\)</span></p>
+<p>Cutting Plane: Linear Convergence in <span class="math inline">\(d\)</span> dimensions -</p>
+<p>This generalizes bijections to higher dimensions. Can be used to optimize convex functions over bounded polygons.</p>
+<ol style="list-style-type: decimal">
+<li><p>At each iteration, compute a subgradient at the center of the polygon. From the definition of subgradient we have for any <span class="math inline">\(w\)</span> that <span class="math inline">\(f(w) \geq f(w_k) +g_k^\top (w - w_k)\)</span>. So any <span class="math inline">\(w\)</span> satisfying <span class="math inline">\(g_k^\top (w - w_k) &gt; 0\)</span> will be greater than <span class="math inline">\(f(w_k)\)</span>.</p></li>
+<li><p>This constraint is analogous to a plane that cuts the polygon.</p></li>
+</ol>
+<p>Worst-case theoretical rates for convex optimization with subgradients are:</p>
+<p>Best subgradient methods require <span class="math inline">\(O(1/\epsilon^2)\)</span> iterations.
+Best cutting plane methods require <span class="math inline">\(O(d log(1/\epsilon))\)</span> iterations</p>
+<p><strong>Using Multiple Subgradients</strong></p>
+<p>We get a tighter bound by using all previous function and subgradient values:
 <span class="math display">\[
-\alpha_k = \frac{4}{(\sqrt{L} + \sqrt{\mu})^2}, \quad \beta_k = \left( \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}} \right)^2.
-\]</span></p>
-<p>Under these choices the heavy-ball method has:
-<span class="math display">\[
-\|w_k - w^*\| \leq \left( \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}} + \epsilon_k \right)^k \|w_0 - w^*\|,
+f(w) \geq \max_{t \in \{1, \ldots, k\}} f(w_t) + g_t^\top (w - w_t)
 \]</span>
-where <span class="math inline">\(\epsilon_k \to 0\)</span>.</p>
-<p>Instead of directly bounding <span class="math inline">\(\|w_k - x^*\|\)</span>, the proof bounds <span class="math inline">\(\|w_k - w^*\|^2 + \|w_{k-1} - w^*\|^2\)</span>. Shows that a function that is “bigger” is converging at the right rate.</p>
-<p>The optimal dimension-independent rate in the first-order oracle model is:
+We can also choose the “best” subgradient?
+Convex functions have directional derivatives everywhere. Direction <span class="math inline">\(-g_t\)</span> that minimizes directional derivative is minimum-norm subgradient:
 <span class="math display">\[
-\frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}.
-\]</span></p>
-<p>So with this choice the heavy-ball method is close to optimal.</p>
-</div>
-<div id="conjugate-gradient-heavy-ball-with-optimal-parameters" class="section level2 hasAnchor" number="3.3">
-<h2><span class="header-section-number">3.3</span> Conjugate Gradient: Heavy-Ball with Optimal Parameters<a href="improving-gradient-descent.html#conjugate-gradient-heavy-ball-with-optimal-parameters" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>For quadratics, we could optimize <span class="math inline">\(\alpha_k\)</span> and <span class="math inline">\(\beta_k\)</span> on each iteration. At each iteration, choose <span class="math inline">\(\alpha_k\)</span> and <span class="math inline">\(\beta_k\)</span> that maximally decrease <span class="math inline">\(f\)</span>. “Plane search” (“subspace optimization”) along two directions instead of “line search”. This “optimal heavy-ball” method is called the conjugate gradient (CG) method:</p>
-<p><span class="math inline">\(\alpha_k = \frac{\nabla f(w_k)^T d_k}{d_k^T A d_k}\)</span> (step size for gradient direction)</p>
-<p><span class="math inline">\(\beta_k = \frac{\alpha_k \beta_{\hat{k}-1}}{\alpha_{k-1}}\)</span> (momentum parameter, <span class="math inline">\(\beta_0 = 0\)</span>)</p>
-<p><span class="math inline">\(w_{k+1} = w_k - \alpha_k \nabla f(w_k) + \beta_k (w_k - w_{k-1})\)</span> (heavy-ball update)</p>
-<p><span class="math inline">\(\beta_{\hat{k}} = \frac{\nabla f(w_{k-1})^T A d_{k-1}}{d_{k-1}^T A d_{k-1}}\)</span> (search direction, <span class="math inline">\(d_0 = -\nabla f(w_0)\)</span>)</p>
-<p>Gradients between iterations are orthogonal, <span class="math inline">\(\nabla f(w_k)^T \nabla f(w_{k-1}) = 0\)</span>.</p>
-<p>Achieves optimal <span class="math inline">\(\frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}\)</span> dimension-independent rate.</p>
-<p>You can show that conjugate gradient minimizes a d-dimensional quadratic in <span class="math inline">\(d\)</span> steps. Tends not to happen on computers due to floating point issues. Note that conjugate gradient does not need to know <span class="math inline">\(L\)</span> or <span class="math inline">\(µ\)</span>.</p>
-</div>
-<div id="nesterov-accelerated-gradient" class="section level2 hasAnchor" number="3.4">
-<h2><span class="header-section-number">3.4</span> Nesterov Accelerated Gradient<a href="improving-gradient-descent.html#nesterov-accelerated-gradient" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>We call a first-order method accelerated if it either has a <span class="math inline">\(O(1/k^2)\)</span> rate for convex functions or have a linear rate depending on <span class="math inline">\(\sqrt{L}\)</span> and <span class="math inline">\(\sqrt{\mu}\)</span> for strongly-convex functions</p>
-<p><span class="math display">\[
-w^{k+1} = w^{k} - \alpha_k \nabla f(v^k) \\
-v^{k+1} = w^{k+1} + \beta_k (w^{k+1} - w^{k}) \\
+g_k \in \arg\min_{g \in \partial f(w_k)} \|g\|
 \]</span>
-Nesterov’s Acceleration computes gradient after applying the the momentum.</p>
-<p>Consider optimizing a one-dimensional convex function. If sign of gradient stays same, Nesterov’s algorithm speeds up heavy-ball. If sign of gradient changes (overshooting the minima), it “slows down” faster.</p>
-<p>Nesterov’s method is typically analyzed with <span class="math inline">\(\alpha_k = \frac{1}{L}\)</span>.</p>
-<p>For convex functions, accelerated rate can be achieved with - <span class="math inline">\(\beta_k = \frac{k - 1}{k + 2}\)</span>, a momentum that converges to 1.</p>
-<p>For strongly-convex functions, acceleration can be achieved with constant - <span class="math inline">\(\beta_k = \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}\)</span>, as in the heavy-ball method.</p>
-<p>Notice that you need different parameters for different problems. Using a momentum that converges to 1 for strongly-convex could be very slow. Unlike gradient descent which adapts to the problem with standard choices. Using <span class="math inline">\(\alpha_k = \frac{1}{L}\)</span> maintains rate for convex, strongly-convex, and non-convex.</p>
-<p><strong>In practice</strong>, we can maintain a accelerated rate without knowing <span class="math inline">\(L\)</span>.</p>
-<ul>
-<li><p>Start with a guess <span class="math inline">\(\hat{L}\)</span></p></li>
-<li><p>Given the momentum step <span class="math inline">\(v_k\)</span>, test the inequality
-<span class="math inline">\(f(w_{k+1}) \leq f(v_k) - \frac{1}{2\hat{L}} \| \nabla f(v_k) \|^2\)</span>,
-and double <span class="math inline">\(\hat{L}\)</span> until it is satisfied.</p></li>
-</ul>
-<p>As with gradient descent, this can work much better than knowing <span class="math inline">\(L\)</span>.</p>
-<p>Nesterov’s method is often non-monotonic. We do not always have $ f(w_{k+1}) &lt; f(w_k) $. As with momentum, this is not necessarily a bad thing.</p>
-<p><strong>TODO 2nd derivative method</strong></p>
+This is the steepest descent direction for non-smooth convex optimization problems.</p>
+<p>Some advantages are that the solution is a fixed point: <span class="math inline">\(w^* = w^* - \alpha g^*\)</span> since <span class="math inline">\(g^* = 0\)</span>. We can satisfy line-search criteria since <span class="math inline">\(-g_k\)</span> is a descent direction.
+- And line searches work with directional derivatives, which exist.</p>
+<p>Some issues are that he minimum-norm subgradient may be difficult to find. Convergence not well understood and it is not shown to improve worst-case rate over subgradient method. Counter-examples exist where line search causes convergence to sub-optimal values.</p>
 
 </div>
 </div>
@@ -257,8 +296,8 @@ and double <span class="math inline">\(\hat{L}\)</span> until it is satisfied.</
           </div>
         </div>
       </div>
-<a href="gradient-descent-analysis.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="coordinate-optimization.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="projected-gradient-based-algorithms.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="optimization-demo.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -289,7 +328,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/03-iterations.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/10-global.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -297,7 +336,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/03-iterations.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/10-global.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],

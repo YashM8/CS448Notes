@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" project-jdk-name="base-ml" project-jdk-type="Python SDK" />
+  <component name="Black">
+    <option name="sdkName" value="/opt/miniconda3" />
+  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="/opt/miniconda3" project-jdk-type="Python SDK" />
   <component name="RMarkdownSettings">
     <option name="renderProfiles">
       <map>
@@ -12,6 +15,13 @@
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/03-iterations.Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/12-demo_optimization.Rmd">
           <value>
             <RMarkdownRenderProfile>
               <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$" />
