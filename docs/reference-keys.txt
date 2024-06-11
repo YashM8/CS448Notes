@@ -53,3 +53,9 @@ convergence-rate-1
 dualty
 supremum-and-infimum
 optimization-demo
+gradient-descent-with-momentum
+gradient-descent-with-nesterov-acceleration
+nesterov-with-restart
+newtons-method
+damped-newtons-method
+coordinate-descent

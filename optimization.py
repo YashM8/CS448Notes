@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 # Gradient norm change to stop optimization.
 tolerance = 1e-5
@@ -202,14 +203,14 @@ optimizers = [
 #     plot_optimizer(optimizer, param1, param2)
 #     plt.show()
 
-import os
+
 def save_plot(optimizer_name):
     if not os.path.exists("images"):
         os.makedirs("images")
     plt.savefig(f"images/{optimizer_name}.png")
     plt.close()
 
-# Iterate through optimizers and plot/save each one
+
 for optimizer, param1, param2 in optimizers:
     plot_optimizer(optimizer, param1, param2)
     optimizer_name = optimizer.__name__
