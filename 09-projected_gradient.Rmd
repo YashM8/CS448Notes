@@ -176,6 +176,7 @@ Since it uses the average of the previous gradients as variance of the direction
 
 ## Frank-Wolfe Method
 
+**TODO - Linear instead of ^2 approximation**
 
 
 
