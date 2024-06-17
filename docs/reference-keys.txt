@@ -59,3 +59,10 @@ nesterov-with-restart
 newtons-method
 damped-newtons-method
 coordinate-descent
+connvolutional-neural-networks
+basics
+convolutions
+convolutional-layers
+pooling-layers
+example
+conclusion
