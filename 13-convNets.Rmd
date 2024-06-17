@@ -69,11 +69,11 @@ Below is an example convolutional neural network with two convolutional layers a
 ![Example](images/cnnexample.jpeg)
 
 $$
-I_1(c_1, i, j) = \sum_{c=1}^{3} \sum_{m=-k_1}^{k_1} \sum_{n=-k_1}^{k_1} I(c, i-m, j-n) \cdot K_1(c_1, c, m, n) \\\\
+I_1(c_1, i, j) = h_{conv_1}\left[\sum_{c=1}^{3} \sum_{m=-k_1}^{k_1} \sum_{n=-k_1}^{k_1} I(c, i-m, j-n) \cdot K_1(c_1, c, m, n) + b_{conv_1}\right] \\\\
 \quad \\
 P_1(c_1, i, j) = \max_{m,n \in \{0, \ldots, p_1-1\}} I_1(c_1, i \cdot p_1 + m, j \cdot p_1 + n) \\\\
 \quad \\
-I_2(c_2, i, j) = \sum_{c_1=1}^{C_1} \sum_{m=-k_2}^{k_2} \sum_{n=-k_2}^{k_2} P_1(c_1, i-m, j-n) \cdot K_2(c_2, c_1, m, n) \\\\
+I_2(c_2, i, j) = h_{conv_2}\left[\sum_{c_1=1}^{C_1} \sum_{m=-k_2}^{k_2} \sum_{n=-k_2}^{k_2} P_1(c_1, i-m, j-n) \cdot K_2(c_2, c_1, m, n)+ b_{conv_2}\right] \\\\
 \quad \\
 P_2(c_2, i, j) = \max_{m,n \in \{0, \ldots, p_2-1\}} I_2(c_2, i \cdot p_2 + m, j \cdot p_2 + n) \\\\
 \quad \\
