@@ -44,6 +44,24 @@ def gradient_descent(grad_f, f, initial_point, learning_rate, num_iterations):
     return point, path, k, f(*point)
 
 
+def stochastic_gradient_descent(grad_f, f, initial_point, learning_rate, num_iterations):
+    point = np.array(initial_point, dtype=float)
+    path = [point.copy()]
+    k = None
+    for k in range(num_iterations):
+        noise = np.random.normal(scale=10, size=2)
+        gradient = grad_f(*point)
+        gradient = gradient + noise
+
+        point -= learning_rate * gradient
+        path.append(point.copy())
+        k += 1
+        if np.linalg.norm(gradient) < tolerance:
+            break
+
+    return point, path, k, f(*point)
+
+
 def gradient_descent_armijo(grad_f, f, initial_point, initial_learning_rate, num_iterations, beta=0.5, sigma=0.001):
     point = np.array(initial_point, dtype=float)
     path = [point.copy()]
@@ -190,18 +208,19 @@ def plot_optimizer(run_optim_func, lr, max_iter):
 
 optimizers = [
     (gradient_descent, 0.001, 1000),
-    (gradient_descent_momentum, 0.0001, 15),
-    (gradient_descent_nesterov, 0.0001, 15),
-    (gradient_descent_nesterov_with_restart, 0.001, 100),
-    (gradient_descent_armijo, 1, 100),
-    (newtons_method, -1, 10),
-    (newtons_method_damped, 0.999, 10),
-    (coordinate_descent, 0.001, 10000)
+    (stochastic_gradient_descent, 0.001, 1000)
+    # (gradient_descent_momentum, 0.0001, 15),
+    # (gradient_descent_nesterov, 0.0001, 15),
+    # (gradient_descent_nesterov_with_restart, 0.001, 100),
+    # (gradient_descent_armijo, 1, 100),
+    # (newtons_method, -1, 10),
+    # (newtons_method_damped, 0.999, 10),
+    # (coordinate_descent, 0.001, 10000)
 ]
 
-# for optimizer, param1, param2 in optimizers:
-#     plot_optimizer(optimizer, param1, param2)
-#     plt.show()
+for optimizer, param1, param2 in optimizers:
+    plot_optimizer(optimizer, param1, param2)
+    plt.show()
 
 
 def save_plot(optimizer_name):
@@ -209,9 +228,9 @@ def save_plot(optimizer_name):
         os.makedirs("images")
     plt.savefig(f"images/{optimizer_name}.png")
     plt.close()
-
-
-for optimizer, param1, param2 in optimizers:
-    plot_optimizer(optimizer, param1, param2)
-    optimizer_name = optimizer.__name__
-    save_plot(optimizer_name)
+#
+#
+# for optimizer, param1, param2 in optimizers:
+#     plot_optimizer(optimizer, param1, param2)
+#     optimizer_name = optimizer.__name__
+#     save_plot(optimizer_name)

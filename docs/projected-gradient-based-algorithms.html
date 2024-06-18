@@ -344,7 +344,21 @@ w_{k+1} = \text{proj}_C \left[ w_0 - \alpha_k \sum_{t=1}^k \nabla f(w_k) \right]
 </div>
 <div id="frank-wolfe-method" class="section level2 hasAnchor" number="9.6">
 <h2><span class="header-section-number">9.6</span> Frank-Wolfe Method<a href="projected-gradient-based-algorithms.html#frank-wolfe-method" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>TODO - Linear instead of ^2 approximation</strong></p>
+<p>Frank Wolfe method uses a linear approximation to the function instead of quadratic. The quadratic approximation will be harder to compute and sometimes simpler linear approximation can do the trick.</p>
+<p><span class="math display">\[
+argmin_{ v \in C} \left\{ f(w_k) + \nabla f(w_k)^\top (v - w_k) \right\}
+\]</span>
+The set <span class="math inline">\(C\)</span> must be bounded otherwise a solution may not exist. This is because you can move <span class="math inline">\(v\)</span> and we won’t have a solution in finite steps.</p>
+<p>The algorithm is:</p>
+<p><span class="math display">\[
+w_{k+1} = w_k + \alpha_k (v_k - w_k)\\
+v_k \in argmin_{v \in C} \nabla f(w_k)^\top v\\
+\]</span>
+The gradient mapping is:
+<span class="math display">\[
+\frac{1}{\alpha_k} (w_k - v_k).
+\]</span>
+Can be used with a line search. The convergence rate is <span class="math inline">\(O(\frac{1}{k})\)</span>.</p>
 
 </div>
 </div>

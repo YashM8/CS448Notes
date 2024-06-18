@@ -242,7 +242,7 @@ f_i(w_k - \alpha_k \nabla f_i(w_k)) \leq f_i(w_k) - c \alpha_k \|\nabla f_i(w_k)
 \text{}
 \]</span></p>
 <p>Without interpolation this does not work (satisfied by steps that are too large). With interpolation, can guarantee sufficient progress towards solution.</p>
-<p><strong>TODO- line search with SGD under SGC. Need to read further on this.</strong></p>
+<p>Line search works well if the model is overparameterized or close to over overparameterized but works horribly if it is far from overparameterized.</p>
 
 </div>
 </div>

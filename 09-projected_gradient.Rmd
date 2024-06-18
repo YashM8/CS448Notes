@@ -176,10 +176,25 @@ Since it uses the average of the previous gradients as variance of the direction
 
 ## Frank-Wolfe Method
 
-**TODO - Linear instead of ^2 approximation**
+Frank Wolfe method uses a linear approximation to the function instead of quadratic. The quadratic approximation will be harder to compute and sometimes simpler linear approximation can do the trick.
+
+$$
+argmin_{ v \in C} \left\{ f(w_k) + \nabla f(w_k)^\top (v - w_k) \right\}
+$$
+The set $C$ must be bounded otherwise a solution may not exist. This is because you can move $v$ and we won't have a solution in finite steps.
 
 
+The algorithm is:
 
+$$
+w_{k+1} = w_k + \alpha_k (v_k - w_k)\\
+v_k \in argmin_{v \in C} \nabla f(w_k)^\top v\\
+$$
+The gradient mapping is:
+$$
+\frac{1}{\alpha_k} (w_k - v_k).
+$$
+Can be used with a line search. The convergence rate is $O(\frac{1}{k})$.
 
 
 

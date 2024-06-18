@@ -159,23 +159,37 @@ $$
 
 which chooses the coordinate with the largest directional derivative.
 
-This leads to a progress bound of
+This leads to a progress bound of:
 
 $$
 f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
 $$
 
-Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of
+Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of:
 
-$$ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], $$
+$$ 
+f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*]
+$$
 
 Where $\mu_1$ is the PL constant in the $\infty$-norm
 
-$$ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. $$
+$$
+\mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty
+$$
 
 This is faster than random because $\mu_d \leq \mu_1 \leq \mu$ (by norm equivalences). The $\mu_1$-PL condition is implied by strong-convexity in the 1-norm.
 
-**TODO Greedy Lipschitz, strong convexity and PL**
+**Convergence Rate**
+
+$$
+f(w_{k+1}) \leq f(w_k) - \frac{1}{2L_k} \|\nabla f(w_k)\|_\infty^2,\\
+\text{PL gives us:}\\
+f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*] \\
+\text{Where } \mu_1 \text{ is the PL constant maximum norm:}\\
+\mu_1[f(w) - f^*] \leq \frac{1}{2} \| \nabla f(w) \|_\infty^2
+$$
+
+ Lipschitz Sampling
 
 
 

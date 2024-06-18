@@ -312,16 +312,28 @@ Cyclic often outperforms random in practice, but is worse in theory.</p>
 j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
 \]</span></p>
 <p>which chooses the coordinate with the largest directional derivative.</p>
-<p>This leads to a progress bound of</p>
+<p>This leads to a progress bound of:</p>
 <p><span class="math display">\[
 f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
 \]</span></p>
-<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of</p>
-<p><span class="math display">\[ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*], \]</span></p>
+<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of:</p>
+<p><span class="math display">\[
+f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*]
+\]</span></p>
 <p>Where <span class="math inline">\(\mu_1\)</span> is the PL constant in the <span class="math inline">\(\infty\)</span>-norm</p>
-<p><span class="math display">\[ \mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty. \]</span></p>
+<p><span class="math display">\[
+\mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty
+\]</span></p>
 <p>This is faster than random because <span class="math inline">\(\mu_d \leq \mu_1 \leq \mu\)</span> (by norm equivalences). The <span class="math inline">\(\mu_1\)</span>-PL condition is implied by strong-convexity in the 1-norm.</p>
-<p><strong>TODO Greedy Lipschitz, strong convexity and PL</strong></p>
+<p><strong>Convergence Rate</strong></p>
+<p><span class="math display">\[
+f(w_{k+1}) \leq f(w_k) - \frac{1}{2L_k} \|\nabla f(w_k)\|_\infty^2,\\
+\text{PL gives us:}\\
+f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*] \\
+\text{Where } \mu_1 \text{ is the PL constant maximum norm:}\\
+\mu_1[f(w) - f^*] \leq \frac{1}{2} \| \nabla f(w) \|_\infty^2
+\]</span></p>
+<p>Lipschitz Sampling</p>
 
 </div>
 </div>

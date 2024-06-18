@@ -68,10 +68,7 @@ $$
 
 Without interpolation this does not work (satisfied by steps that are too large). With interpolation, can guarantee sufficient progress towards solution.
 
-
-
-**TODO- line search with SGD under SGC. Need to read further on this.**
-
+Line search works well if the model is overparameterized or close to over overparameterized but works horribly if it is far from overparameterized.
 
 
 
