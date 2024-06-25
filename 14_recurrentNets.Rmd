@@ -23,7 +23,7 @@ Here, $W_{x} x_{t}$ is the standard matrix multiply used in regular neural netwo
 
 RNN's can be represented as -
 
-![RNN](images/rnn.jpg)
+![RNN](images/rnn.jpg){width=30% height=30%}
 
 The cyclic arrow represents the network updating at a time interval $t$. This can be used to represent any recurrent neural network but we can be more concrete. There a some common arrangements that can be useful in different situations. 
 
