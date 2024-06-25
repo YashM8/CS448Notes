@@ -66,3 +66,11 @@ convolutional-layers
 pooling-layers
 example
 conclusion
+recurrent-neural-networks
+background
+introduction-1
+types-of-rnns
+one-to-many
+many-to-one
+many-to-many
+problems-with-basic-rnns
