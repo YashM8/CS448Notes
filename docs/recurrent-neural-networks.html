@@ -176,7 +176,7 @@
 <li class="chapter" data-level="14.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#types-of-rnns"><i class="fa fa-check"></i><b>14.3</b> Types of RNN’s</a>
 <ul>
 <li class="chapter" data-level="14.3.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#one-to-many"><i class="fa fa-check"></i><b>14.3.1</b> One to many</a></li>
-<li class="chapter" data-level="14.3.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-one"><i class="fa fa-check"></i><b>14.3.2</b> Many to one</a></li>
+<li class="chapter" data-level="14.3.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-one"><i class="fa fa-check"></i><b>14.3.2</b> Many to One</a></li>
 <li class="chapter" data-level="14.3.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-many"><i class="fa fa-check"></i><b>14.3.3</b> Many to Many</a></li>
 </ul></li>
 <li class="chapter" data-level="14.4" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#problems-with-basic-rnns"><i class="fa fa-check"></i><b>14.4</b> Problems with (Basic) RNN’s</a></li>
@@ -223,7 +223,7 @@ y = f_2(W_{y} h_{t} + b_y)
 <h2><span class="header-section-number">14.3</span> Types of RNN’s<a href="recurrent-neural-networks.html#types-of-rnns" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>RNN’s can be represented as -</p>
 <div class="float">
-<img src="images/IMG_0012.jpg" alt="RNN" />
+<img src="images/rnn.jpg" alt="RNN" />
 <div class="figcaption">RNN</div>
 </div>
 <p>The cyclic arrow represents the network updating at a time interval <span class="math inline">\(t\)</span>. This can be used to represent any recurrent neural network but we can be more concrete. There a some common arrangements that can be useful in different situations.</p>
@@ -232,7 +232,7 @@ y = f_2(W_{y} h_{t} + b_y)
 <p>These networks take in one input (a sequence of size 1), and produce of sequence of any size. For example, the input may be an image of fixed size and the output is a caption sequence of any size.</p>
 </div>
 <div id="many-to-one" class="section level3 hasAnchor" number="14.3.2">
-<h3><span class="header-section-number">14.3.2</span> Many to one<a href="recurrent-neural-networks.html#many-to-one" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<h3><span class="header-section-number">14.3.2</span> Many to One<a href="recurrent-neural-networks.html#many-to-one" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>These networks take in an input sequence of variable size and give us one output. For example, the input may be a sentence sequence of variable size and the output is the sentiment of the sentence.</p>
 <div class="float">
 <img src="images/IMG_0012.jpg" alt="One to Many &amp; Many to One" />

@@ -23,7 +23,7 @@ Here, $W_{x} x_{t}$ is the standard matrix multiply used in regular neural netwo
 
 RNN's can be represented as -
 
-![RNN](images/IMG_0012.jpg)
+![RNN](images/rnn.jpg)
 
 The cyclic arrow represents the network updating at a time interval $t$. This can be used to represent any recurrent neural network but we can be more concrete. There a some common arrangements that can be useful in different situations. 
 
@@ -32,7 +32,7 @@ The cyclic arrow represents the network updating at a time interval $t$. This ca
 These networks take in one input (a sequence of size 1), and produce of sequence of any size. For example, the input may be an image of fixed size and the output is a caption sequence of any size.
 
 
-### Many to one 
+### Many to One 
 
 These networks take in an input sequence of variable size and give us one output. For example, the input may be a sentence sequence of variable size and the output is the sentiment of the sentence.
 
