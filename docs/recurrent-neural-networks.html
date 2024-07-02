@@ -175,11 +175,13 @@
 <li class="chapter" data-level="14.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#introduction-1"><i class="fa fa-check"></i><b>14.2</b> Introduction</a></li>
 <li class="chapter" data-level="14.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#types-of-rnns"><i class="fa fa-check"></i><b>14.3</b> Types of RNN’s</a>
 <ul>
-<li class="chapter" data-level="14.3.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#one-to-many"><i class="fa fa-check"></i><b>14.3.1</b> One to many</a></li>
+<li class="chapter" data-level="14.3.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#one-to-many"><i class="fa fa-check"></i><b>14.3.1</b> One to Many</a></li>
 <li class="chapter" data-level="14.3.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-one"><i class="fa fa-check"></i><b>14.3.2</b> Many to One</a></li>
 <li class="chapter" data-level="14.3.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-many"><i class="fa fa-check"></i><b>14.3.3</b> Many to Many</a></li>
 </ul></li>
 <li class="chapter" data-level="14.4" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#problems-with-basic-rnns"><i class="fa fa-check"></i><b>14.4</b> Problems with (Basic) RNN’s</a></li>
+<li class="chapter" data-level="14.5" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#lstm---long-short-term-memory"><i class="fa fa-check"></i><b>14.5</b> LSTM - Long Short Term Memory</a></li>
+<li class="chapter" data-level="14.6" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#gated-recurrent-units"><i class="fa fa-check"></i><b>14.6</b> Gated Recurrent Units</a></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -212,7 +214,7 @@ y = h(Wx+b)
 </div>
 <div id="introduction-1" class="section level2 hasAnchor" number="14.2">
 <h2><span class="header-section-number">14.2</span> Introduction<a href="recurrent-neural-networks.html#introduction-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To handle sequential data, we can define a neural network that updates it’s weights based on previous data from a sequence.</p>
+<p>To handle sequential data, we can define a neural network that updates its weights based on previous data from a sequence.</p>
 <p><span class="math display">\[
 h_t = f_1(W_{h} h_{t-1} + W_{x} x_{t} + b_h) \\
 y = f_2(W_{y} h_{t} + b_y)
@@ -228,7 +230,7 @@ y = f_2(W_{y} h_{t} + b_y)
 </div>
 <p>The cyclic arrow represents the network updating at a time interval <span class="math inline">\(t\)</span>. This can be used to represent any recurrent neural network but we can be more concrete. There a some common arrangements that can be useful in different situations.</p>
 <div id="one-to-many" class="section level3 hasAnchor" number="14.3.1">
-<h3><span class="header-section-number">14.3.1</span> One to many<a href="recurrent-neural-networks.html#one-to-many" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<h3><span class="header-section-number">14.3.1</span> One to Many<a href="recurrent-neural-networks.html#one-to-many" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>These networks take in one input (a sequence of size 1), and produce of sequence of any size. For example, the input may be an image of fixed size and the output is a caption sequence of any size.</p>
 </div>
 <div id="many-to-one" class="section level3 hasAnchor" number="14.3.2">
@@ -267,6 +269,60 @@ Let <span class="math inline">\(L\)</span> be a loss function</p>
 \frac{\partial L}{\partial W_{h}} = \frac{1}{n} \sum_{t=1}^{n} \frac{\partial L_{t}}{\partial h_{t}} \prod_{j=i+1}^t \frac{\partial h_{j}}{\partial h_{j-1}} \frac{\partial h_{i}}{\partial W_{h}}
 \]</span></p>
 <p>If the gradients are consistently more than 1, the gradient is multiplied <span class="math inline">\(t\)</span> times and explodes resulting in a overflow. If the gradients are consistently less than 1, the gradient is multiplied <span class="math inline">\(t\)</span> times and vanishes resulting in a underflow.</p>
+<p><strong>We can deal with these issues by architectures that are more robust to the Exploding/Vanishing gradient problem.</strong></p>
+</div>
+<div id="lstm---long-short-term-memory" class="section level2 hasAnchor" number="14.5">
+<h2><span class="header-section-number">14.5</span> LSTM - Long Short Term Memory<a href="recurrent-neural-networks.html#lstm---long-short-term-memory" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>LSTM’s have a channel for information to flow for the entire recurrent network giving it a long term memory. This information can only be modified very carefully through a series of gates. This is called the cell state. <span class="math inline">\(C_t\)</span> represents the cell state at a time interval <span class="math inline">\(t\)</span>.</p>
+<p><span class="math inline">\([a, b]\)</span> below is just a concatenation of vectors <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>.</p>
+<p><strong>Forget Gate -</strong></p>
+<p>This modifies the previous state of the cell, determining now much information is retained. This is done as follows -</p>
+<p><span class="math display">\[
+f_t = \sigma(W_f [h_{t-1}, x_t] + b_f)
+\]</span>
+<span class="math inline">\([h_{t-1}, x_t]\)</span> simply concats the vectors. The range of the sigmoid function <span class="math inline">\(\sigma\)</span> is <span class="math inline">\([0, 1]\)</span>. An output of 1 means that all the information is retain and 0 means “forget everything”. This controls what percentage of information can influence the long term memory at <span class="math inline">\(C_t\)</span>. For a language task, we can imagine forgetting predicting the end quote character <strong>“</strong> after we have already closed it.</p>
+<p><strong>Input Gate -</strong></p>
+<p>This gate adds information to the cell state as follows -</p>
+<p><span class="math display">\[
+i_t = \sigma(W_i [h_{t-1}, x_t] + b_i) \\
+\bar{C_t} = tanh(W_C [h_{t-1}, x_t] + b_C)
+\]</span></p>
+<p><span class="math inline">\(\bar{C_t}\)</span> are candidates that could be added to the cell state. The state is updated as follows -</p>
+<p><span class="math display">\[
+C_t = f_t \odot C_{t-1} + i_t \odot \bar{C_t}
+\]</span></p>
+<p>In a language context, this would be the update of the sales state where we would loose memory of the quote character.</p>
+<p><strong>Output Gate -</strong></p>
+<p>This is where we get a an output for a time step <span class="math inline">\(t\)</span>.</p>
+<p><span class="math display">\[
+o_t = \sigma(W_o [h_{t-1}, x_t] + b_o) \\
+h_t = o_t \odot tanh(C_t)
+\]</span></p>
+<p><span class="math inline">\(h_t\)</span> is the output at time step <span class="math inline">\(t\)</span>. There are many variations on this memory architecture.</p>
+<div class="float">
+<img src="images/lstm.jpeg" alt="One to Many &amp; Many to One" />
+<div class="figcaption">One to Many &amp; Many to One</div>
+</div>
+</div>
+<div id="gated-recurrent-units" class="section level2 hasAnchor" number="14.6">
+<h2><span class="header-section-number">14.6</span> Gated Recurrent Units<a href="recurrent-neural-networks.html#gated-recurrent-units" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>GRUs also selectively updates and expose information over time. The architecture is simplified compared to LSTM by combining the forget and input gates into a single gate and merging the cell and hidden state.</p>
+<p><strong>Update Gate -</strong></p>
+<p><span class="math display">\[
+z_t = \sigma(W_z [h_{t-1}, x_t] + b_z)
+\]</span></p>
+<p><strong>Reset Gate -</strong></p>
+<p><span class="math display">\[
+r_t = \sigma(W_r [h_{t-1}, x_t] + b_r)
+\]</span></p>
+<p><strong>Candidate Hidden State -</strong></p>
+<p><span class="math display">\[
+\bar{h}_t = \tanh(W [r_t \odot h_{t-1}, x_t] + b)
+\]</span>
+<strong>Final Hidden State -</strong></p>
+<p><span class="math display">\[
+h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \bar{h}_t
+\]</span></p>
 
 </div>
 </div>
