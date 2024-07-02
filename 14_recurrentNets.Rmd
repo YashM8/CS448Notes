@@ -116,7 +116,7 @@ $$
 
 $h_t$ is the output at time step $t$. There are many variations on this memory architecture. 
 
-![One to Many & Many to One](images/lstm.jpeg)
+![LSTM](images/lstm.jpeg)
 
 ## Gated Recurrent Units
 
