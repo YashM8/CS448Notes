@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Coordinate Optimization | CS448Notes</title>
-  <meta name="description" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <title>Chapter 16 Self-Attention and Transformers | CS448Notes</title>
+  <meta name="description" content="Chapter 16 Self-Attention and Transformers | CS448Notes" />
   <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta property="og:title" content="Chapter 16 Self-Attention and Transformers | CS448Notes" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Coordinate Optimization | CS448Notes" />
+  <meta name="twitter:title" content="Chapter 16 Self-Attention and Transformers | CS448Notes" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="improving-gradient-descent.html"/>
-<link rel="next" href="stochastic-gradient-methods.html"/>
+<link rel="prev" href="attention-with-rnns.html"/>
+
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -215,151 +215,79 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="coordinate-optimization" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Coordinate Optimization<a href="coordinate-optimization.html#coordinate-optimization" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="definition-and-examples" class="section level2 hasAnchor" number="4.1">
-<h2><span class="header-section-number">4.1</span> Definition and examples<a href="coordinate-optimization.html#definition-and-examples" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>During each iteration of coordinate optimization, only one variable (or coordinate) is updated. By updating only one variable at a time, the optimization process becomes simpler and more efficient.</p>
-<p>On iteration <span class="math inline">\(k\)</span> we select a variable <span class="math inline">\(j_k\)</span> and set
-<span class="math display">\[
-w_{k+1}^{j_k} = w_k^{j_k} - \alpha_k \nabla_{j_k} f(w_k)
-\]</span>
-A gradient descent step for one coordinate <span class="math inline">\(j_k\)</span> (other <span class="math inline">\(w_j\)</span> stay the same).</p>
-<p>Theoretically, coordinate descent is a provably bad algorithm. The convergence rate is slower than gradient descent. The iteration cost can be similar to gradient descent. Computing 1 partial derivative may have same cost as computing gradient.</p>
-<p>But it is widely-used in practice. Nothing works better for certain problems. Certain fields think it is the “ultimate” algorithm.</p>
-<p>Global convergence rate can be showed for randomized coordinate selection. Coordinate descent is faster than gradient descent if iterations are <span class="math inline">\(d\)</span> times cheaper. Sometimes called coordinate-friendly structures.</p>
-<p><strong>For what functions is coordinate descent <span class="math inline">\(d\)</span> times faster than gradient descent?</strong></p>
-<p>The simplest example are separable functions:
-<span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j)
-\]</span>
-Where <span class="math inline">\(f\)</span> is the sum of <span class="math inline">\(f_j\)</span> applied to each <span class="math inline">\(w_j\)</span>, like <span class="math inline">\(f(w) = \frac{\lambda}{2} \|w\|^2 = \sum_{j=1}^{d} \frac{\lambda}{2} w_j^2\)</span>.</p>
-<p>Gradient descent costs <span class="math inline">\(O(d)\)</span> to compute each <span class="math inline">\(f&#39;_j(w_k^j)\)</span>.
-Coordinate descent costs <span class="math inline">\(O(1)\)</span> to compute the one <span class="math inline">\(f&#39;_jk(w_k^{jk})\)</span>.</p>
-<p>For separable functions you should only use coordinate optimization. The variables <span class="math inline">\(w_j\)</span> have “separate” effects, so can be minimized independently.</p>
-<p>A more interesting example is pairwise-separable functions:
-<span class="math display">\[
-f(w) = \sum_{i=1}^{d} \sum_{j=1}^{d} f_{ij}(w_i, w_j),
-\]</span>
-Which depend on a function of each pair of variables. This includes quadratic functions. An example is label propagation for semi-supervised learning. Here <span class="math inline">\(f_{ij}\)</span> measures how similar labels are between neighbors.</p>
-<p>The double sum has <span class="math inline">\(O(d^2)\)</span> terms. Gradient descent needs to compute the gradient of all these terms.
-Each <span class="math inline">\(w_j\)</span> only appears in <span class="math inline">\(O(d)\)</span> terms. Coordinate optimization only needs to use these terms.</p>
-<p>The label propagation example looks a bit more like this:</p>
-<p><span class="math display">\[
-f(w) = \sum_{j=1}^{d} f_j(w_j) + \sum_{(i,j) \in E} f_{ij}(w_i, w_j),
-\]</span></p>
-<p>where <span class="math inline">\(E\)</span> is a set of <span class="math inline">\((i, j)\)</span> edges in a graph. Adding a separable function doesn’t change costs. We could just combine each <span class="math inline">\(f_j\)</span> with one <span class="math inline">\(f_{ij}\)</span>. Restricting <span class="math inline">\((i, j)\)</span> to <span class="math inline">\(E\)</span> makes gradient descent cheaper. Now costs <span class="math inline">\(O(|E|)\)</span> to compute gradient. Coordinate descent could also cost <span class="math inline">\(O(|E|)\)</span> if the degree of <span class="math inline">\(j_k\)</span> is <span class="math inline">\(O(|E|)\)</span>. Coordinate descent is still <span class="math inline">\(d\)</span> times faster in expectation if you randomly update coordinates.</p>
-<p>Another coordinate-friendly structure is <strong>linear compositions:</strong></p>
-<p><span class="math display">\[
-f(w) = g(Aw), \text{ for a } n \times d \text{ matrix and a sooth function } g
-\]</span>
-It is still coordinate friendly if we add a separable function like an L2-regularizer.
-<span class="math display">\[
-f(w) = g(Aw) + \sum_{j=1}^{d} f_j(w_j),
-\]</span></p>
-<p>The main idea is that you can track <span class="math inline">\(Aw_k\)</span> as you go for a cost <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span>.</p>
-<p>For linear compositions problems, the partial derivatives on iteration <span class="math inline">\(k\)</span> have the form:
-<span class="math display">\[
-\nabla_j f(w_k) = a_j^T g&#39;(Aw_k),
-\]</span>
-where <span class="math inline">\(a_j\)</span> is column <span class="math inline">\(j\)</span> of <span class="math inline">\(A\)</span>.</p>
-<p>If we have <span class="math inline">\(Aw^k\)</span>, this costs <span class="math inline">\(O(n)\)</span> instead of <span class="math inline">\(O(nd)\)</span> for the full gradient. (Assuming <span class="math inline">\(g&#39;\)</span> costs <span class="math inline">\(O(n)\)</span>)
-We can track the product <span class="math inline">\(Aw_k\)</span> as we go with <span class="math inline">\(O(n)\)</span> cost:</p>
-<p><span class="math display">\[
-Aw^{k+1} = A(w^k + \gamma_k e_{jk}) = Aw^k + \gamma_k a_j.
-\]</span>
-This allows computing partial derivatives and implementing line-search steps in <span class="math inline">\(O(n)\)</span>.</p>
-<p>Neural networks are usually not coordinate friendly. Would need something like “number of units after first hidden layer is tiny”. Updating just one parameter can lead to complex and non-local effects on the overall function of the network.</p>
+<div id="self-attention-and-transformers" class="section level1 hasAnchor" number="16">
+<h1><span class="header-section-number">Chapter 16</span> Self-Attention and Transformers<a href="self-attention-and-transformers.html#self-attention-and-transformers" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="self-attention-mechanism" class="section level2 hasAnchor" number="16.1">
+<h2><span class="header-section-number">16.1</span> Self-Attention Mechanism<a href="self-attention-and-transformers.html#self-attention-mechanism" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Consider a sequence of inputs like a sentence or a voice recording like “The people ate some food and it was good”. Self attention allows a model to differentiate between what “it” refers to even in much longer sequences. In the above example, what “it” refers to can infer that the food was good or the people were good. Developing context within a sequence is important to help differentiate this. Self-attention lets you do this and the “self” refers to attention within a sentence. In a properly trained network, “it” would pay attention to “food”.</p>
+<p>Self-attention still relies on similarity scores but works a little differently. Attention can use a mechanism similar to a key-value store. But instead of finding the exact key for a query, a query can result a higher score for a key and low for others. The output would then me a weighted sum.</p>
+<div class="float">
+<img src="images/svh-matching.jpg" alt="Soft vs Hard Matching" />
+<div class="figcaption">Soft vs Hard Matching</div>
 </div>
-<div id="analyzing-coordinate-descent" class="section level2 hasAnchor" number="4.2">
-<h2><span class="header-section-number">4.2</span> Analyzing Coordinate Descent<a href="coordinate-optimization.html#analyzing-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To analyze coordinate descent, we can write it as
-<span class="math display">\[
-w_{k+1} = w_k - \alpha_k \nabla_{jk} f(w_k) e_{jk},
-\]</span>
-where the “elementary vector” <span class="math inline">\(e_j\)</span> has a zero in every position except <span class="math inline">\(j\)</span>,
-<span class="math display">\[
-e_j^T =
-\begin{bmatrix}
-0 &amp; \cdots &amp; 1 &amp; \cdots &amp; 0
-\end{bmatrix}
-\]</span>
-We usually assume that each <span class="math inline">\(\nabla_j f\)</span> is <span class="math inline">\(L\)</span>-Lipshitz (“coordinate-wise Lipschitz”),
-<span class="math display">\[
-|\nabla_j f(w + \gamma e_j) - \nabla_j f(w)| \leq L|\gamma|
-\]</span>
-which for <span class="math inline">\(C^2\)</span> functions is equivalent to <span class="math inline">\(|\nabla_{jj}^2 f(w)| \leq L\)</span> for all <span class="math inline">\(j\)</span>.</p>
-<p>This is not a stronger assumption than for gradient descent - If the gradient is <span class="math inline">\(L\)</span>-Lipschitz then it is also coordinate-wise <span class="math inline">\(L\)</span>-Lipschitz.</p>
-<p>Coordinate-wise Lipschitz assumption implies the descent lemma coordinate-wise:
-<span class="math display">\[
-f(w^{k+1}) \leq f(w^k) + \nabla_j f(w^k)(w^{k+1} - w^k)_j + \frac{L}{2}(w^{k+1} - w^k)^2_j
-\]</span>
-for any <span class="math inline">\(w^{k+1}\)</span> and <span class="math inline">\(w_k\)</span> that only differ in coordinate <span class="math inline">\(j\)</span>. With <span class="math inline">\(\alpha_k = \frac{1}{L}\)</span> (for simplicity), plugging in <span class="math inline">\((w_{k+1} - w_k) = -\frac{1}{L}e_{jk}\nabla_{jk} f(w_k)\)</span> gives</p>
-<p><span class="math display">\[
-f(w^{k+1}) \leq f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2,
-\]</span>
-a progress bound based on only updating coordinate <span class="math inline">\(j_k\)</span>.</p>
+<p>More concretely, it is done as follows:</p>
+<p>This is done with matrices. Say we have <span class="math inline">\(w_1, ... w_t\)</span> words in a large vocabulary. <span class="math inline">\(x_1, ... x_t\)</span> are those words embedded into some space <span class="math inline">\(x_i = Ew_i\)</span> where <span class="math inline">\(E\)</span> is an embedding matrix.</p>
+<p>We then transform each embedding using 3 different learnable matrices <span class="math inline">\(W^K, W^Q, W^V\)</span>.</p>
+<ul>
+<li>The queries are given by <span class="math inline">\(q_i = W^Qx_i\)</span> or <span class="math inline">\(Q = XW^Q\)</span></li>
+<li>The keys are given by <span class="math inline">\(k_i = W^Kx_i\)</span> or <span class="math inline">\(K = XW^K\)</span></li>
+<li>The values are given by <span class="math inline">\(v_i = W^Vx_i\)</span> or <span class="math inline">\(V = XW^V\)</span></li>
+</ul>
+<p>Now the raw attention scores are calculated using: <span class="math inline">\(e_{ij} = q_i^Tk_j\)</span> or <span class="math inline">\(E = QK^T\)</span></p>
+<p>Now we normalize to probabilities (or interpreted like probabilities) using using the softmax function: <span class="math inline">\(\alpha_ij = \frac{e^{e_{ij}}}{\sum_{ij^*} e^{ij^*}}\)</span> or <span class="math inline">\(A = softmax(E)\)</span></p>
+<p>Then, we compute the output as the weighted sum: <span class="math inline">\(o_i = \sum_{j} \alpha_{ij} v_j\)</span> or <span class="math inline">\(O = AV\)</span></p>
+<p>This is done like this to be more GPU efficient manner like this -</p>
+<div class="float">
+<img src="images/gpu_calc.jpg" alt="Calculation" />
+<div class="figcaption">Calculation</div>
 </div>
-<div id="randomized-cd-progress" class="section level2 hasAnchor" number="4.3">
-<h2><span class="header-section-number">4.3</span> Randomized CD Progress<a href="coordinate-optimization.html#randomized-cd-progress" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The progress on a <strong>randomized</strong> coordinate descent depends on the random selection of <span class="math inline">\(j_k\)</span>. The expected progress is:</p>
+<p>The freedom of the self-attention mechanism also allows for parallelization but we loose what position a vector is in a sequence. It is an operation on sets not an ordered sequence. So what is commonly used is <strong>learned absolute position encoding</strong>. Here we use a <span class="math inline">\(n \times d \text{ matrix }P\)</span> matrix and each column <span class="math inline">\(p_i\)</span> is the positional encoding. Then we simply let <span class="math inline">\(\hat{x_i} = x_i + p_i\)</span></p>
+<p>Also, from the mechanism used above self-attention is just a linear transformation. In order to introduce non-linearity, we can simply add dense layers with some activation function after self-attention.</p>
 <p><span class="math display">\[
-\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given }w^k\\
-= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
-= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
-\]</span>
-Expectation is conditioned on all steps up to time <span class="math inline">\(k\)</span>.</p>
-<p>Let’s choose <span class="math inline">\(j_k\)</span> uniformly at random in this bound, <span class="math inline">\(p(j_k = j) = \frac{1}{d}\)</span>.</p>
-<p><span class="math display">\[
-E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
-= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
+m_i = Dense(o_i) = W_2 \cdot h_1 (W_1 \cdot o_i + b_1) + b_2
 \]</span></p>
-<p><strong>Random-Shuffling Coordinate Selection</strong></p>
-<p>An alternative to random selection of <span class="math inline">\(j_k\)</span> is cyclic selection:
-<span class="math display">\[
-j_1 = 1, j_2 = 2, \ldots, j_d = d \\
-j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
-j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
-\]</span>
-Cyclic often outperforms random in practice, but is worse in theory.</p>
-<p>For some problems, a bad ordering leads to provably-bad performance for cyclic.</p>
-<p><strong>Hybrid between cyclic and random is using random shuffling:</strong></p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]\)</span>.</p>
-<p>Choose random permutation <span class="math inline">\(r\)</span> and set <span class="math inline">\(j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]\)</span>.</p>
-<p>Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.</p>
+<div class="float">
+<img src="images/nonl-self-attention.jpg" alt="Adding Non-Linearity" />
+<div class="figcaption">Adding Non-Linearity</div>
 </div>
-<div id="gauss-southwell-greedy-coordinate-descent" class="section level2 hasAnchor" number="4.4">
-<h2><span class="header-section-number">4.4</span> Gauss-Southwell: Greedy Coordinate Descent<a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Instead of cyclic or random, there are also greedy coordinate selection methods.</p>
-<p>The classic greedy method is the Gauss-Southwell rule,</p>
+<p>If we are using an encoder-decoder architecture like in translation, we need to make sure that in the decoder we are only allowing the network to “see” the step you are on and not peek into the future during training. We could change the keys and queries at each time step but this is inefficient. A better way is to mask the attention.</p>
 <p><span class="math display">\[
-j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
-\]</span></p>
-<p>which chooses the coordinate with the largest directional derivative.</p>
-<p>This leads to a progress bound of:</p>
-<p><span class="math display">\[
-f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
-\]</span></p>
-<p>Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of:</p>
-<p><span class="math display">\[
-f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*]
-\]</span></p>
-<p>Where <span class="math inline">\(\mu_1\)</span> is the PL constant in the <span class="math inline">\(\infty\)</span>-norm</p>
-<p><span class="math display">\[
-\mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty
-\]</span></p>
-<p>This is faster than random because <span class="math inline">\(\mu_d \leq \mu_1 \leq \mu\)</span> (by norm equivalences). The <span class="math inline">\(\mu_1\)</span>-PL condition is implied by strong-convexity in the 1-norm.</p>
-<p><strong>Convergence Rate</strong></p>
-<p><span class="math display">\[
-f(w_{k+1}) \leq f(w_k) - \frac{1}{2L_k} \|\nabla f(w_k)\|_\infty^2,\\
-\text{PL gives us:}\\
-f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*] \\
-\text{Where } \mu_1 \text{ is the PL constant maximum norm:}\\
-\mu_1[f(w) - f^*] \leq \frac{1}{2} \| \nabla f(w) \|_\infty^2
-\]</span></p>
-<p>Lipschitz Sampling</p>
+e_{ij} = \begin{cases}
+q_i^Tk_j &amp; \text{if } j \leq i \\
+-\infty &amp; \text{if } j &gt; i
+\end{cases}
+\]</span>
+Note that the softamx of <span class="math inline">\(-\infty\)</span> is 0 which implies we can’t “look” at it.</p>
+</div>
+<div id="multi-head-attention" class="section level2 hasAnchor" number="16.2">
+<h2><span class="header-section-number">16.2</span> Multi-Head Attention<a href="self-attention-and-transformers.html#multi-head-attention" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Say we have a sequence that is split into 2 important parts - “The people went to the restaurant and ate food”.</p>
+<p>A query on “restaurant” could give high score on “ate” and “food”. But it could also be contextually correct to give a high score on “people” and “went”. Why not both?</p>
+<p>We can split our attention into multiple “heads” and hope that they specialize to “catch” different things in a sequence. This is computationally very efficient since we are not adding matrices. We’re just splitting the ones that we have into many heads.</p>
+<div class="float">
+<img src="images/multi.jpg" alt="Multi Head Attention" />
+<div class="figcaption">Multi Head Attention</div>
+</div>
+<p><strong>Summary</strong></p>
+<p>The people went to a nice restaurant and ate good food.</p>
+<p>Each word has its own embedding we take that embedding and map it to a lower dimensional vector using the query matrix. each word is also mapped to a lower dimensional space using the key matrix. Now if the lower dimensional vectors align. It means that we have a high score for those words, focusing on the word restaurant. It might have a higher attention score with the word nice which is describing the restaurant. This means that the embedding for the word nice attends to the embedding of the word restaurant. Softmax let us interpret this as probabilities.</p>
+<p>Now, the value matrix takes the soft, maxed vector and moves it. In the restaurant example, it might move (update) the restaurant vector (after softmax) towards a region that align with “nice” things. Say the current attention head cannot make this update from a regular restaurant to a nice restaurant. This is why we have multiple heads of attention each of which could specialize to different tasks and help us look at different contexts of a sentence.</p>
+</div>
+<div id="tips-for-numerical-stability" class="section level2 hasAnchor" number="16.3">
+<h2><span class="header-section-number">16.3</span> Tips for numerical stability<a href="self-attention-and-transformers.html#tips-for-numerical-stability" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>TODO</strong></p>
+<p><strong>Scaled dot product</strong></p>
+<p><strong>Skip connections</strong></p>
+<p><strong>Batch norm</strong></p>
+</div>
+<div id="transformers" class="section level2 hasAnchor" number="16.4">
+<h2><span class="header-section-number">16.4</span> Transformers<a href="self-attention-and-transformers.html#transformers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Transformers rely on self attention and were introduced in the paper “Attention is all you need” by Vasvani et al. They can be summarized like this:</p>
+<p>The arrows from the decoder to the decoder uses cross-attention. <strong>TODO cross attention and transformer details.</strong></p>
+<div class="float">
+<img src="images/transformer.jpg" alt="Transformer" />
+<div class="figcaption">Transformer</div>
+</div>
 
 </div>
 </div>
@@ -368,8 +296,8 @@ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*] \\
           </div>
         </div>
       </div>
-<a href="improving-gradient-descent.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="stochastic-gradient-methods.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="attention-with-rnns.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -400,7 +328,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/16-selfattention.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -408,7 +336,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/YashM8/CS448Notes/blob/main/04-coordinate.Rmd",
+"link": "https://github.com/YashM8/CS448Notes/blob/main/16-selfattention.Rmd",
 "text": null
 },
 "download": ["bookdownproj.pdf"],

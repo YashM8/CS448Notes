@@ -76,3 +76,11 @@ many-to-many
 problems-with-basic-rnns
 lstm---long-short-term-memory
 gated-recurrent-units
+attention-with-rnns
+introduction-2
+downsides-of-this-attention.
+self-attention-and-transformers
+self-attention-mechanism
+multi-head-attention
+tips-for-numerical-stability
+transformers
