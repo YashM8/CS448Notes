@@ -22,7 +22,7 @@ Now the raw attention scores are calculated using: $e_{ij} = q_i^Tk_j$ or $E = Q
 
 Now we normalize to probabilities (or interpreted like probabilities) using using the softmax function: $\alpha_ij = \frac{e^{e_{ij}}}{\sum_{ij^*} e^{ij^*}}$ or $A = softmax(E)$
 
-Then, we compute the output as the weighted sum: $o_i = \sum_{j} \alpha_{ij} v_j$ or $O = AV$
+Then, we compute the output as the weighted sum: $o_i = \sum_{j} \alpha_{ij} v_j$ or $O = AW^V$
 
 This is done like this to be more GPU efficient manner like this - 
 
@@ -57,37 +57,77 @@ A query on "restaurant" could give high score on "ate" and "food". But it could 
 
 We can split our attention into multiple "heads" and hope that they specialize to "catch" different things in a sequence. This is computationally very efficient since we are not adding matrices. We're just splitting the ones that we have into many heads.
 
+More concretely, the key, value and query matrices become $W^K_l$, $W^V_l$, $W^Q_l$ where $l = 1 \text{ to } h$ where $h$ are the heads of attention. The dimensionality of this is $d \times \frac{d}{h}$. Here $XW^Q$ is of reshaped to $n \times h \times \frac{d}{h}$.
+
+
+
 ![Multi Head Attention](images/multi.jpg)
 
 **Summary**
 
-The people went to a nice restaurant and ate good food.
+Example sentence - "The people went to a nice restaurant and ate good food"
 
 Each word has its own embedding we take that embedding and map it to a lower dimensional vector using the query matrix. each word is also mapped to a lower dimensional space using the key matrix. Now if the lower dimensional vectors align. It means that we have a high score for those words, focusing on the word restaurant. It might have a higher attention score with the word nice which is describing the restaurant. This means that the embedding for the word nice attends to the embedding of the word restaurant. Softmax let us interpret this as probabilities.
 
 Now, the value matrix takes the soft, maxed vector and moves it. In the restaurant example, it might move (update) the restaurant vector (after softmax) towards a region that align with "nice" things. Say the current attention head cannot make this update from a regular restaurant to a nice restaurant. This is why we have multiple heads of attention each of which could specialize to different tasks and help us look at different contexts of a sentence.
 
-## Tips for numerical stability
 
-**TODO**
+## Tips for numerical stability
 
 **Scaled dot product**
 
+When vectors grow very large, the dot product of two vectors become very large. We need to control for this to preserve numerical stability. Instead of $O = softmax(XW^Q \phantom{1}W^{K^T} X^T) \cdot XW^V$, we do $O = softmax(\frac{XW^Q \phantom{1}W^{K^T} X^T}{\sqrt{d/h}}) \cdot XW^V$
+
 **Skip connections**
 
-**Batch norm**
+Skip connections are used in various types of networks and are almost always useful. They help smooth out the loss landscape. They are implemented simply like this $X_i = X_{i-1} + Layer(X_{i-1})$.
 
+**Layer normalization**
 
+This helps enforce numerical stability after a large amount of computation. The idea is to to remove large variation in a layer before moving forward. This similar to a standard scaler in a typical ML pipeline. It is done like this - 
+
+$$
+\mu = \frac{1}{d} \sum_{i=1}^d w_i \phantom{\alpha} \text{ This is the mean.}\\
+\sigma = \sqrt{\frac{1}{d} \sum_{i=1}^d (w_i - \mu)^2} \phantom{\alpha} \text{ This is the deviation.}\\
+o = \frac{x - \mu}{\sigma} 
+$$
+
+Assume $w$ is a single word vector. 
 
 ## Transformers
 
-Transformers rely on self attention and were introduced in the paper "Attention is all you need" by Vasvani et al. They can be summarized like this:
+Transformers rely on self attention and were introduced in the paper "Attention is all you need" by Vasvani et al. They can just put together based on the things we discussed earlier and multi head attention is the main idea that pulls it together.
 
-The arrows from the decoder to the decoder uses cross-attention. **TODO cross attention and transformer details.**
+The **Encoder** does the following:
+
+- Inputs, which are your words.
+- You embed them as a vector.
+- Develop context using multi-head attention.
+- Layer norm to prevent numerical instability.
+- Dense layer for non-linearities.
+- Layer norm again for numerical stability.
+
+The decoder **decoder** received 2 inputs, the first one is the previous element in the sequence. The second inputs are the keys and values directly from the encoder.
+
+Let $w_i$ be the outputs from the encoder and $z_i$ be the inputs from the decoder. Cross attention is computed as follows.
+
+$$
+\text{The key and value is calculated from the encoder.}\\
+k_i = W^Kh_i \\
+v_i = W^Vh_i\\
+\text{The query is calculated from the decoder.}\\
+q_i = W^Qz_i
+$$
+
+The decoder also follows the general theme of **embed -> attention -> normalize -> dense**. In the decoder however, a linear layer followed my the softmax function is used to get probabilities.
 
 ![Transformer](images/transformer.jpg)
 
+## Conclution and Drawbacks
 
+Transformers have achieved state of the art of the art results in most tasks, including natural language, processing computer vision and time series modelling. Due to, they are very parallel nature during training, huge amount of data can be thrown into them developing a more robust model capable of generalizing better. the downside is that transformers require a large amount of data for example, if you have less data, a convolutional neural net is likely to work better but with more data, a transformer is more likely to beat a CNN.
+
+Another downside is that in self attention, there is a quadratic need for computation with sequence length $O(n^2 d)$. For recurrent models, it grew linearly. There are other methods that reduce the quadratic runtime, but don't scale efficiently, which is why they're not used in very large models.
 
 
 

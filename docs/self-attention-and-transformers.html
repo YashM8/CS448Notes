@@ -194,6 +194,7 @@
 <li class="chapter" data-level="16.2" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#multi-head-attention"><i class="fa fa-check"></i><b>16.2</b> Multi-Head Attention</a></li>
 <li class="chapter" data-level="16.3" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#tips-for-numerical-stability"><i class="fa fa-check"></i><b>16.3</b> Tips for numerical stability</a></li>
 <li class="chapter" data-level="16.4" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#transformers"><i class="fa fa-check"></i><b>16.4</b> Transformers</a></li>
+<li class="chapter" data-level="16.5" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#conclution-and-drawbacks"><i class="fa fa-check"></i><b>16.5</b> Conclution and Drawbacks</a></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -235,7 +236,7 @@
 </ul>
 <p>Now the raw attention scores are calculated using: <span class="math inline">\(e_{ij} = q_i^Tk_j\)</span> or <span class="math inline">\(E = QK^T\)</span></p>
 <p>Now we normalize to probabilities (or interpreted like probabilities) using using the softmax function: <span class="math inline">\(\alpha_ij = \frac{e^{e_{ij}}}{\sum_{ij^*} e^{ij^*}}\)</span> or <span class="math inline">\(A = softmax(E)\)</span></p>
-<p>Then, we compute the output as the weighted sum: <span class="math inline">\(o_i = \sum_{j} \alpha_{ij} v_j\)</span> or <span class="math inline">\(O = AV\)</span></p>
+<p>Then, we compute the output as the weighted sum: <span class="math inline">\(o_i = \sum_{j} \alpha_{ij} v_j\)</span> or <span class="math inline">\(O = AW^V\)</span></p>
 <p>This is done like this to be more GPU efficient manner like this -</p>
 <div class="float">
 <img src="images/gpu_calc.jpg" alt="Calculation" />
@@ -264,30 +265,62 @@ Note that the softamx of <span class="math inline">\(-\infty\)</span> is 0 which
 <p>Say we have a sequence that is split into 2 important parts - “The people went to the restaurant and ate food”.</p>
 <p>A query on “restaurant” could give high score on “ate” and “food”. But it could also be contextually correct to give a high score on “people” and “went”. Why not both?</p>
 <p>We can split our attention into multiple “heads” and hope that they specialize to “catch” different things in a sequence. This is computationally very efficient since we are not adding matrices. We’re just splitting the ones that we have into many heads.</p>
+<p>More concretely, the key, value and query matrices become <span class="math inline">\(W^K_l\)</span>, <span class="math inline">\(W^V_l\)</span>, <span class="math inline">\(W^Q_l\)</span> where <span class="math inline">\(l = 1 \text{ to } h\)</span> where <span class="math inline">\(h\)</span> are the heads of attention. The dimensionality of this is <span class="math inline">\(d \times \frac{d}{h}\)</span>. Here <span class="math inline">\(XW^Q\)</span> is of reshaped to <span class="math inline">\(n \times h \times \frac{d}{h}\)</span>.</p>
 <div class="float">
 <img src="images/multi.jpg" alt="Multi Head Attention" />
 <div class="figcaption">Multi Head Attention</div>
 </div>
 <p><strong>Summary</strong></p>
-<p>The people went to a nice restaurant and ate good food.</p>
+<p>Example sentence - “The people went to a nice restaurant and ate good food”</p>
 <p>Each word has its own embedding we take that embedding and map it to a lower dimensional vector using the query matrix. each word is also mapped to a lower dimensional space using the key matrix. Now if the lower dimensional vectors align. It means that we have a high score for those words, focusing on the word restaurant. It might have a higher attention score with the word nice which is describing the restaurant. This means that the embedding for the word nice attends to the embedding of the word restaurant. Softmax let us interpret this as probabilities.</p>
 <p>Now, the value matrix takes the soft, maxed vector and moves it. In the restaurant example, it might move (update) the restaurant vector (after softmax) towards a region that align with “nice” things. Say the current attention head cannot make this update from a regular restaurant to a nice restaurant. This is why we have multiple heads of attention each of which could specialize to different tasks and help us look at different contexts of a sentence.</p>
 </div>
 <div id="tips-for-numerical-stability" class="section level2 hasAnchor" number="16.3">
 <h2><span class="header-section-number">16.3</span> Tips for numerical stability<a href="self-attention-and-transformers.html#tips-for-numerical-stability" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>TODO</strong></p>
 <p><strong>Scaled dot product</strong></p>
+<p>When vectors grow very large, the dot product of two vectors become very large. We need to control for this to preserve numerical stability. Instead of <span class="math inline">\(O = softmax(XW^Q \phantom{1}W^{K^T} X^T) \cdot XW^V\)</span>, we do <span class="math inline">\(O = softmax(\frac{XW^Q \phantom{1}W^{K^T} X^T}{\sqrt{d/h}}) \cdot XW^V\)</span></p>
 <p><strong>Skip connections</strong></p>
-<p><strong>Batch norm</strong></p>
+<p>Skip connections are used in various types of networks and are almost always useful. They help smooth out the loss landscape. They are implemented simply like this <span class="math inline">\(X_i = X_{i-1} + Layer(X_{i-1})\)</span>.</p>
+<p><strong>Layer normalization</strong></p>
+<p>This helps enforce numerical stability after a large amount of computation. The idea is to to remove large variation in a layer before moving forward. This similar to a standard scaler in a typical ML pipeline. It is done like this -</p>
+<p><span class="math display">\[
+\mu = \frac{1}{d} \sum_{i=1}^d w_i \phantom{\alpha} \text{ This is the mean.}\\
+\sigma = \sqrt{\frac{1}{d} \sum_{i=1}^d (w_i - \mu)^2} \phantom{\alpha} \text{ This is the deviation.}\\
+o = \frac{x - \mu}{\sigma}
+\]</span></p>
+<p>Assume <span class="math inline">\(w\)</span> is a single word vector.</p>
 </div>
 <div id="transformers" class="section level2 hasAnchor" number="16.4">
 <h2><span class="header-section-number">16.4</span> Transformers<a href="self-attention-and-transformers.html#transformers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Transformers rely on self attention and were introduced in the paper “Attention is all you need” by Vasvani et al. They can be summarized like this:</p>
-<p>The arrows from the decoder to the decoder uses cross-attention. <strong>TODO cross attention and transformer details.</strong></p>
+<p>Transformers rely on self attention and were introduced in the paper “Attention is all you need” by Vasvani et al. They can just put together based on the things we discussed earlier and multi head attention is the main idea that pulls it together.</p>
+<p>The <strong>Encoder</strong> does the following:</p>
+<ul>
+<li>Inputs, which are your words.</li>
+<li>You embed them as a vector.</li>
+<li>Develop context using multi-head attention.</li>
+<li>Layer norm to prevent numerical instability.</li>
+<li>Dense layer for non-linearities.</li>
+<li>Layer norm again for numerical stability.</li>
+</ul>
+<p>The decoder <strong>decoder</strong> received 2 inputs, the first one is the previous element in the sequence. The second inputs are the keys and values directly from the encoder.</p>
+<p>Let <span class="math inline">\(w_i\)</span> be the outputs from the encoder and <span class="math inline">\(z_i\)</span> be the inputs from the decoder. Cross attention is computed as follows.</p>
+<p><span class="math display">\[
+\text{The key and value is calculated from the encoder.}\\
+k_i = W^Kh_i \\
+v_i = W^Vh_i\\
+\text{The query is calculated from the decoder.}\\
+q_i = W^Qz_i
+\]</span></p>
+<p>The decoder also follows the general theme of <strong>embed -&gt; attention -&gt; normalize -&gt; dense</strong>. In the decoder however, a linear layer followed my the softmax function is used to get probabilities.</p>
 <div class="float">
 <img src="images/transformer.jpg" alt="Transformer" />
 <div class="figcaption">Transformer</div>
 </div>
+</div>
+<div id="conclution-and-drawbacks" class="section level2 hasAnchor" number="16.5">
+<h2><span class="header-section-number">16.5</span> Conclution and Drawbacks<a href="self-attention-and-transformers.html#conclution-and-drawbacks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Transformers have achieved state of the art of the art results in most tasks, including natural language, processing computer vision and time series modelling. Due to, they are very parallel nature during training, huge amount of data can be thrown into them developing a more robust model capable of generalizing better. the downside is that transformers require a large amount of data for example, if you have less data, a convolutional neural net is likely to work better but with more data, a transformer is more likely to beat a CNN.</p>
+<p>Another downside is that in self attention, there is a quadratic need for computation with sequence length <span class="math inline">\(O(n^2 d)\)</span>. For recurrent models, it grew linearly. There are other methods that reduce the quadratic runtime, but don’t scale efficiently, which is why they’re not used in very large models.</p>
 
 </div>
 </div>
