@@ -1,0 +1,11 @@
+--- 
+title: "CS448Notes"
+author: "Yash Mali"
+site: bookdown::bookdown_site
+---
+
+# CPSC 448 Notes 
+
+Directed studies on optimization in ML and advanced deep learning architectures.
+
+

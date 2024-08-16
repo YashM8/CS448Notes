@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Gradient Descent Analysis | CS448Notes</title>
+  <meta name="description" content="Chapter 2 Gradient Descent Analysis | CS448Notes" />
+  <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 2 Gradient Descent Analysis | CS448Notes" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 2 Gradient Descent Analysis | CS448Notes" />
+  
+  
+  
+
+<meta name="author" content="Yash Mali" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+<link rel="next" href="improving-gradient-descent.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">CS448 Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> CPSC 448 Notes</a></li>
+<li class="chapter" data-level="2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html"><i class="fa fa-check"></i><b>2</b> Gradient Descent Analysis</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#gradient-descent-background"><i class="fa fa-check"></i><b>2.1</b> Gradient descent background</a></li>
+<li class="chapter" data-level="2.2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#showing-gradient-descent-reduces-the-objective-function."><i class="fa fa-check"></i><b>2.2</b> Showing gradient descent reduces the objective function.</a></li>
+<li class="chapter" data-level="2.3" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#what-learning-rate-to-use"><i class="fa fa-check"></i><b>2.3</b> What learning rate to use?</a></li>
+<li class="chapter" data-level="2.4" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#convergence-rate"><i class="fa fa-check"></i><b>2.4</b> Convergence rate</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html"><i class="fa fa-check"></i><b>3</b> Improving Gradient Descent</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#oracle-model-of-computation"><i class="fa fa-check"></i><b>3.1</b> Oracle Model of Computation</a></li>
+<li class="chapter" data-level="3.2" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#heavy-ball-method"><i class="fa fa-check"></i><b>3.2</b> Heavy Ball Method</a></li>
+<li class="chapter" data-level="3.3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#conjugate-gradient-heavy-ball-with-optimal-parameters"><i class="fa fa-check"></i><b>3.3</b> Conjugate Gradient: Heavy-Ball with Optimal Parameters</a></li>
+<li class="chapter" data-level="3.4" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#nesterov-accelerated-gradient"><i class="fa fa-check"></i><b>3.4</b> Nesterov Accelerated Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html"><i class="fa fa-check"></i><b>4</b> Coordinate Optimization</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#definition-and-examples"><i class="fa fa-check"></i><b>4.1</b> Definition and examples</a></li>
+<li class="chapter" data-level="4.2" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#analyzing-coordinate-descent"><i class="fa fa-check"></i><b>4.2</b> Analyzing Coordinate Descent</a></li>
+<li class="chapter" data-level="4.3" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#randomized-cd-progress"><i class="fa fa-check"></i><b>4.3</b> Randomized CD Progress</a></li>
+<li class="chapter" data-level="4.4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent"><i class="fa fa-check"></i><b>4.4</b> Gauss-Southwell: Greedy Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>5</b> Stochastic Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
+<li class="chapter" data-level="5.3" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions"><i class="fa fa-check"></i><b>5.3</b> Convergence of SGD for PL functions</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#when-to-stop"><i class="fa fa-check"></i><b>5.3.1</b> When to stop?</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing"><i class="fa fa-check"></i><b>5.4</b> Mini Batches and Batch Growing</a></li>
+<li class="chapter" data-level="5.5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation"><i class="fa fa-check"></i><b>5.5</b> Variation in Mini-Batch Approximation</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="overparameterization.html"><a href="overparameterization.html"><i class="fa fa-check"></i><b>6</b> Overparameterization</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="overparameterization.html"><a href="overparameterization.html#overparameterization-and-sgd"><i class="fa fa-check"></i><b>6.1</b> Overparameterization and SGD</a></li>
+<li class="chapter" data-level="6.2" data-path="overparameterization.html"><a href="overparameterization.html#faster-sgd-for-overparameterized-models"><i class="fa fa-check"></i><b>6.2</b> Faster SGD for Overparameterized Models</a></li>
+<li class="chapter" data-level="6.3" data-path="overparameterization.html"><a href="overparameterization.html#stochastic-line-search"><i class="fa fa-check"></i><b>6.3</b> Stochastic Line Search</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html"><i class="fa fa-check"></i><b>7</b> Variations on SGD</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#stochastic-average-gradient"><i class="fa fa-check"></i><b>7.1</b> Stochastic Average Gradient</a></li>
+<li class="chapter" data-level="7.2" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#variance-reduced-stochastic-gradient"><i class="fa fa-check"></i><b>7.2</b> Variance Reduced Stochastic Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html"><i class="fa fa-check"></i><b>8</b> Approximating the Hessian</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-1---diagonal-hessian"><i class="fa fa-check"></i><b>8.1</b> Cheap Hessian Approximation 1 - Diagonal Hessian</a></li>
+<li class="chapter" data-level="8.2" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-2---preconditioning"><i class="fa fa-check"></i><b>8.2</b> Cheap Hessian Approximation 2 - Preconditioning</a></li>
+<li class="chapter" data-level="8.3" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-3---mini-batch-hessian"><i class="fa fa-check"></i><b>8.3</b> Cheap Hessian Approximation 3 - Mini Batch Hessian</a></li>
+<li class="chapter" data-level="8.4" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#hessian-free-newton-methods-truncated-newton"><i class="fa fa-check"></i><b>8.4</b> Hessian Free Newton Methods (Truncated Newton)</a></li>
+<li class="chapter" data-level="8.5" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#quasi-newton-methods"><i class="fa fa-check"></i><b>8.5</b> Quasi-Newton Methods</a></li>
+<li class="chapter" data-level="8.6" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#barzilai-borwein-method"><i class="fa fa-check"></i><b>8.6</b> Barzilai-Borwein Method</a></li>
+<li class="chapter" data-level="8.7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#bfgs-quasi-newton-method"><i class="fa fa-check"></i><b>8.7</b> BFGS Quasi-Newton Method</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html"><i class="fa fa-check"></i><b>9</b> Projected Gradient Based Algorithms</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-gradient"><i class="fa fa-check"></i><b>9.1</b> Projected Gradient</a></li>
+<li class="chapter" data-level="9.2" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#l1-regularization-to-a-constrained-problem"><i class="fa fa-check"></i><b>9.2</b> L1 Regularization to a Constrained Problem</a></li>
+<li class="chapter" data-level="9.3" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#active-set-identification-and-backtracking"><i class="fa fa-check"></i><b>9.3</b> Active Set Identification and Backtracking</a></li>
+<li class="chapter" data-level="9.4" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#accelerating-projection-methods"><i class="fa fa-check"></i><b>9.4</b> Accelerating Projection Methods</a></li>
+<li class="chapter" data-level="9.5" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd"><i class="fa fa-check"></i><b>9.5</b> Projected SGD and CD</a></li>
+<li class="chapter" data-level="9.6" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#frank-wolfe-method"><i class="fa fa-check"></i><b>9.6</b> Frank-Wolfe Method</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html"><i class="fa fa-check"></i><b>10</b> Global Optimization and Subgradients</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
+<li class="chapter" data-level="10.2" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
+<li class="chapter" data-level="10.3" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
+<li class="chapter" data-level="10.4" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#using-multiple-subgradients"><i class="fa fa-check"></i><b>10.4</b> Using Multiple Subgradients</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html"><i class="fa fa-check"></i><b>11</b> Proximal Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#convergence-rate-1"><i class="fa fa-check"></i><b>11.1</b> Convergence Rate</a></li>
+<li class="chapter" data-level="11.2" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#dualty"><i class="fa fa-check"></i><b>11.2</b> Dualty</a></li>
+<li class="chapter" data-level="11.3" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#supremum-and-infimum"><i class="fa fa-check"></i><b>11.3</b> Supremum and Infimum</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>12</b> Optimization Demo</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-momentum"><i class="fa fa-check"></i><b>12.1</b> Gradient Descent with Momentum</a></li>
+<li class="chapter" data-level="12.2" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-nesterov-acceleration"><i class="fa fa-check"></i><b>12.2</b> Gradient Descent with Nesterov Acceleration</a></li>
+<li class="chapter" data-level="12.3" data-path="optimization-demo.html"><a href="optimization-demo.html#nesterov-with-restart"><i class="fa fa-check"></i><b>12.3</b> Nesterov With Restart</a></li>
+<li class="chapter" data-level="12.4" data-path="optimization-demo.html"><a href="optimization-demo.html#newtons-method"><i class="fa fa-check"></i><b>12.4</b> Newton’s Method</a></li>
+<li class="chapter" data-level="12.5" data-path="optimization-demo.html"><a href="optimization-demo.html#damped-newtons-method"><i class="fa fa-check"></i><b>12.5</b> Damped Newton’s Method</a></li>
+<li class="chapter" data-level="12.6" data-path="optimization-demo.html"><a href="optimization-demo.html#coordinate-descent"><i class="fa fa-check"></i><b>12.6</b> Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html"><i class="fa fa-check"></i><b>13</b> Connvolutional Neural Networks</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#basics"><i class="fa fa-check"></i><b>13.1</b> Basics</a></li>
+<li class="chapter" data-level="13.2" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutions"><i class="fa fa-check"></i><b>13.2</b> Convolutions</a></li>
+<li class="chapter" data-level="13.3" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutional-layers"><i class="fa fa-check"></i><b>13.3</b> Convolutional Layers</a></li>
+<li class="chapter" data-level="13.4" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#pooling-layers"><i class="fa fa-check"></i><b>13.4</b> Pooling layers</a></li>
+<li class="chapter" data-level="13.5" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#example"><i class="fa fa-check"></i><b>13.5</b> Example</a></li>
+<li class="chapter" data-level="13.6" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#conclusion"><i class="fa fa-check"></i><b>13.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html"><i class="fa fa-check"></i><b>14</b> Recurrent Neural Networks</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#background"><i class="fa fa-check"></i><b>14.1</b> Background</a></li>
+<li class="chapter" data-level="14.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#introduction-1"><i class="fa fa-check"></i><b>14.2</b> Introduction</a></li>
+<li class="chapter" data-level="14.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#types-of-rnns"><i class="fa fa-check"></i><b>14.3</b> Types of RNN’s</a>
+<ul>
+<li class="chapter" data-level="14.3.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#one-to-many"><i class="fa fa-check"></i><b>14.3.1</b> One to Many</a></li>
+<li class="chapter" data-level="14.3.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-one"><i class="fa fa-check"></i><b>14.3.2</b> Many to One</a></li>
+<li class="chapter" data-level="14.3.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-many"><i class="fa fa-check"></i><b>14.3.3</b> Many to Many</a></li>
+</ul></li>
+<li class="chapter" data-level="14.4" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#problems-with-basic-rnns"><i class="fa fa-check"></i><b>14.4</b> Problems with (Basic) RNN’s</a></li>
+<li class="chapter" data-level="14.5" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#lstm---long-short-term-memory"><i class="fa fa-check"></i><b>14.5</b> LSTM - Long Short Term Memory</a></li>
+<li class="chapter" data-level="14.6" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#gated-recurrent-units"><i class="fa fa-check"></i><b>14.6</b> Gated Recurrent Units</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html"><i class="fa fa-check"></i><b>15</b> Attention with RNN’s</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#introduction-2"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#downsides-of-this-attention."><i class="fa fa-check"></i><b>15.2</b> Downsides of this attention.</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html"><i class="fa fa-check"></i><b>16</b> Self-Attention and Transformers</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#self-attention-mechanism"><i class="fa fa-check"></i><b>16.1</b> Self-Attention Mechanism</a></li>
+<li class="chapter" data-level="16.2" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#multi-head-attention"><i class="fa fa-check"></i><b>16.2</b> Multi-Head Attention</a></li>
+<li class="chapter" data-level="16.3" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#tips-for-numerical-stability"><i class="fa fa-check"></i><b>16.3</b> Tips for numerical stability</a></li>
+<li class="chapter" data-level="16.4" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#transformers"><i class="fa fa-check"></i><b>16.4</b> Transformers</a></li>
+<li class="chapter" data-level="16.5" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#conclution-and-drawbacks"><i class="fa fa-check"></i><b>16.5</b> Conclution and Drawbacks</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="project.html"><a href="project.html"><i class="fa fa-check"></i><b>17</b> Project</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">CS448Notes</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="gradient-descent-analysis" class="section level1 hasAnchor" number="2">
+<h1><span class="header-section-number">Chapter 2</span> Gradient Descent Analysis<a href="gradient-descent-analysis.html#gradient-descent-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="gradient-descent-background" class="section level2 hasAnchor" number="2.1">
+<h2><span class="header-section-number">2.1</span> Gradient descent background<a href="gradient-descent-analysis.html#gradient-descent-background" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Gradient descent is an iterative optimization algorithm that was first proposed in 1847 by Cauchy. The algorithm can be summarized as follows:</p>
+<p><span class="math display">\[
+w^t = w^{t-1} - \alpha_t \nabla f(w^t) \\
+\text{  For t = 1, 2, 3 ...}
+\]</span></p>
+<p>Where we are trying to find a set of parameters <span class="math inline">\(w\)</span> that minimize the function <span class="math inline">\(f\)</span>, also called the objective function. <span class="math inline">\(\nabla f\)</span> is the gradient of <span class="math inline">\(f\)</span> with respect to <span class="math inline">\(w\)</span> and the subscript <span class="math inline">\(t\)</span> is the iteration number.</p>
+<p>The main idea is to move in the opposite direction of the steepest ascent of the function <span class="math inline">\(f\)</span>. How much you move during each iteration is controlled by two things. The first is the steepness of gradient which we cannot control after we have chosen the objective function. The second is the parameter <span class="math inline">\(\alpha_t\)</span>. It is also called th learning rate.</p>
+<p>The time complexity of <strong>each</strong> iteration is only <span class="math inline">\(O(d)\)</span> after computing the gradient. Where <span class="math inline">\(d\)</span> is the number of parameters. We can stop if we have made very little progress, <span class="math inline">\(||f(w^t) - f(w^{t-1})||\)</span> is very small.</p>
+<p>Intuitively gradient descent can be thought of as standing on the top of a canyon while being blindfolded and using your leg to find the steepest slope downwards locally. Then, taking a small step in that direction and repeating the process until you reach the bottom. In this analogy the canyon can be thought of as modelled by a 3D objective function.</p>
+</div>
+<div id="showing-gradient-descent-reduces-the-objective-function." class="section level2 hasAnchor" number="2.2">
+<h2><span class="header-section-number">2.2</span> Showing gradient descent reduces the objective function.<a href="gradient-descent-analysis.html#showing-gradient-descent-reduces-the-objective-function." class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let us assume that the objective function is Lipschitz continuous. Intuitively it means that a this function does not change in gradient arbitrarily fast. Formally it means that there has to be a a real valued number <span class="math inline">\(L\)</span> that satisfies:</p>
+<p><span class="math display">\[
+\nabla f(w) − \nabla f(v) \le L||w − v||
+\]</span>
+For twice continuously differentiable <span class="math inline">\((C^2)\)</span> functions, using the mean value theorem, we can show:
+<span class="math display">\[
+||\nabla^2 f (w)|| \le L \Longrightarrow \nabla^2 f (w) \le LI
+\]</span>
+So we can bound quadratic functions of the form below using:</p>
+<p><span class="math display">\[
+d^T \nabla^2f(w) d ≤ d^T (LI)d = Ld^Td = L||d^2||
+\]</span>
+Using multivariate Taylor expansion:</p>
+<p><span class="math display">\[
+f(v) = f(w) + \nabla f(w)^T (v - w) + \frac{1}{2} (v - w)^T \nabla^2 f(u) (v - w),\text{where } u \in [v, w]
+\\
+f(v) \le f(w) + \nabla f(w)^T (v - w) + \frac{L}{2} ||v-w||^2
+\]</span>
+This is also known as the descent lemma.</p>
+<p>This inequality give us an upper bound on <span class="math inline">\(f\)</span> that can be minimized by <span class="math inline">\(\alpha_t = \frac{1}{L}\)</span>. Using the above equations we can show that gradient descent reduces the objective with one iteration:</p>
+<p><span class="math display">\[
+w^t = w^{t-1} - \alpha_t \nabla f(w^k) \\
+w^t = w^{t-1} - \frac{1}{L} \nabla f(w^t)\\
+f(w^t) \le f(w^{t-1}) + \nabla f(w^{t-1})^T (w^{t} - w^{t-1}) + \frac{L}{2} ||w^{t}-w^{t-1}||^2\\
+\text{Now we can use, } w^{t}-w^{t-1} = - \frac{1}{L} \nabla f(w^{t-1})\\
+f(w^t) \le f(w^{t-1}) - \nabla f(w^{t-1})^T \frac{1}{L} \nabla f(w^{t-1}) + \frac{L}{2} ||\frac{1}{L} \nabla f(w^{t-1})||^2\\
+f(w^t) \le f(w^{t-1}) - \frac{1}{L} ||\nabla f(w^{t-1})||^2 + \frac{1}{2L} ||\nabla f(w^{t-1})||^2\\
+f(w^t) \le f(w^{t-1}) - \frac{1}{2L} ||\nabla f(w^{t-1})||^2\\
+\]</span>
+This shows that with every iteration we are guaranteed to make progress with the learning rate <span class="math inline">\(\alpha_t = \frac{1}{L}\)</span> when the gradient is non-zero.</p>
+</div>
+<div id="what-learning-rate-to-use" class="section level2 hasAnchor" number="2.3">
+<h2><span class="header-section-number">2.3</span> What learning rate to use?<a href="gradient-descent-analysis.html#what-learning-rate-to-use" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Using <span class="math inline">\(\alpha_t = \frac{1}{L}\)</span> is impractical since computing <span class="math inline">\(L\)</span> is very expensive. The step size we get from this approach is usually very small. A more practical solution is to approximate <span class="math inline">\(L\)</span>. Starting with an initial guess <span class="math inline">\(\hat{L}\)</span>. Then before you take a step, check if the progress bound is satisfied.</p>
+<p><span class="math display">\[
+f(w^t -\frac{1}{\hat{L}} \nabla f(w^{t})) \le f(w^{t}) - \frac{1}{2L} ||\nabla f(w^{t})||^2\\
+\text{Where } w^t -\frac{1}{\hat{L}} f(w^{t}) \text{ is a potential } w^{t+1}
+\]</span>
+Then, double <span class="math inline">\(\hat{L}\)</span> if the condition is not satisfied.</p>
+<p><strong>Armijo Backtracking</strong></p>
+<ol style="list-style-type: decimal">
+<li><p>Start <strong>each iteration</strong> with Start each iteration with a large <span class="math inline">\(\alpha\)</span> so as to be optimistic of that fact that we are not in the worst case where we need a small step size.</p></li>
+<li><p>Half <span class="math inline">\(\alpha\)</span> until the Armijo condition is satisfies. This is given by:</p></li>
+</ol>
+<p><span class="math display">\[
+f(w^t - \alpha \nabla f(w^{t})) \le f(w^t) - \alpha \gamma ||\nabla f(w^t)||^2 \\
+\text{For } \gamma \in (0, \frac{1}{2}]
+\]</span></p>
+<p>This allows us to vary the learning rate in such a way that the new set of parameters <span class="math inline">\(w^{t+1}\)</span> have sufficiently decreased the objective function going the current parameters <span class="math inline">\(w^t\)</span>.</p>
+<p>More to come later.</p>
+</div>
+<div id="convergence-rate" class="section level2 hasAnchor" number="2.4">
+<h2><span class="header-section-number">2.4</span> Convergence rate<a href="gradient-descent-analysis.html#convergence-rate" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Using the progress bound, <span class="math inline">\(f(w^t) \le f(w^{t-1}) - \frac{1}{2L} ||\nabla f(w^{t-1})||^2 \Longrightarrow ||\nabla f(w^{t-1})||^2 \le 2L[f(w^{t-1}) - f(w^t)]\)</span></p>
+<p>Let’s consider the smallest squared gradient norm <span class="math inline">\(\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f(\mathbf{w^j})\|^2\)</span>. This is the change in the objective function is the smallest.</p>
+<p>Trivally, this will be smaller than the average squared gradient norm:</p>
+<p><span class="math display">\[
+\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{1}{t} \sum_{k=1}^t ||\nabla f({w^{k-1}})||^2 \le \frac{2L}{t} \sum_{k=1}^t [f({w^{k-1}}) - f(w^k)] \\
+\frac{2L}{t} \sum_{k=1}^t [f({w^{k-1}}) - f(w^k)] = \frac{2L}{t} [f(w^0) - f(w^t)], \text{ Since this is a telescoping sum}\\
+\text{Also, } f(w^t) \ge f^* \text{ where } f^* \text{ is objective value for optimal } w^* \\
+\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{2L}{t} [f(w^0) - f^*] = O(1/t)
+\]</span>
+It is not the last iteration that satisfies the inequality. It can be satisfied at any point of the optimization process. The last iteration however does have the lowest <span class="math inline">\(f\)</span> value. This also does not imply that we will find the global optima. We could be minimizing a objective that has local optima.</p>
+<p>We usually stop the iterative process when the norm is below some small value <span class="math inline">\(\epsilon\)</span>.</p>
+<p><span class="math display">\[
+\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{2L}{t} [f(w^0) - f^*] \le \epsilon \\
+t \geq \frac{2L[f(w_0) - f^*)]}{\epsilon}\\
+t = O(1/\epsilon)
+\]</span>
+To satisfy out stopping condition. <span class="math inline">\(t = O(1/\epsilon)\)</span> is called the <strong>iteration complexity</strong> of the algorithm. For least squares, the cost of computing a gradient is <span class="math inline">\(O(nd)\)</span> where <span class="math inline">\(n\)</span> is the nuber of data points and <span class="math inline">\(d\)</span> is the dimensionality of the data. The total cost is <span class="math inline">\(O(nd \times 1/\epsilon)\)</span></p>
+<p>Another way to measure the rate of convergence is by the limit of the ratio of successive errors:
+<span class="math display">\[
+\lim_{k \to \infty} \frac{f(w_{k+1}) - f(w^*)}{f(w_k) - f(w^*)} = \rho.
+\]</span>
+Different values of <span class="math inline">\(\rho\)</span> give us different rates of convergence:</p>
+<ol style="list-style-type: decimal">
+<li>If <span class="math inline">\(\rho=1\)</span>, it is called a sublinear rate. Which means we need <span class="math inline">\(O(1/\epsilon)\)</span> iterations.</li>
+<li>If <span class="math inline">\(\rho \in (0, 1)\)</span> it is called a linear rate. Which means we need <span class="math inline">\(O(log(1/\epsilon))\)</span> iterations.</li>
+<li>If <span class="math inline">\(\rho = 0\)</span>, it is called a superlinear rate. Which means we need <span class="math inline">\(O(log(log(1/\epsilon))\)</span> iterations.</li>
+</ol>
+<p>Having <span class="math inline">\(f(w_t) - f(w^*) = O(1/t)\)</span> gives a sublinear convergence rate. The longer you run the algorithm, the less progress it makes.</p>
+<p><strong>Polyak-Lojasiewicz (PL) Inequality</strong></p>
+<p>Gradient descent with least squares has linear cost but a sublinear rate. For many “nice” functions, gradient descent actually has a linear rate. For example, functions satisfying the PL Inequality:</p>
+<p><span class="math display">\[
+\frac{1}{2} ||\nabla f(w)||^2 \ge \mu (f(w) - f^*)
+\]</span>
+To get a linear convergence rate under the PL ineqaulity:</p>
+<p><span class="math display">\[
+f(w^{k+1}) \leq f(w^k) - \frac{1}{2L} \|\nabla f(w^k)\|^2. \\
+\text{Under the PL inequality, we have:} \\
+-\|\nabla f(w^k)\|^2 \leq -2\mu (f(w^k) - f^*). \\
+f(w^{k+1}) \leq f(w^k) - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq f(w^k) - f^* - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^k) - f^*). \\
+\]</span>
+Using this inequality recursively:</p>
+<p><span class="math display">\[
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^{k-1}) - f^*). \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) \left(1 - \frac{\mu}{L}\right) [f(w^{k-2} - f^*]. \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^3 [f(w^{k-3} - f^*]. \\
+...\\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^k [f(w^{0} - f^*]. \\
+\]</span>
+And since <span class="math inline">\(0 &lt; \mu \le L\)</span>, we have <span class="math inline">\(\left(1 - \frac{\mu}{L} \right) \le 0\)</span>. This implies <span class="math inline">\(f(w^{k+1}) - f^* = O(\rho^k) \text{ when } \rho &lt; 1\)</span>.</p>
+<p>Using the fact that <span class="math inline">\((1-x) \ge e^{-x}\)</span> we can rewrite the above as:</p>
+<p><span class="math display">\[
+f(w^{k}) - f^* \leq exp\left(k\frac{\mu}{L}\right) [f(w^{0} - f^*]. \\
+\]</span>
+Which is why linear convergence is sometimes also called “exponential convergence”. For some <span class="math inline">\(f(w^{k}) - f^* \leq \epsilon\)</span> we have <span class="math inline">\(k \ge \frac{L}{\mu} log (\frac{f(w^0 - f^*)}{\mu}) = O(log(1/\epsilon))\)</span>.</p>
+<p>PL is satisfied for many convex objective functions like least squares. PL is not satisfied for many other scenarios like neural network optimization. The PL constant <span class="math inline">\(\mu\)</span> might be bad for some functions. It might be hard to show the PL satisfiability for many functions.</p>
+<p><strong>Strong Convexity</strong></p>
+<p>A function <span class="math inline">\(f\)</span> is strong convex if the function:</p>
+<p><span class="math display">\[
+f(w) - \frac{\mu}{2} \|w\|^2
+\]</span>
+Is also a convex function for any <span class="math inline">\(\mu &gt; 0\)</span>. More informally, if you un-regularize with <span class="math inline">\(\mu\)</span>, the function is still convex. Strongly convex functions have some nice properties:</p>
+<p>A unique global minimizing point <span class="math inline">\(w^*\)</span> exists.
+For <span class="math inline">\(C^1\)</span> strongly convex functions satisfies the PL inequality.
+If <span class="math inline">\(g(w) = f(Aw)\)</span> for a strongly convex <span class="math inline">\(f\)</span> and a matrix <span class="math inline">\(A\)</span>, then <span class="math inline">\(g\)</span> satisfies the PL inequality.</p>
+<p>Strong Convexity Implies PL Inequality. From Taylor’s theorem we have for <span class="math inline">\(C^2\)</span> functions:</p>
+<p><span class="math display">\[
+f(v) = f(w) + \nabla f(w)^\top (v - w) + \frac{1}{2} (v - w)^\top \nabla^2 f(u) (v - w).
+\]</span></p>
+<p>By strong convexity, <span class="math inline">\(d^\top \nabla^2 f(u) d \geq \mu \|d\|^2 \quad \text{for any } d \text{ and } u.\)</span> we have:</p>
+<p><span class="math display">\[
+f(v) \geq f(w) + \nabla f(w)^\top (v - w) + \frac{\mu}{2} \|v - w\|^2
+\]</span></p>
+<p>Treating the right side as a function of <span class="math inline">\(v\)</span>, we get a quadratic lower bound on <span class="math inline">\(f\)</span>. After minimizing with respect to <span class="math inline">\(v\)</span> we get:</p>
+<p><span class="math display">\[
+f(w) - f^* \leq \frac{1}{2\mu} \|\nabla f(w)\|^2\\
+\text{Which is the PL inequality.}
+\]</span>
+<strong>Combining Lipschitz Continuity and Strong Convexity</strong> - Lipschitz continuity of gradient gives guaranteed progress. Strong convexity of functions gives maximum sub-optimality. Progress on each iteration will be at least a fixed fraction of the sub-optimality.</p>
+<p><strong>Effect of L2 Regularization on Convergence Rate.</strong></p>
+<p>If we have a convex loss <span class="math inline">\(f\)</span>, adding L2-regularization makes it strongly-convex.</p>
+<p><span class="math display">\[
+f(w) + \frac{\lambda}{2} ||w^2||, \text{ with } \mu \ge \lambda
+\]</span>
+So adding the <span class="math inline">\(L2\)</span> regulaizer improves rate from sub-linear and linear. We go from <span class="math inline">\(O(\frac{1}{\epsilon})\)</span> to <span class="math inline">\(O(log(\frac{1}{\epsilon}))\)</span> and guarantees a unique minimizer.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="improving-gradient-descent.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/02-basics.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/02-basics.Rmd",
+"text": null
+},
+"download": ["bookdownproj.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

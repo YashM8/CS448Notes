@@ -1,0 +1,113 @@
+# Improving Gradient Descent
+
+## Oracle Model of Computation
+
+To analyze algorithms we need two ingredients:
+1. Assumptions about the function like Lipschitz, PL, convexity, and so on.
+2. Model of computation, restricting what the algorithm can do.
+
+**Standard model of computation is the first-order oracle model:**
+
+1. At each iteration the algorithm chooses a point $w^k$.
+2. The algorithm then gets $f(w^k)$ and $\nabla f(w^k)$.
+
+We analyze how many iterations are needed to make some quantity small.
+Usually $\| \nabla f(w^k) \|$ or $f(w^k) - f^*$ or $\| w^k - w^* \|$.
+
+Given assumptions and oracle model, we can prove upper bounds on iteration complexity of specific algorithms and prove lower bounds on iteration complexity across algorithms.
+
+In first-order oracle model the algorithm itself is often unrestricted,
+but it can only learn about the function through evaluations at the chosen $w^k$.
+Often prove lower bounds by designing a “worst function” under the assumptions.
+And show that you can only slowly discover the minimum location from oracle.
+
+
+## Heavy Ball Method
+
+$$
+w^{k+1} = w^{k} - \alpha_k \nabla f(w^k) + \beta_k (w^k - w^{k-1}) \\
+$$
+Which adds a momentum term to each gradient descent iteration where $k > 1$. Informally this term makes us go further in the previous direction. $\beta_k \in [0, 1)$
+
+Heavy-ball method can increase function and “overshoot” the optimum. But we will reach the optima quicker.
+
+Considering the heavy-ball method with the choices:
+$$
+\alpha_k = \frac{4}{(\sqrt{L} + \sqrt{\mu})^2}, \quad \beta_k = \left( \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}} \right)^2.
+$$
+
+Under these choices the heavy-ball method has:
+$$
+\|w_k - w^*\| \leq \left( \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}} + \epsilon_k \right)^k \|w_0 - w^*\|,
+$$
+where $\epsilon_k \to 0$.
+
+Instead of directly bounding $\|w_k - x^*\|$, the proof bounds $\|w_k - w^*\|^2 + \|w_{k-1} - w^*\|^2$. Shows that a function that is “bigger” is converging at the right rate.
+
+The optimal dimension-independent rate in the first-order oracle model is:
+$$
+\frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}.
+$$
+
+So with this choice the heavy-ball method is close to optimal.
+
+
+## Conjugate Gradient: Heavy-Ball with Optimal Parameters
+
+
+For quadratics, we could optimize $\alpha_k$ and $\beta_k$ on each iteration. At each iteration, choose $\alpha_k$ and $\beta_k$ that maximally decrease $f$. “Plane search” (“subspace optimization”) along two directions instead of “line search”. This “optimal heavy-ball” method is called the conjugate gradient (CG) method:
+
+$\alpha_k = \frac{\nabla f(w_k)^T d_k}{d_k^T A d_k}$ (step size for gradient direction)
+
+$\beta_k = \frac{\alpha_k \beta_{\hat{k}-1}}{\alpha_{k-1}}$ (momentum parameter, $\beta_0 = 0$)
+
+$w_{k+1} = w_k - \alpha_k \nabla f(w_k) + \beta_k (w_k - w_{k-1})$ (heavy-ball update)
+
+$\beta_{\hat{k}} = \frac{\nabla f(w_{k-1})^T A d_{k-1}}{d_{k-1}^T A d_{k-1}}$ (search direction, $d_0 = -\nabla f(w_0)$)
+
+Gradients between iterations are orthogonal, $\nabla f(w_k)^T \nabla f(w_{k-1}) = 0$.
+
+Achieves optimal $\frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}$ dimension-independent rate.
+
+You can show that conjugate gradient minimizes a d-dimensional quadratic in $d$ steps. Tends not to happen on computers due to floating point issues. Note that conjugate gradient does not need to know $L$ or $µ$.
+
+## Nesterov Accelerated Gradient 
+
+We call a first-order method accelerated if it either has a $O(1/k^2)$ rate for convex functions or have a linear rate depending on $\sqrt{L}$ and $\sqrt{\mu}$ for strongly-convex functions
+
+
+$$
+w^{k+1} = w^{k} - \alpha_k \nabla f(v^k) \\
+v^{k+1} = w^{k+1} + \beta_k (w^{k+1} - w^{k}) \\
+$$
+Nesterov's Acceleration computes gradient after applying the the momentum.
+
+Consider optimizing a one-dimensional convex function. If sign of gradient stays same, Nesterov’s algorithm speeds up heavy-ball. If sign of gradient changes (overshooting the minima), it “slows down” faster.
+
+
+Nesterov’s method is typically analyzed with $\alpha_k = \frac{1}{L}$.
+
+For convex functions, accelerated rate can be achieved with - $\beta_k = \frac{k - 1}{k + 2}$, a momentum that converges to 1.
+
+For strongly-convex functions, acceleration can be achieved with constant - $\beta_k = \frac{\sqrt{L} - \sqrt{\mu}}{\sqrt{L} + \sqrt{\mu}}$, as in the heavy-ball method.
+
+Notice that you need different parameters for different problems. Using a momentum that converges to 1 for strongly-convex could be very slow. Unlike gradient descent which adapts to the problem with standard choices. Using $\alpha_k = \frac{1}{L}$ maintains rate for convex, strongly-convex, and non-convex.
+
+**In practice**, we can maintain a accelerated rate without knowing $L$.
+
+- Start with a guess $\hat{L}$
+
+- Given the momentum step $v_k$, test the inequality
+$f(w_{k+1}) \leq f(v_k) - \frac{1}{2\hat{L}} \| \nabla f(v_k) \|^2$,
+and double $\hat{L}$ until it is satisfied.
+
+As with gradient descent, this can work much better than knowing $L$.
+
+Nesterov’s method is often non-monotonic. We do not always have $ f(w_{k+1}) < f(w_k) $. As with momentum, this is not necessarily a bad thing.
+
+**TODO 2nd derivative method**
+
+
+
+
+

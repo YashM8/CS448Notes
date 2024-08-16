@@ -1,0 +1,198 @@
+# Gradient Descent Analysis
+
+## Gradient descent background
+
+Gradient descent is an iterative optimization algorithm that was first proposed in 1847 by Cauchy. The algorithm can be summarized as follows:
+
+$$
+w^t = w^{t-1} - \alpha_t \nabla f(w^t) \\
+\text{  For t = 1, 2, 3 ...}
+$$
+
+Where we are trying to find a set of parameters $w$ that minimize the function $f$, also called the objective function. $\nabla f$ is the gradient of $f$ with respect to $w$ and the subscript $t$ is the iteration number.
+
+The main idea is to move in the opposite direction of the steepest ascent of the function $f$. How much you move during each iteration is controlled by two things. The first is the steepness of gradient which we cannot control after we have chosen the objective function. The second is the parameter $\alpha_t$. It is also called th learning rate.
+
+The time complexity of **each** iteration is only $O(d)$ after computing the gradient. Where $d$ is the number of parameters. We can stop if we have made very little progress, $||f(w^t) - f(w^{t-1})||$ is very small.
+
+Intuitively gradient descent can be thought of as standing on the top of a canyon while being blindfolded and using your leg to find the steepest slope downwards locally. Then, taking a small step in that direction and repeating the process until you reach the bottom. In this analogy the canyon can be thought of as modelled by a 3D objective function. 
+
+## Showing gradient descent reduces the objective function.
+
+Let us assume that the objective function is Lipschitz continuous. Intuitively it means that a this function does not change in gradient arbitrarily fast. Formally it means that there has to be a a real valued number $L$ that satisfies:
+
+$$
+\nabla f(w) − \nabla f(v) \le L||w − v||
+$$
+For twice continuously differentiable $(C^2)$ functions, using the mean value theorem, we can show:
+$$
+||\nabla^2 f (w)|| \le L \Longrightarrow \nabla^2 f (w) \le LI
+$$
+So we can bound quadratic functions of the form below using:
+
+$$
+d^T \nabla^2f(w) d ≤ d^T (LI)d = Ld^Td = L||d^2||
+$$
+Using multivariate Taylor expansion:
+
+$$
+f(v) = f(w) + \nabla f(w)^T (v - w) + \frac{1}{2} (v - w)^T \nabla^2 f(u) (v - w),\text{where } u \in [v, w]
+\\
+f(v) \le f(w) + \nabla f(w)^T (v - w) + \frac{L}{2} ||v-w||^2
+$$
+This is also known as the descent lemma. 
+
+This inequality give us an upper bound on $f$ that can be minimized by $\alpha_t = \frac{1}{L}$. Using the above equations we can show that gradient descent reduces the objective with one iteration:
+
+$$
+w^t = w^{t-1} - \alpha_t \nabla f(w^k) \\
+w^t = w^{t-1} - \frac{1}{L} \nabla f(w^t)\\
+f(w^t) \le f(w^{t-1}) + \nabla f(w^{t-1})^T (w^{t} - w^{t-1}) + \frac{L}{2} ||w^{t}-w^{t-1}||^2\\
+\text{Now we can use, } w^{t}-w^{t-1} = - \frac{1}{L} \nabla f(w^{t-1})\\
+f(w^t) \le f(w^{t-1}) - \nabla f(w^{t-1})^T \frac{1}{L} \nabla f(w^{t-1}) + \frac{L}{2} ||\frac{1}{L} \nabla f(w^{t-1})||^2\\
+f(w^t) \le f(w^{t-1}) - \frac{1}{L} ||\nabla f(w^{t-1})||^2 + \frac{1}{2L} ||\nabla f(w^{t-1})||^2\\
+f(w^t) \le f(w^{t-1}) - \frac{1}{2L} ||\nabla f(w^{t-1})||^2\\
+$$
+This shows that with every iteration we are guaranteed to make progress with the learning rate $\alpha_t = \frac{1}{L}$ when the gradient is non-zero.
+
+## What learning rate to use?
+
+Using $\alpha_t = \frac{1}{L}$ is impractical since computing $L$ is very expensive. The step size we get from this approach is usually very small. A more practical solution is to approximate $L$. Starting with an initial guess $\hat{L}$. Then before you take a step, check if the progress bound is satisfied.
+
+$$
+f(w^t -\frac{1}{\hat{L}} \nabla f(w^{t})) \le f(w^{t}) - \frac{1}{2L} ||\nabla f(w^{t})||^2\\
+\text{Where } w^t -\frac{1}{\hat{L}} f(w^{t}) \text{ is a potential } w^{t+1}
+$$
+Then, double $\hat{L}$ if the condition is not satisfied.
+
+**Armijo Backtracking**
+
+1. Start **each iteration** with Start each iteration with a large $\alpha$ so as to be optimistic of that fact that we are not in the worst case where we need a small step size.
+
+2. Half $\alpha$ until the Armijo condition is satisfies. This is given by:
+
+$$
+f(w^t - \alpha \nabla f(w^{t})) \le f(w^t) - \alpha \gamma ||\nabla f(w^t)||^2 \\
+\text{For } \gamma \in (0, \frac{1}{2}]
+$$
+
+This allows us to vary the learning rate in such a way that the new set of parameters $w^{t+1}$ have sufficiently decreased the objective function going the current parameters $w^t$.
+
+More to come later.
+
+## Convergence rate
+
+Using the progress bound, $f(w^t) \le f(w^{t-1}) - \frac{1}{2L} ||\nabla f(w^{t-1})||^2 \Longrightarrow ||\nabla f(w^{t-1})||^2 \le 2L[f(w^{t-1}) - f(w^t)]$
+
+Let's consider the smallest squared gradient norm $\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f(\mathbf{w^j})\|^2$. This is the change in the objective function is the smallest. 
+
+Trivally, this will be smaller than the average squared gradient norm:
+
+$$
+\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{1}{t} \sum_{k=1}^t ||\nabla f({w^{k-1}})||^2 \le \frac{2L}{t} \sum_{k=1}^t [f({w^{k-1}}) - f(w^k)] \\
+\frac{2L}{t} \sum_{k=1}^t [f({w^{k-1}}) - f(w^k)] = \frac{2L}{t} [f(w^0) - f(w^t)], \text{ Since this is a telescoping sum}\\
+\text{Also, } f(w^t) \ge f^* \text{ where } f^* \text{ is objective value for optimal } w^* \\
+\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{2L}{t} [f(w^0) - f^*] = O(1/t)
+$$
+It is not the last iteration that satisfies the inequality. It can be satisfied at any point of the optimization process. The last iteration however does have the lowest $f$ value. This also does not imply that we will find the global optima. We could be minimizing a objective that has local optima.
+
+We usually stop the iterative process when the norm is below some small value $\epsilon$.
+
+$$
+\min_{\mathbf{j \in {[0, t-1]}}} \|\nabla f({w^j})\|^2 \le \frac{2L}{t} [f(w^0) - f^*] \le \epsilon \\
+t \geq \frac{2L[f(w_0) - f^*)]}{\epsilon}\\
+t = O(1/\epsilon)
+$$
+To satisfy out stopping condition. $t = O(1/\epsilon)$ is called the **iteration complexity** of the algorithm. For least squares, the cost of computing a gradient is $O(nd)$ where $n$ is the nuber of data points and $d$ is the dimensionality of the data. The total cost is $O(nd \times 1/\epsilon)$
+
+Another way to measure the rate of convergence is by the limit of the ratio of successive errors:
+$$
+\lim_{k \to \infty} \frac{f(w_{k+1}) - f(w^*)}{f(w_k) - f(w^*)} = \rho.
+$$
+Different values of $\rho$ give us different rates of convergence:
+
+1. If $\rho=1$, it is called a sublinear rate. Which means we need $O(1/\epsilon)$ iterations.
+2. If $\rho \in (0, 1)$ it is called a linear rate. Which means we need $O(log(1/\epsilon))$ iterations.
+3. If $\rho = 0$, it is called a superlinear rate. Which means we need $O(log(log(1/\epsilon))$ iterations.
+
+Having $f(w_t) - f(w^*) = O(1/t)$ gives a sublinear convergence rate. The longer you run the algorithm, the less progress it makes.
+
+**Polyak-Lojasiewicz (PL) Inequality**
+
+Gradient descent with least squares has linear cost but a sublinear rate. For many “nice” functions, gradient descent actually has a linear rate. For example, functions satisfying the PL Inequality:
+
+$$
+\frac{1}{2} ||\nabla f(w)||^2 \ge \mu (f(w) - f^*)
+$$
+To get a linear convergence rate under the PL ineqaulity:
+
+$$
+f(w^{k+1}) \leq f(w^k) - \frac{1}{2L} \|\nabla f(w^k)\|^2. \\
+\text{Under the PL inequality, we have:} \\
+-\|\nabla f(w^k)\|^2 \leq -2\mu (f(w^k) - f^*). \\
+f(w^{k+1}) \leq f(w^k) - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq f(w^k) - f^* - \frac{\mu}{L} (f(w^k) - f^*). \\
+f(w^{k+1}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^k) - f^*). \\
+$$
+Using this inequality recursively:
+
+$$
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) (f(w^{k-1}) - f^*). \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right) \left(1 - \frac{\mu}{L}\right) [f(w^{k-2} - f^*]. \\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^3 [f(w^{k-3} - f^*]. \\
+...\\
+f(w^{k}) - f^* \leq \left(1 - \frac{\mu}{L}\right)^k [f(w^{0} - f^*]. \\
+$$
+And since $0 < \mu \le L$, we have $\left(1 - \frac{\mu}{L} \right) \le 0$. This implies $f(w^{k+1}) - f^* = O(\rho^k) \text{ when } \rho < 1$. 
+
+Using the fact that $(1-x) \ge e^{-x}$ we can rewrite the above as:
+
+$$
+f(w^{k}) - f^* \leq exp\left(k\frac{\mu}{L}\right) [f(w^{0} - f^*]. \\
+$$
+Which is why linear convergence is sometimes also called “exponential convergence". For some $f(w^{k}) - f^* \leq \epsilon$ we have $k \ge \frac{L}{\mu} log (\frac{f(w^0 - f^*)}{\mu}) = O(log(1/\epsilon))$.
+
+PL is satisfied for many convex objective functions like least squares. PL is not satisfied for many other scenarios like neural network optimization. The PL constant $\mu$ might be bad for some functions. It might be hard to show the PL satisfiability for many functions.
+
+**Strong Convexity**
+
+A function $f$ is strong convex if the function:
+  
+$$
+f(w) - \frac{\mu}{2} \|w\|^2
+$$
+Is also a convex function for any $\mu > 0$. More informally, if you un-regularize with $\mu$, the function is still convex. Strongly convex functions have some nice properties:
+
+A unique global minimizing point $w^*$ exists.
+For $C^1$ strongly convex functions satisfies the PL inequality.
+If $g(w) = f(Aw)$ for a strongly convex $f$ and a matrix $A$, then $g$ satisfies the PL inequality.
+
+Strong Convexity Implies PL Inequality. From Taylor’s theorem we have for \(C^2\) functions:
+
+$$
+f(v) = f(w) + \nabla f(w)^\top (v - w) + \frac{1}{2} (v - w)^\top \nabla^2 f(u) (v - w).
+$$
+
+By strong convexity, $d^\top \nabla^2 f(u) d \geq \mu \|d\|^2 \quad \text{for any } d \text{ and } u.$ we have:
+
+$$
+f(v) \geq f(w) + \nabla f(w)^\top (v - w) + \frac{\mu}{2} \|v - w\|^2
+$$
+
+Treating the right side as a function of \(v\), we get a quadratic lower bound on \(f\). After minimizing with respect to $v$ we get:
+
+$$
+f(w) - f^* \leq \frac{1}{2\mu} \|\nabla f(w)\|^2\\
+\text{Which is the PL inequality.}
+$$
+**Combining Lipschitz Continuity and Strong Convexity** - Lipschitz continuity of gradient gives guaranteed progress. Strong convexity of functions gives maximum sub-optimality. Progress on each iteration will be at least a fixed fraction of the sub-optimality.
+
+**Effect of L2 Regularization on Convergence Rate.**
+
+If we have a convex loss $f$, adding L2-regularization makes it strongly-convex.
+
+$$
+f(w) + \frac{\lambda}{2} ||w^2||, \text{ with } \mu \ge \lambda
+$$
+So adding the $L2$ regulaizer improves rate from sub-linear and linear. We go from $O(\frac{1}{\epsilon})$ to $O(log(\frac{1}{\epsilon}))$ and guarantees a unique minimizer.
+

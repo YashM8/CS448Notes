@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 8 Approximating the Hessian | CS448Notes</title>
+  <meta name="description" content="Chapter 8 Approximating the Hessian | CS448Notes" />
+  <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 8 Approximating the Hessian | CS448Notes" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 8 Approximating the Hessian | CS448Notes" />
+  
+  
+  
+
+<meta name="author" content="Yash Mali" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="variations-on-sgd.html"/>
+<link rel="next" href="projected-gradient-based-algorithms.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">CS448 Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> CPSC 448 Notes</a></li>
+<li class="chapter" data-level="2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html"><i class="fa fa-check"></i><b>2</b> Gradient Descent Analysis</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#gradient-descent-background"><i class="fa fa-check"></i><b>2.1</b> Gradient descent background</a></li>
+<li class="chapter" data-level="2.2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#showing-gradient-descent-reduces-the-objective-function."><i class="fa fa-check"></i><b>2.2</b> Showing gradient descent reduces the objective function.</a></li>
+<li class="chapter" data-level="2.3" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#what-learning-rate-to-use"><i class="fa fa-check"></i><b>2.3</b> What learning rate to use?</a></li>
+<li class="chapter" data-level="2.4" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#convergence-rate"><i class="fa fa-check"></i><b>2.4</b> Convergence rate</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html"><i class="fa fa-check"></i><b>3</b> Improving Gradient Descent</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#oracle-model-of-computation"><i class="fa fa-check"></i><b>3.1</b> Oracle Model of Computation</a></li>
+<li class="chapter" data-level="3.2" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#heavy-ball-method"><i class="fa fa-check"></i><b>3.2</b> Heavy Ball Method</a></li>
+<li class="chapter" data-level="3.3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#conjugate-gradient-heavy-ball-with-optimal-parameters"><i class="fa fa-check"></i><b>3.3</b> Conjugate Gradient: Heavy-Ball with Optimal Parameters</a></li>
+<li class="chapter" data-level="3.4" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#nesterov-accelerated-gradient"><i class="fa fa-check"></i><b>3.4</b> Nesterov Accelerated Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html"><i class="fa fa-check"></i><b>4</b> Coordinate Optimization</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#definition-and-examples"><i class="fa fa-check"></i><b>4.1</b> Definition and examples</a></li>
+<li class="chapter" data-level="4.2" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#analyzing-coordinate-descent"><i class="fa fa-check"></i><b>4.2</b> Analyzing Coordinate Descent</a></li>
+<li class="chapter" data-level="4.3" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#randomized-cd-progress"><i class="fa fa-check"></i><b>4.3</b> Randomized CD Progress</a></li>
+<li class="chapter" data-level="4.4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent"><i class="fa fa-check"></i><b>4.4</b> Gauss-Southwell: Greedy Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>5</b> Stochastic Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
+<li class="chapter" data-level="5.3" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions"><i class="fa fa-check"></i><b>5.3</b> Convergence of SGD for PL functions</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#when-to-stop"><i class="fa fa-check"></i><b>5.3.1</b> When to stop?</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing"><i class="fa fa-check"></i><b>5.4</b> Mini Batches and Batch Growing</a></li>
+<li class="chapter" data-level="5.5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation"><i class="fa fa-check"></i><b>5.5</b> Variation in Mini-Batch Approximation</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="overparameterization.html"><a href="overparameterization.html"><i class="fa fa-check"></i><b>6</b> Overparameterization</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="overparameterization.html"><a href="overparameterization.html#overparameterization-and-sgd"><i class="fa fa-check"></i><b>6.1</b> Overparameterization and SGD</a></li>
+<li class="chapter" data-level="6.2" data-path="overparameterization.html"><a href="overparameterization.html#faster-sgd-for-overparameterized-models"><i class="fa fa-check"></i><b>6.2</b> Faster SGD for Overparameterized Models</a></li>
+<li class="chapter" data-level="6.3" data-path="overparameterization.html"><a href="overparameterization.html#stochastic-line-search"><i class="fa fa-check"></i><b>6.3</b> Stochastic Line Search</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html"><i class="fa fa-check"></i><b>7</b> Variations on SGD</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#stochastic-average-gradient"><i class="fa fa-check"></i><b>7.1</b> Stochastic Average Gradient</a></li>
+<li class="chapter" data-level="7.2" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#variance-reduced-stochastic-gradient"><i class="fa fa-check"></i><b>7.2</b> Variance Reduced Stochastic Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html"><i class="fa fa-check"></i><b>8</b> Approximating the Hessian</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-1---diagonal-hessian"><i class="fa fa-check"></i><b>8.1</b> Cheap Hessian Approximation 1 - Diagonal Hessian</a></li>
+<li class="chapter" data-level="8.2" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-2---preconditioning"><i class="fa fa-check"></i><b>8.2</b> Cheap Hessian Approximation 2 - Preconditioning</a></li>
+<li class="chapter" data-level="8.3" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-3---mini-batch-hessian"><i class="fa fa-check"></i><b>8.3</b> Cheap Hessian Approximation 3 - Mini Batch Hessian</a></li>
+<li class="chapter" data-level="8.4" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#hessian-free-newton-methods-truncated-newton"><i class="fa fa-check"></i><b>8.4</b> Hessian Free Newton Methods (Truncated Newton)</a></li>
+<li class="chapter" data-level="8.5" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#quasi-newton-methods"><i class="fa fa-check"></i><b>8.5</b> Quasi-Newton Methods</a></li>
+<li class="chapter" data-level="8.6" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#barzilai-borwein-method"><i class="fa fa-check"></i><b>8.6</b> Barzilai-Borwein Method</a></li>
+<li class="chapter" data-level="8.7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#bfgs-quasi-newton-method"><i class="fa fa-check"></i><b>8.7</b> BFGS Quasi-Newton Method</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html"><i class="fa fa-check"></i><b>9</b> Projected Gradient Based Algorithms</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-gradient"><i class="fa fa-check"></i><b>9.1</b> Projected Gradient</a></li>
+<li class="chapter" data-level="9.2" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#l1-regularization-to-a-constrained-problem"><i class="fa fa-check"></i><b>9.2</b> L1 Regularization to a Constrained Problem</a></li>
+<li class="chapter" data-level="9.3" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#active-set-identification-and-backtracking"><i class="fa fa-check"></i><b>9.3</b> Active Set Identification and Backtracking</a></li>
+<li class="chapter" data-level="9.4" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#accelerating-projection-methods"><i class="fa fa-check"></i><b>9.4</b> Accelerating Projection Methods</a></li>
+<li class="chapter" data-level="9.5" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd"><i class="fa fa-check"></i><b>9.5</b> Projected SGD and CD</a></li>
+<li class="chapter" data-level="9.6" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#frank-wolfe-method"><i class="fa fa-check"></i><b>9.6</b> Frank-Wolfe Method</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html"><i class="fa fa-check"></i><b>10</b> Global Optimization and Subgradients</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
+<li class="chapter" data-level="10.2" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
+<li class="chapter" data-level="10.3" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
+<li class="chapter" data-level="10.4" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#using-multiple-subgradients"><i class="fa fa-check"></i><b>10.4</b> Using Multiple Subgradients</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html"><i class="fa fa-check"></i><b>11</b> Proximal Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#convergence-rate-1"><i class="fa fa-check"></i><b>11.1</b> Convergence Rate</a></li>
+<li class="chapter" data-level="11.2" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#dualty"><i class="fa fa-check"></i><b>11.2</b> Dualty</a></li>
+<li class="chapter" data-level="11.3" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#supremum-and-infimum"><i class="fa fa-check"></i><b>11.3</b> Supremum and Infimum</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>12</b> Optimization Demo</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-momentum"><i class="fa fa-check"></i><b>12.1</b> Gradient Descent with Momentum</a></li>
+<li class="chapter" data-level="12.2" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-nesterov-acceleration"><i class="fa fa-check"></i><b>12.2</b> Gradient Descent with Nesterov Acceleration</a></li>
+<li class="chapter" data-level="12.3" data-path="optimization-demo.html"><a href="optimization-demo.html#nesterov-with-restart"><i class="fa fa-check"></i><b>12.3</b> Nesterov With Restart</a></li>
+<li class="chapter" data-level="12.4" data-path="optimization-demo.html"><a href="optimization-demo.html#newtons-method"><i class="fa fa-check"></i><b>12.4</b> Newton’s Method</a></li>
+<li class="chapter" data-level="12.5" data-path="optimization-demo.html"><a href="optimization-demo.html#damped-newtons-method"><i class="fa fa-check"></i><b>12.5</b> Damped Newton’s Method</a></li>
+<li class="chapter" data-level="12.6" data-path="optimization-demo.html"><a href="optimization-demo.html#coordinate-descent"><i class="fa fa-check"></i><b>12.6</b> Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html"><i class="fa fa-check"></i><b>13</b> Connvolutional Neural Networks</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#basics"><i class="fa fa-check"></i><b>13.1</b> Basics</a></li>
+<li class="chapter" data-level="13.2" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutions"><i class="fa fa-check"></i><b>13.2</b> Convolutions</a></li>
+<li class="chapter" data-level="13.3" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutional-layers"><i class="fa fa-check"></i><b>13.3</b> Convolutional Layers</a></li>
+<li class="chapter" data-level="13.4" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#pooling-layers"><i class="fa fa-check"></i><b>13.4</b> Pooling layers</a></li>
+<li class="chapter" data-level="13.5" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#example"><i class="fa fa-check"></i><b>13.5</b> Example</a></li>
+<li class="chapter" data-level="13.6" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#conclusion"><i class="fa fa-check"></i><b>13.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html"><i class="fa fa-check"></i><b>14</b> Recurrent Neural Networks</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#background"><i class="fa fa-check"></i><b>14.1</b> Background</a></li>
+<li class="chapter" data-level="14.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#introduction-1"><i class="fa fa-check"></i><b>14.2</b> Introduction</a></li>
+<li class="chapter" data-level="14.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#types-of-rnns"><i class="fa fa-check"></i><b>14.3</b> Types of RNN’s</a>
+<ul>
+<li class="chapter" data-level="14.3.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#one-to-many"><i class="fa fa-check"></i><b>14.3.1</b> One to Many</a></li>
+<li class="chapter" data-level="14.3.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-one"><i class="fa fa-check"></i><b>14.3.2</b> Many to One</a></li>
+<li class="chapter" data-level="14.3.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-many"><i class="fa fa-check"></i><b>14.3.3</b> Many to Many</a></li>
+</ul></li>
+<li class="chapter" data-level="14.4" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#problems-with-basic-rnns"><i class="fa fa-check"></i><b>14.4</b> Problems with (Basic) RNN’s</a></li>
+<li class="chapter" data-level="14.5" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#lstm---long-short-term-memory"><i class="fa fa-check"></i><b>14.5</b> LSTM - Long Short Term Memory</a></li>
+<li class="chapter" data-level="14.6" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#gated-recurrent-units"><i class="fa fa-check"></i><b>14.6</b> Gated Recurrent Units</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html"><i class="fa fa-check"></i><b>15</b> Attention with RNN’s</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#introduction-2"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#downsides-of-this-attention."><i class="fa fa-check"></i><b>15.2</b> Downsides of this attention.</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html"><i class="fa fa-check"></i><b>16</b> Self-Attention and Transformers</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#self-attention-mechanism"><i class="fa fa-check"></i><b>16.1</b> Self-Attention Mechanism</a></li>
+<li class="chapter" data-level="16.2" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#multi-head-attention"><i class="fa fa-check"></i><b>16.2</b> Multi-Head Attention</a></li>
+<li class="chapter" data-level="16.3" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#tips-for-numerical-stability"><i class="fa fa-check"></i><b>16.3</b> Tips for numerical stability</a></li>
+<li class="chapter" data-level="16.4" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#transformers"><i class="fa fa-check"></i><b>16.4</b> Transformers</a></li>
+<li class="chapter" data-level="16.5" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#conclution-and-drawbacks"><i class="fa fa-check"></i><b>16.5</b> Conclution and Drawbacks</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="project.html"><a href="project.html"><i class="fa fa-check"></i><b>17</b> Project</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">CS448Notes</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="approximating-the-hessian" class="section level1 hasAnchor" number="8">
+<h1><span class="header-section-number">Chapter 8</span> Approximating the Hessian<a href="approximating-the-hessian.html#approximating-the-hessian" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Newton’s method is expensive if dimension <span class="math inline">\(d\)</span> is large as it requires solving <span class="math inline">\(\nabla^2 f(w_k) d_k = \nabla f(w_k)\)</span>. For logistic regression this costs <span class="math inline">\(O(nd^2)\)</span> to form the Hessian and <span class="math inline">\(O(d^3)\)</span> to solve.</p>
+<p>Many methods proposed to approximate Newton’s method at reduced cost -
+- Cheaper Hessian approximations
+- Hessian-free Newton method
+- Quasi-Newton methods</p>
+<div id="cheap-hessian-approximation-1---diagonal-hessian" class="section level2 hasAnchor" number="8.1">
+<h2><span class="header-section-number">8.1</span> Cheap Hessian Approximation 1 - Diagonal Hessian<a href="approximating-the-hessian.html#cheap-hessian-approximation-1---diagonal-hessian" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Use <span class="math inline">\(\nabla^2 f(w^k) \approx D^k\)</span> where <span class="math inline">\(D\)</span> is the diagonal matrix. This makes the damped newton update -</p>
+<p><span class="math display">\[
+w^{k+1} = w^{k} - \alpha_{k} D^{k} \nabla f(w^{k})
+\]</span>
+This costs <span class="math inline">\(O(d)\)</span>.</p>
+<p>The downside is that the diagonal approximations loses the superlinear convergence. For some problems Hessian diagonals outperforms gradient descent. For many problems using Hessian diagonals is worse than gradient descent.</p>
+</div>
+<div id="cheap-hessian-approximation-2---preconditioning" class="section level2 hasAnchor" number="8.2">
+<h2><span class="header-section-number">8.2</span> Cheap Hessian Approximation 2 - Preconditioning<a href="approximating-the-hessian.html#cheap-hessian-approximation-2---preconditioning" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Using a fixed positive definite fixed matrix <span class="math inline">\(M\)</span>. The update becomes -</p>
+<p><span class="math display">\[
+w^{k+1} = w^{k} - \alpha_{k} M \nabla f(w^{k})
+\]</span>
+The matrix can be chosen to include some second order information and that the dot product costs <span class="math inline">\(O(d^2)\)</span> or less. This is called preconditioning.</p>
+<p>It can be thought of as performing gradient descent under change of variables.</p>
+<p>Using the Matrix Upper Bound -</p>
+<p><span class="math display">\[
+\text{Using the Lipschitz continuity assumption on the gradient} \\
+\|\nabla f(w) - \nabla f(v)\| \leq L \|w - v\|. \\
+\text{We could instead assume Lipschitz continuity with respect to a matrix } M, \\
+\|\nabla f(w) - \nabla f(v)\|_M^{-1} \leq \|w - v\|_M, \\
+\text{where } \|d\|_M = \sqrt{d^T M d} \text{ and we assume } M \text{ is positive definite.} \\
+\text{For quadratic functions, we can use } M = \nabla^2 f(w) \text{ and we get Newton} \\
+\text{For binary logistic regression, we can use } M = \frac{1}{4} X^T X \\
+\]</span>
+The matrix-norm Lipschitz continuity leads to a descent lemma of the form
+<span class="math display">\[
+f(w_{k+1}) \leq f(w_k) + \nabla f(w_k)^T (w_{k+1} - w_k) + \frac{1}{2} \|w_{k+1} - w_k\|_M^2
+\]</span></p>
+<p>And minimizing the right side yields the Newton-like step</p>
+<p><span class="math display">\[
+w_{k+1} = w_k - M^{-1} \nabla f(w_k)
+\]</span>
+This step does not require a step size and guarantees descent. With appropriate <span class="math inline">\(M\)</span> guarantees more progress per iteration than gradient descent. Though in practice you may get better performance using a line-search. You loose superlinear convergence and cost is <span class="math inline">\(O(d^2)\)</span>.</p>
+</div>
+<div id="cheap-hessian-approximation-3---mini-batch-hessian" class="section level2 hasAnchor" number="8.3">
+<h2><span class="header-section-number">8.3</span> Cheap Hessian Approximation 3 - Mini Batch Hessian<a href="approximating-the-hessian.html#cheap-hessian-approximation-3---mini-batch-hessian" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>For ML problems with lots of data, we can use a mini-batch Hessian approximation
+<span class="math display">\[
+\nabla^2 f(w_k) = \frac{1}{n} \sum_{i=1}^n \nabla^2 f_i(w_k) \approx \frac{1}{|B|} \sum_{i \in B} \nabla^2 f_i(w_k), \\
+\text{which removes dependence on } n \text{ in the Hessian calculation.} \\
+\]</span>
+Leads to superlinear convergence if batch size grows fast enough. For L2-regularized logistic regression, costs <span class="math inline">\(O(|B|^2d + |B|^3)\)</span> by using a kernalized version.</p>
+</div>
+<div id="hessian-free-newton-methods-truncated-newton" class="section level2 hasAnchor" number="8.4">
+<h2><span class="header-section-number">8.4</span> Hessian Free Newton Methods (Truncated Newton)<a href="approximating-the-hessian.html#hessian-free-newton-methods-truncated-newton" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Cheap Hessian methods approximate <span class="math inline">\(\nabla^2 f(w_k)\)</span> and lose superlinear convergence. Hessian-free Newton uses the exact <span class="math inline">\(\nabla^2 f(w_k)\)</span> but approximates the Newton direction.</p>
+<p>For strongly-convex <span class="math inline">\(f\)</span> Newton’s method minimizes a quadratic -</p>
+<p><span class="math display">\[
+\text{argmin}_g f(w_k) + \nabla f(w_k)^T g + \frac{1}{2} g^T \nabla^2 f(w_k) g
+\]</span></p>
+<p>For binary logistic regression we have
+<span class="math display">\[
+\nabla f(w) = X^T r(w), \quad \nabla^2 f(w) = X^T D(w) X, \\
+\text{where } r(w) \text{ and } D(w) \text{ each cost } O(n) \text{ to compute for } n \text{ training examples.} \\
+\]</span></p>
+<p>Cost of computing gradient is <span class="math inline">\(O(nd)\)</span> due to the matrix-vector product. Cost of computing Hessian is <span class="math inline">\(O(nd^2)\)</span> due to the matrix-matrix product.</p>
+<p><span class="math display">\[
+\text{But cost of computing Hessian-vector product is only } O(nd) - \\
+\nabla^2 f(w) d = X^T D(w) Xd = X^T (D(w) (Xd)), \\
+\text{due to the matrix-vector products.}
+\]</span>
+This is a directional derivative of the gradient. You can compute it efficiently and exactly using automatic differentiation.</p>
+<p>Key ideas behind Hessian-free Newton method is to approximate and compute Newton direction using conjugate gradient. Each iteration of conjugate gradient only needs a “cheap” Hessian-vector product instead of the “expensive” matrix-matrix product.</p>
+</div>
+<div id="quasi-newton-methods" class="section level2 hasAnchor" number="8.5">
+<h2><span class="header-section-number">8.5</span> Quasi-Newton Methods<a href="approximating-the-hessian.html#quasi-newton-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Quasi-Newton build a sequence of Hessian approximations <span class="math inline">\(B_0, B_2, B_3, ...\)</span> and using <span class="math inline">\(B_k\)</span> -</p>
+<p><span class="math display">\[
+w_{k+1} = w_k - \alpha_k B_k^{-1} \nabla f(w_k)
+\]</span>
+With the goal that approximations eventually act like the Hessian. Usually used with a line-search that initially tries <span class="math inline">\(\alpha_k = 1\)</span>.</p>
+<p>Classic quasi-Newton methods choose Bk to satisfy the <strong>secant equation</strong> -</p>
+<p><span class="math display">\[
+B_{k+1} (w_k - w_{k-1}) = \nabla f(w_k) - \nabla f(w_{k-1})
+\]</span></p>
+<p>This only iterate and gradient differences no Hessian information is needed.</p>
+</div>
+<div id="barzilai-borwein-method" class="section level2 hasAnchor" number="8.6">
+<h2><span class="header-section-number">8.6</span> Barzilai-Borwein Method<a href="approximating-the-hessian.html#barzilai-borwein-method" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Uses an approximation of the form <span class="math inline">\(B_k = \frac{1}{\alpha_k} I\)</span></p>
+<p>This <span class="math inline">\(B_k\)</span> cannot always solve the secant equations, so we minimize squared error</p>
+<p><span class="math display">\[
+\alpha_{k+1} \in \text{argmin} ||\alpha_k B_{k+1} (w_k - w_{k-1}) - (\nabla f(w_k) - \nabla f(w_{k-1})) ||^2 \\
+\alpha_{k+1} = \frac{\|w_k - w_{k-1}\|^2}{(w_k - w_{k-1})^T (\nabla f(w_k) - \nabla f(w_{k-1}))}
+\]</span></p>
+<p>Barzilai and Borwein showed this gives superlinear convergence for 2d quadratics. We could also require inverse to satisfy secant equations -</p>
+<p><span class="math display">\[
+(w_k - w_{k-1}) = [B_{k+1}]^{-1} \nabla f(w_k) - \nabla f(w_{k-1}) \\
+\text{This gives an alternate BB step size of} \\
+\alpha_{k+1} = \frac{(w_k - w_{k-1})^T (\nabla f(w_k) - \nabla f(w_{k-1}))}{\|\nabla f(w_k) - \nabla f(w_{k-1})\|^2}
+\]</span></p>
+</div>
+<div id="bfgs-quasi-newton-method" class="section level2 hasAnchor" number="8.7">
+<h2><span class="header-section-number">8.7</span> BFGS Quasi-Newton Method<a href="approximating-the-hessian.html#bfgs-quasi-newton-method" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Most quasi-Newton methods use dense matrices <span class="math inline">\(B_k\)</span>. In this case there may be an infinite number of solutions to secant equations. Many methods exist, and typical methods also require <span class="math inline">\(B_{k+1}\)</span> to be symmetric and <span class="math inline">\(B_{k+1}\)</span> to be close to <span class="math inline">\(B_k\)</span> under some norm</p>
+<p>Most popular is the Broyden-Fletcher-Goldfarb-Shanno (BFGS) update -</p>
+<p><span class="math display">\[
+B_{k+1} = B_k - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} + \frac{y_k y_k^T}{y_k^T s_k}, \\
+\text{where } s_k = w_k - w_{k-1} \text{ and } y_k = \nabla f(w_k) - \nabla f(w_{k-1}).\\
+\]</span></p>
+<p>Derived as rank-2 update so that the updates stay close to previous matrix in some norm. Cost of inverting a dense <span class="math inline">\(B_k\)</span> is <span class="math inline">\(O(d^3)\)</span>. This can be reduced to <span class="math inline">\(O(md)\)</span>.</p>
+<p>Instead of storing <span class="math inline">\(B_k\)</span>, only store <span class="math inline">\(m\)</span> vectors <span class="math inline">\(s_k\)</span> and <span class="math inline">\(y_k\)</span>. Uses an update based on a matrix <span class="math inline">\(H_k\)</span> and the “limited” memory. Applies the BFGS update <span class="math inline">\(m\)</span> times starting from <span class="math inline">\(H_k\)</span>. Typically we choose <span class="math inline">\(H_k = \alpha_k I\)</span>. This is called the Limited-Memory BFGS method. This is the default non-stochastic optimizer in many cases.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="variations-on-sgd.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="projected-gradient-based-algorithms.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/08-newtonvariations.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/08-newtonvariations.Rmd",
+"text": null
+},
+"download": ["bookdownproj.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

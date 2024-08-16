@@ -1,0 +1,179 @@
+# Stochastic Gradient Methods
+
+## Introduction
+
+Stochastic gradient descent is primarily used when calculating the full gradient for $t$ iterations is too costly. In a machine learning prespective, instead of calculating the gradient using the entire dataset, you calculate it using a randomly picked data point (or small batches of data points) instead. 
+
+A couple of data points might point you in the wrong direction. But on average you will move towards the minima. This erractic nature is useful while optimizing non-convex landscapes like neural network where the stochasic nature can allow you to escape saddle points and local optimia and reach a better and deeper optima.
+
+Random selection of $i_k$ from $\{1, 2, \ldots, n\}$.
+$$ 
+w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k). 
+$$
+With $p(i_k = i) = 1/n$, the stochastic gradient is an unbiased estimate of the gradient:
+$$ 
+\mathbb{E}[\nabla f_{i_k}(w)] = \frac{1}{n} \sum_{i=1}^{n} p(i_k = i) \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{n} \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \nabla f_i(w) = \nabla f(w). 
+$$
+Iteration cost is independent of $n$. Convergence requires $\alpha_k \to 0$. Stochastic has low iteration cost but slow convergence rate.
+
+## Progress Bound for SGD
+
+The stochastic gradient descent (SGD) update is
+$$ w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k) $$
+Recall the descent lemma applied to $w_{k+1}$ and $w_k$,
+$$ f(w_{k+1}) \leq f(w_k) + \nabla f(w_k)^\top (w_{k+1} - w_k) + \frac{L}{2} \| w_{k+1} - w_k \|_2^2$$
+Plugging in the SGD iteration $(w_{k+1} - w_k) = -\alpha_k \nabla f_{i_k}(w_k)$ gives
+$$f(w^{k+1}) \leq f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 \frac{ L}{2} \|\nabla f_{i_k}(w^k)\|^2 $$
+
+So far any choice of $\alpha_k$ and $i_k$ we have
+$$
+f(w_{k+1}) \leq f(w_k) - \alpha_k \nabla f(w_k)^\top \nabla f_{i_k}(w_k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w_k)\|^2.
+$$
+Let’s take the expectation and assume $\alpha_k$ does not depend on $i_k$,
+$$
+\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}[f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w^k)\|^2] \\ = f(w^k) - \alpha_k \nabla f(w^k)^\top \mathbb{E}[\nabla f_{i_k}(w^k)] + \alpha_k^2 L_k^2 \mathbb{E}[\|\nabla f_{i_k}(w^k)\|^2]
+$$
+Under uniform sampling $\mathbb{E}[\nabla f_{i_k}(w_k)] = \nabla f(w_k)$ (unbiased) so this gives
+$$
+\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha_k k \|\nabla f(w^k)\|^2 + \alpha_k^2 L_k^2 \mathbb{E}[k\|\nabla f_{i_k}(w^k)\|^2]
+$$
+
+Choosing $\alpha_k = 1/L$ might not be small enough. If $\alpha_k$ is small then $\alpha_k << \alpha_k^2$. $\alpha_k$ controls how much we move towards the solution at each iteration. $\alpha_k^2$ controls how much the stochasic nature moves us away from the solution.
+
+Analyzing SGD assuming only that $ f $ is bounded below. So it could be non-convex. To bound the effect of the noise, we assume for some $ \sigma $ that:
+
+$$ \mathbb{E}[k\|\nabla f_i(w)\|^2] \leq \sigma^2 $$.
+
+It implies gradients are bounded, and cannot hold for PL functions. Using our noise assumption inside the progress bound,
+$$
+\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha^k k\|\nabla f(w^k)\|^2 + \frac{\alpha_k^2 L\sigma^2}{2}
+$$
+Rearranging to get the gradient norm on the left side:
+$$
+\alpha_k k\|\nabla f(w^k)\|^2 \leq f(w^k) - \mathbb{E}[f(w^{k+1})] + \frac{\alpha_k^2 L\sigma^2}{2}.
+$$
+Summing this up and using the iterated expectation to get:
+$$
+\sum_{k=1}^{t} \alpha_{k-1} \mathbb{E}_k\|\nabla f(w^{k-1})\|^2 \leq \sum_{k=1}^{t} [\mathbb{E}f(w^{k-1}) - \mathbb{E}f(w^k)] + \sum_{k=1}^{t} \alpha_{k-1}^2 L\sigma^2
+$$
+Applying the above operations gives
+$$
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \cdot \sum_{k=0}^{t-1} \alpha_k \leq f(w^0) - \mathbb{E}_f(w^t) + \frac{L\sigma^2}{2} \sum_{k=0}^{t-1} \alpha_k^2.
+$$
+Using $\mathbb{E}_f(w_k) \geq f^*$ and dividing both sides by $\sum_{k} \alpha_{k-1}$ gives
+$$
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \leq \frac{f(w^0) - f^*}{\sum_{k} \alpha_{k} (1 - \alpha_{k} L/2)} + \frac{L\sigma^2}{2} \frac{\sum_{k=0}^{t-1} \alpha_k^2}{\sum_{k} \alpha_{k-1}}.
+$$
+
+## Convergence of SGD for PL functions
+
+
+$$
+\text{Starting with the SGD progress bound -} \\
+E[f(w_{k+1})] \leq f(w_k) - \alpha_k \| \nabla f(w_k) \|^2 + \frac{\alpha_k^2 L}{2} E[\|\nabla f_i(w_k) \|^2] \\
+\text{Bounding that with the PL inequality (} \| \nabla f(w_k) \|^2 \geq 2\mu(f(w_k) - f^*) \text{)} \\
+E[f(w_{k+1})] \leq f(w_k) - \alpha_k 2\mu (f(w_k) - f^*) + \frac{\alpha_k^2 L \sigma^2}{2}. \\
+E[f(w_{k+1})] - f^* \leq (1 - 2\alpha_k \mu)(f(w_k) - f^*) + \frac{\alpha_k^2 L \sigma^2}{2}. \\
+\leq (1 - 2\alpha\mu) \left((1 - 2\alpha\mu)(f(w_{k-1}) - f^*) + \frac{\alpha^2 L \sigma^2}{2}\right) + \frac{\alpha^2 L \sigma^2}{2} \\
+= (1 - 2\alpha\mu)^2 (f(w_{k-1}) - f^*) + \frac{\alpha^2 L \sigma^2}{2} (1 + (1 - 2\alpha\mu)) \\
+\text{Applying recursively from } k \text{ to } 0, \text{ we get -} \\
+E[f(w_k)] - f^* \leq (1 - 2\alpha\mu)^k (f(w_0) - f^*) + \frac{\alpha^2 L \sigma^2}{2} \sum_{t=0}^k (1 - 2\alpha\mu)^t \\
+\sum_{t=0}^k (1 - 2\alpha\mu)^t < \sum_{t=0}^\infty (1 - 2\alpha\mu)^t = \frac{1}{2\alpha\mu} \text{ ( This is a geometric series)}.
+$$
+Convergence rate of SGD with constant step size for PL functions - \\
+
+
+$$
+E[f(w_k) - f^*] \leq (1 - 2\alpha\mu)^k (f(w_0) - f^*) + \frac{\alpha \sigma^2 L}{4\mu}
+$$
+
+Thie first term is linear convergence but the 2nd term does not drop to 0. This leads to erratic behavior after making good progress. This aligns with the stochastic nature of SGD. The probability of a random data point pointing you, at least in some part, toward the minima is higher the further away you are. SGD gets confused close to the minima. If that happens, we can half the the step size reducing the space where the optimization is erratic. Halving $\alpha$ divides bound on distance to $f^*$ in half.
+
+### When to stop?
+
+In Gradient Descent we stopped when we are not making enough progress or the gradient is close to zero. But in EGD, the gradients are not guaranteed to go to zero and we cannot see the full gradient. What we can do instead is for every day iterations measure the validation area and if the validation starts to go up, that is when we stop this is also called early stopping
+
+
+## Mini Batches and Batch Growing
+
+Deterministic gradient descent uses all $n$ samples to calculate gradient.
+$$
+\nabla f(w_k) = \frac{1}{n} \sum_{i=1}^n \nabla f_i(w_k)\\
+$$
+
+Stochastic gradient descent approximates gradient with only 1 sample.
+$$
+\nabla f(w_k) \approx \nabla f_{i_k}(w_k)\\
+$$
+A common variant is to use $m$ samples as a mini-batch $B_k$ 
+$$
+\nabla f(w_k) \approx \frac{1}{m} \sum_{i \in B_k} \nabla f_i(w_k)
+$$
+Using a batch of data points from our data reduces the probability that the gradient points in a "worse" direction than what the full gradient would point to if we calculate it. Mini-batches are useful for parallelization. For example, with 16 cores set $m = 16$ and compute 16 gradients at once. 
+
+The mini-batch gradient, in expectation, is the full gradient in the same way it was for SGD.
+
+
+## Variation in Mini-Batch Approximation
+
+To analyze variation in gradients, we use a variance-like identity:
+If random variable g is an unbiased approximation of vector μ, then
+
+$$
+E[\|g - \mu\|^2] = E[\|g\|^2 - 2g^T \mu + \|\mu\|^2] \quad \\
+= E[\|g\|^2] - 2E[g]^T \mu + \|\mu\|^2 \quad \\
+= E[\|g\|^2] - 2\mu^T \mu + \|\mu\|^2 \quad (\text{unbiased}) \\
+= E[\|g\|^2] - \|\mu\|^2.
+$$
+
+Expectation of inner product between independent samples - 
+
+$$
+E[\nabla f_i(w)^T \nabla f_j(w)] = \sum_{i=1}^n \sum_{j=1}^n \frac{1}{n^2} \nabla f_i(w)^T \nabla f_j(w) \\
+= \frac{1}{n} \sum_{i=1}^n \nabla f_i(w)^T \left(\frac{1}{n} \sum_{j=1}^n \nabla f_j(w)\right) \\
+= \frac{1}{n} \sum_{i=1}^n \nabla f_i(w)^T \nabla f(w) \quad (\text{gradient of } f) \\
+= \left(\frac{1}{n} \sum_{i=1}^n \nabla f_i(w)\right)^T \nabla f(w)  \\
+= \nabla f(w)^T \nabla f(w) = \|\nabla f(w)\|^2 .
+$$
+
+
+Let us see why the error goes down as we use more points in our batch.
+
+Let $g_2(w) = \frac{1}{2} (\nabla f_i(w) + \nabla f_j(w))$ be mini-batch approximation with 2 samples.
+$$
+E[\|g_2(w) - \nabla f(w)\|^2] = E\left[\left\|\frac{1}{2} (\nabla f_i(w) + \nabla f_j(w))\right\|^2\right] - \|\nabla f(w)\|^2  \\
+= \frac{1}{4} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} E[\nabla f_i(w)^T \nabla f_j(w)] + \frac{1}{4} E[\|\nabla f_j(w)\|^2] - \|\nabla f(w)\|^2 \quad  \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} E[\nabla f_i(w)^T \nabla f_j(w)] - \|\nabla f(w)\|^2 \quad (E[\nabla f_i] = E[\nabla f_j]) \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} \|\nabla f(w)\|^2 - \|\nabla f(w)\|^2 \quad (E[\nabla f_i \nabla f_j] = \|\nabla f(w)\|^2) \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] - \frac{1}{2} \|\nabla f(w)\|^2 \\
+= \frac{1}{2} \left(E[\|\nabla f_i(w)\|^2] - \|\nabla f(w)\|^2\right)  \\
+= \frac{1}{2} E[\|\nabla f_i(w) - \nabla f(w)\|^2] \quad  \\
+= \frac{\sigma(w)^2}{2} \quad (\sigma^2 \text{ is 1-sample variation}) \\
+$$
+
+
+So SGD error $E[\|e_k\|^2]$ is cut in half compared to using 1 sample.
+
+With $m$ samples we can show that - 
+
+$$
+E[\|e_k\|^2] = \frac{\sigma(w^k)^2}{m}
+$$
+
+Where $\sigma(w^k)^2$ is the variance of the individual gradients at $w^k$. With a larger batch size of size $m$, the the effect of stochasticity is reduced by $m$. With a larger batch size of size $m$, we cause use a step size that is $m$ times larger. Doubling batch size has the same effect as halving the step size.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

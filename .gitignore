@@ -1,0 +1,12 @@
+.Rhistory
+.RData
+.Rproj.user
+*.Rproj
+_bookdown_files/
+*.plk
+/autoencoder/checkpoints/
+/denoise/test_data/
+/denoise/profiles/
+/denoise/test_blue/
+/denoise/data/
+autoencoder/checkpoints/

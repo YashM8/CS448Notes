@@ -1,0 +1,152 @@
+# Proximal Gradient Methods
+
+Proximal-gradient methods apply to functions of the form:
+
+$$
+F(w) = f(w) + r(w)\\
+\text{Where } f \text{ simple and } r \text{ is simple and can be non-smooth.}
+$$
+
+The function to minimize:
+$$
+\arg\min_{w \in \mathbb{R}^d} f(w) + r(w).
+$$
+Iteration $w_k$ works with a quadratic approximation to $f$:
+$$
+f(v) + r(v) \approx f(w_k) + \nabla f(w_k)^\top (v - w_k) + \frac{1}{2\alpha_k} \|v - w_k\|^2 + r(v),
+$$
+$$
+w_{k+1} \in \arg\min_{v \in \mathbb{R}^d} \left[ f(w_k) + \nabla f(w_k)^\top (v - w_k) + \frac{1}{2\alpha_k} \|v - w_k\|^2 + r(v) \right]
+$$
+Writing this as the proximal optimization:
+$$
+w_{k+1} \in \arg\min_{v \in \mathbb{R}^d} \left[ \frac{1}{2} \|v - (w_k - \alpha_k \nabla f(w_k))\|^2 + \alpha_k r(v) \right]\\
+w_{k+1} = \text{prox}_{\alpha_k r} [w_k - \alpha_k \nabla f(w_k)]
+$$
+The proximal-gradient algorithm:
+$$
+w_{k+\frac{1}{2}} = w_k - \alpha_k \nabla f(w_k), \quad w_{k+1} = \arg\min_{v \in \mathbb{R}^d} \left[ \frac{1}{2} \|v - w_{k+\frac{1}{2}}\|^2 + \alpha_k r(v) \right]
+$$
+The right equation is called the proximal operator with respect to a convex function $\alpha_k r$. If you can efficiently compute the proximal operator, $r$ is “simple”.
+
+L1-regularization can be optimized using Proximal-Gradient:
+$$
+\text{prox}_{\alpha_k \lambda \|\cdot\|_1} [w] \in \arg\min_{v \in \mathbb{R}^d} \left[ \frac{1}{2} \|v - w\|^2 + \alpha_k \lambda \|v\|_1 \right]\\
+w_j \in \arg\min_{v_j \in \mathbb{R}} \left[ \frac{1}{2} (v_j - w_j)^2 + \alpha_k \lambda |v_j| \right]
+$$
+
+## Convergence Rate
+
+Proximal-Gradient Linear Convergence Rate
+
+Simplest linear convergence proofs are based on the proximal-PL inequality,
+$$
+\frac{1}{2} D_r(w, L) \geq \mu(F(w) - F^*)\\
+\text{where } \|\nabla f(w)\|^2 \text{ in the PL inequality is generalized }\\
+D_r(w, L) = -2\alpha \min_v \left[ \nabla f(w)^\top (v - w) + \frac{L}{2} \|v - w\|^2 + r(v) - r(w) \right]
+$$
+Linear convergence if $\nabla f$ is Lipschitz and $F$ is proximal-PL:
+$$
+F(w_{k+1}) = f(w_{k+1}) + r(w_{k+1})\\
+\leq f(w_k) + \langle \nabla f(w_k), w_{k+1} - w_k \rangle + \frac{L}{2} \|w_{k+1} - w_k\|^2 + r(w_{k+1})\\
+= F(w_k) + \langle \nabla f(w_k), w_{k+1} - w_k \rangle + \frac{L}{2} \|w_{k+1} - w_k\|^2 + r(w_{k+1}) - r(w_k)\\
+\leq F(w_k) - \frac{\mu}{L} [F(w_k) - F^*] \quad \text{from proximal-PL}
+$$
+
+## Dualty
+
+Considering the support vector machine optimization problem:
+$$
+\arg\min_{w \in \mathbb{R}^d} C \sum_{i=1}^{n} \max\{0, 1 - y_i w^\top x_i\} + \frac{1}{2} \|w\|^2
+$$
+Where $C$ is the regularization parameter ($\lambda = 1/C$).
+
+This problem is non-smooth but strongly-convex, and the proximal operator is not simple. We could use stochastic subgradient, but it converges slowly. It is hard to set step size.
+
+A Fenchel dual to SVM optimization is given by:
+
+$$
+\arg\max_{z \in \mathbb{R}^n \,|\, 0 \leq z \leq C} \sum_{i=1}^{n} z_i - \frac{1}{2} \|X^\top Y z\|^2,
+$$
+Where $X$ has vectors $x_i^T$ as rows and $Y$ is diagonal with the $y_i$ along the diagonal.
+
+For a $d \times n$ matrix $A = X^\top Y$, the SVM dual problem can be written as:
+
+$$
+\arg\max_{0 \leq z \leq C} z^\top 1 - \frac{1}{2} \|Az\|^2
+$$
+The dual transforms the problem to a space where the optimization is easier. We can use a faster method with an optimal step size.
+
+For any dual solution $z*$, the primal solution is $w* = Az*$. Solving the dual problem allows us to solve the primal problem efficiently. The dual is Lipschitz-smooth, with L being the maximum eigenvalue of $A^TA$. Additionally, since the constraints are simple, we can apply projected gradient methods. The dual problem satisfies the proximal-PL condition, where µ is the minimum non-zero singular value of $A^TA$, enabling linear convergence rates. Moreover, as the constraints are separable, and the dual is amenable to random coordinate optimization, projected randomized coordinate optimization achieves a linear convergence rate. Optimal step sizes can be derived straightforwardly, eliminating the need for backtracking. 
+
+
+## Supremum and Infimum
+
+Infimum is a generalization of min that also includes limits:
+$$
+\min_{x \in \mathbb{R}} x^2 = 0, \quad \inf_{x \in \mathbb{R}} x^2 = 0\\
+\min_{x \in \mathbb{R}} e^x = \text{DNE}, \quad \inf_{x \in \mathbb{R}} e^x = 0
+$$
+Formally, the infimum of a function $f$ is its largest lower bound:
+$$
+\inf f(x) = \max_{y} \left\{ y \,|\, y \leq f(x) \right\}.
+$$
+And the Supremum is the smallest upper bound.
+
+**Convex Conjugate**
+
+The convex conjugate $f^*$ of a function $f$ is given by
+$$
+f^*(y) = \sup_{x \in X} \{ y^Tx - f(x) \},
+$$
+where $X$ is the set of values where the supremum is finite. It’s the maximum that the linear function above $f(x)$.
+
+
+In ML our primal problem is usually:
+$$
+\arg\min_{w \in \mathbb{R}^d} P(w) = f(Xw) + r(w).
+$$
+If we introduce equality constraints,
+$$
+\arg\min_{v=Xw} f(v) + r(w).
+$$
+then the Lagrangian dual has a special form called the Fenchel dual.
+$$
+\arg\max_{z \in \mathbb{R}^n} D(z) = -f^*(-z) - r^*(X^\top z)
+$$
+Primal and dual functions in a nutshell:
+
+$$
+P(w) = f(Xw) + r(w) \\
+D(z) = -f^*(-z) - r^*(X^\top z)
+$$
+Number of dual variables is $n$ instead of $d$.
+- Dual may be a lower-dimensional problem.
+- Weak duality is that $P(w) \geq D(z)$ for all $w$ and $z$ (assuming $P$ is bounded below). So any value of dual objective gives a lower bound on $P(w^*)$.
+- Lipschitz-smoothness and strong-convexity relationship.
+- Dual is Lipschitz-smooth if primal is strongly convex (as in SVMs).
+- Dual of loss $f^*$ is separable if $f$ is a finite-sum problem. This allows us to use dual coordinate optimization for many problems.
+- Strong duality holds when $P(w^*) = D(z^*)$. This requires an additional assumption.
+Example: $f$ and $g$ convex, exists feasible $w$ with $z = Xw$ where $g$ is continuous at $z$. When true, we can use the duality gap $P(w) - D(z)$ to certify the optimality of $w$ and $z$.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,221 @@
+# Global Optimization and Subgradients
+
+Real valued functions are extremely tricky to optimize globally. 
+
+Consider minimizing a function over the unit hyper-cube:
+$$
+\min_{w \in [0,1]^d} f(w),
+$$
+
+Using any algorithm, you can construct $f(w_k) - f(w^*) > \epsilon$ forever due to there being infinite real numbers between any two real numbers.
+
+## Considering Minimizing Lipschitz-Continuous Functions
+
+$$
+\vert f(w) - f(v) \vert \leq L \lVert w - v \rVert
+$$
+
+Functions that don't change arbitrarily fast as you change $x$.
+
+Considering the unit hypercube again, it becomes easier to optimize. A worst case of $O(\frac{1}{\epsilon^d})$ is achieved by a simple grid search. 
+
+You can go faster if you use random guesses. Lipschitz-continuity implies there is a ball of $\epsilon$ optimal solutions around $w^*$. The radius of the ball is $\Omega(\epsilon)$so its "volume" is $\Omega(\epsilon^d)$.  
+
+## Subgradient Methods
+
+**What is a subgradient?**
+
+
+Differentiable convex functions are always above their tangent lines:
+
+$$
+f(v) \geq f(w) + \nabla f(w)^\top (v - w), \quad \forall w, v.
+\
+$$
+$$
+\text{A vector } d \text{ is a subgradient of a convex function } f \text{ at } w \text{ if}\\
+f(v) \geq f(w) + d^\top (v - w), \quad \forall v.
+$$
+For example, sub-differential of absolute value function:
+$$
+\partial |w| =
+\begin{cases}
+1 & \text{if } w > 0 \\
+-1 & \text{if } w < 0 \\
+[-1, 1] & \text{if } w = 0
+\end{cases}
+$$
+
+**Why does L1 regularization give sparsity?**
+
+Considering L2-regularized least squares:
+$$
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \frac{\lambda}{2} \| w \|_2^2.
+$$
+Element $j$ of the gradient at $w_j = 0$ is given by
+$$
+\nabla_j f(w) = x_j^\top (Xw - y) \big| + \lambda w
+$$
+For $w_j = 0$ to be a solution we need $\nabla_j f(w^*) = 0$ or that $0 = x_j^\top r^*$
+where $r^* = Xw^* - y$ for the solution $w^*$ that column $j$is orthogonal to the final residual.
+
+This is possible, but it is very unlikely. Increasing $\lambda$ doesn’t help.
+
+Considering L1-regularized least squares:
+$$
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \lambda \| w \|_1.
+$$
+Element $j$ of the subdifferential at $w_j = 0$ is given by
+$$
+\partial_j f(w) \equiv x_j^\top (Xw - y) \big| + \lambda [-1, 1] .
+$$
+For $w_j = 0$ to be a solution, we need $0 \in \partial_j f(w^*)$ or that
+$$
+0 \in x_j^\top r^* + \lambda [-1, 1] \\
+-x_j^\top r^* \in \lambda [-1, 1] \\
+|x_j^\top r^*| \leq \lambda,
+$$
+So features $j$ that have little to do with $y$ will often lead to $w_j = 0$. Increasing $\lambda$ makes this more likely to happen.
+
+
+The subgradient method:
+
+$$
+w_{k+1} = w_k - \alpha_k g_k,
+$$
+For any $g_k \in \partial f(w_k)$.
+
+At a non-differentiable point, some subgradients may reduce the objective. At differentiable points, subgradient is the gradient and reduces the objective.
+
+For the subgradient method applied to Lipschitz and convex $f$ we have
+$$
+\|w_{k+1} - w^*\|^2 = \|w_k - w^*\|^2 - 2\alpha_k g_k^\top (w_k - w^*) + \alpha_k^2 ||g_k||^2\\
+\leq \|w_k - w^*\|^2 - 2\alpha_k[f(w_k) - f(w^*)] + \alpha_k^2 L^2.\\\\
+\rightarrow 2\alpha_k[f(w_k) - f(w^*)] \leq \|w_k - w^*\|^2 - \|w_{k+1} - w^*\|^2 + \alpha_k^2 L^2
+$$
+And summing the telescoping values from $k = 1$ to $t$ we get
+$$
+2 \sum_{k=1}^t \alpha_k[f(w_k) - f(w^*)] \leq \|w_0 - w^*\|^2 - \|w_{k+1} - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k.
+$$
+
+Using $f_b$ as the lowest $f(w_k)$ and $\|w_{k+1} - w^*\|^2 \geq 0$ we can re-arrange to get a bound that is very similar to what we showed for SGD:
+$$
+f(w_b) - f(w^*) \leq \frac{\|w_1 - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k^2}{2 \sum_{k=1}^t \alpha_k}
+= O \left( \frac{1}{\sum_{k} \alpha_k} \right) + O \left( \frac{\sum_{k} \alpha_k^2}{\sum_{k} \alpha_k} \right)
+$$
+## Smooth Approximations
+
+Non smooth functions can be approximated using smooth functions. Non smooth regions can be smoothed leaving the rest of the function untouched. Like Huber loss for the absolute value function.
+
+The advantage is to smoothing can be faster conversions than sub gradient methods. You can use line search and momentum or acceleration for faster convergence. Huber smoothed objective functions often have similar test error.
+
+Some reasons not to smooth are that smoothing can destroy the structure of the solution. For example, L1 regularization leads to sparse solutions because it is not smooth Huber loss does not lead to sparse solutions. Smooth approximations can be expensive to evaluate and they don't converge faster when you add stochasticity.
+
+
+## Linear convergence
+
+Bisection: Linear convergence in 1 dimension -
+
+Consider the following method for finding a minimizer:
+
+1. At each iteration, compute a subgradient at the middle of the interval.
+2. Set the lower/upper bound of the interval to the midpoint (using subgradient sign)
+
+Maximum distance to $w^*$ is cut in half giving iteration complexity of $O(log(1/\epsilon))$
+
+
+Cutting Plane: Linear Convergence in $d$ dimensions -
+
+This generalizes bijections to higher dimensions. Can be used to optimize convex functions over bounded polygons.
+
+
+1. At each iteration, compute a subgradient at the center of the polygon. From the definition of subgradient we have for any $w$ that $f(w) \geq f(w_k) +g_k^\top (w - w_k)$. So any $w$ satisfying $g_k^\top (w - w_k) > 0$ will be greater than $f(w_k)$.
+
+2. This constraint is analogous to a plane that cuts the polygon.
+
+
+Worst-case theoretical rates for convex optimization with subgradients are:
+
+Best subgradient methods require $O(1/\epsilon^2)$ iterations.
+Best cutting plane methods require $O(d log(1/\epsilon))$ iterations
+
+## Using Multiple Subgradients
+
+We get a tighter bound by using all previous function and subgradient values:
+$$
+f(w) \geq \max_{t \in \{1, \ldots, k\}} f(w_t) + g_t^\top (w - w_t)
+$$
+We can also choose the “best” subgradient?
+Convex functions have directional derivatives everywhere. Direction $-g_t$ that minimizes directional derivative is minimum-norm subgradient:
+$$
+g_k \in \arg\min_{g \in \partial f(w_k)} \|g\|
+$$
+This is the steepest descent direction for non-smooth convex optimization problems.
+
+Some advantages are that the solution is a fixed point: $w^* = w^* - \alpha g^*$ since $g^* = 0$. We can satisfy line-search criteria since $-g_k$ is a descent direction.
+- And line searches work with directional derivatives, which exist.
+
+Some issues are that he minimum-norm subgradient may be difficult to find. Convergence not well understood and  it is not shown to improve worst-case rate over subgradient method. Counter-examples exist where line search causes convergence to sub-optimal values.
+
+Optimizing a smooth $f$ with (non-smooth) L1-regularization,
+$$
+\text{argmin}_w f(w) + \lambda \|w\|_1.
+$$
+The subdifferential with respect to coordinate $j$ has the form:
+$$
+\nabla_j f(w) + \lambda \begin{cases}
+\text{sign}(w_j) & w_j \neq 0 \\
+[-1, 1] & w_j = 0
+\end{cases}.
+$$
+The part of the subdifferential with smallest absolute value is given by
+$$
+\begin{cases}
+\nabla_j f(w) + \lambda \text{sign}(w_j) & \text{for } w_j \neq 0 \\
+\nabla_j f(w) - \lambda \text{sign}(\nabla_j f(w)) & \text{for } w_j = 0, |\nabla_j f(w)| > \lambda \\
+0 & \text{for } w_j = 0, |\nabla_j f(w)| \leq \lambda
+\end{cases}.
+$$
+This can be viewed as the steepest descent direction for L1-regularization. This keeps variables at 0 if the partial derivative at zero is small enough. However, the min-norm subgradient does not automatically set variables to 0.
+
+**Orthant-Projected Min-Norm Subgradient for L1-regularization**
+
+Min-norm subgradient method with orthant projection for L1-regularization is:
+$$
+w_{k+1} = \text{proj}_O(w_k) [w_k - \alpha_k g_k]\\
+\text{Where, } g_k \in \arg\min_{g \in \partial f(w_k)} \|g\|
+$$
+$\text{proj}_O(w_k) [z]$ sets $z_j = 0$ if $\text{sign}(z_j) \neq \text{sign}(w_j) $.
+
+So $w_{k+1}$ stays in the same orthant as $w_k$.
+
+This has a lot of appealing properties:
+- Orthant-project can result in sparse solutions.
+- Min-norm subgradient keeps values at 0.
+- Can be combined with line-search.
+- Can use clever step sizes like Barzilai Borwein.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

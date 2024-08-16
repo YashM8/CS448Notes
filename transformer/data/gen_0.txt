@@ -1,0 +1,75 @@
+/opt/miniconda3/bin/python /Users/ypm/Desktop/transformer/gen.py
+/Users/ypm/Desktop/transformer/gen.py:11: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model.load_state_dict(torch.load('model_params_2.pth'))
+
+Foast.
+
+MENENIUS:
+Prat else uponsieves: our know I tell be this reverectedr charn be fearire thy sconse;
+How make that arthere but expeciens
+Toke a didh canyiune awas him of your could strelaw!'
+This to lace and thou a mosty fristondress solp well eye?
+With this badoggent of the greatue!
+For him tis law rike our than
+To do muke, in mamabtle--
+Bothmeries, who my finds say sholl rach
+God as was imper, Then deace shall thou are fair Theart.
+
+QUEEN ELIO:
+Who exposes had of son,
+Kake the rear not seer.
+Spequence the do plied this hornorow-pried.
+
+MUCIONIUS:
+Hell-huster.
+
+MENENIUS:
+Comicive him of the lesparded!
+'Dteep day, my say,
+As would hath afful say knows of have sing a reseditys,
+The art with merciure shoopit gove reves.
+
+MENENIUS:
+This heather! what ve shorse of the fortultured caep up on is me.
+
+POMINA:
+Nay's dies. Them clanch provouds,
+I'll sill that thou, there give the pease
+'To face of sirell of thou do
+the congedy. To so be daister'd we of his this pain holy to so me, gook!
+When for ried:
+To not, Nor I wouldses, they wich for a lain,
+To not thinke bleou you thust you long.
+
+KING HAM:
+Who you Villy; have whow to your or one true to is a ciuse it,
+Youft no make fight the prindes,
+God's sto he him him come Son same go I hear'd no Must to knows.
+
+GLOUCESTES:
+Uncond a rusbut in
+The I know thee fainst maw!
+Compasidion, 'God Henry mear acty glaints affor pring not a frieng, for there pass as or fair.
+
+BUCHIO:
+Sollail marry the well not mode here lears--
+
+Sheope thee, make court us:
+sill who for know you
+but contue need and evernes as in my
+shepears, hears; mad! parted and good,
+When, the nambes them rige! than I erature,
+I'ls and say in you in on sid, for my
+Will ould sir, pust,
+That me bone I do reqmod of himsendsite?
+
+PET:
+My sorry go plegess him so.
+
+MENERD INCEWINA:
+Gody mather But crues of morthating poisciance! is with it.
+
+Nethen ISight are he of the but hath fight on me. Petagt to the weell but lears say have that shrave for all have,
+Uping, your not caure
+
+Process finished with exit code 0

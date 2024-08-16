@@ -1,0 +1,216 @@
+# Projected Gradient Based Algorithms
+
+## Projected Gradient
+
+The main premise here to to optimize when we have a constraint as to what our solution can be. For example, we might want sparse solutions for model space complexity or a non-negative solutions between 0 and 1 while optimizing probabilities.
+
+The Projected-Gradient for non-negative solutions is:
+$$
+w_{k+1} = max\{0, w_k - \alpha_k \nabla f(w_k)\}
+$$
+Here the max is taken element wise. Sets negative values after gradient descent to 0.
+
+Regular projected gradient computes the vanilla gradient descent iteration then projects the intermediate $w$ value to the closest point that satisfies your constraints. Formally this is:
+
+The projected-gradient algorithm has two steps:
+
+1. Perform an unconstrained gradient descent step:
+$$
+w_{k+1/2} = w_k - \alpha_k \nabla f(w_k).
+$$
+
+2. Compute projection onto the set $C$:
+$$
+w_{k+1} \in \arg \min_{v \in C} \|v - w_{k+1/2}\|.
+$$
+Deriving Projected-Gradient using a quadratic approximation over the set $C$:
+$$
+w_{k+1} \in \arg \min_{v \in C} \left\{ f(w_k) + \nabla f(w_k)^\top (v - w_k) + \frac{1}{2\alpha_k} \| v - w_k \|^2 \right\} \\
+\equiv \arg \min_{v \in C} \left\{ \alpha_k f(w_k) + \alpha_k \nabla f(w_k)^\top (v - w_k) + \frac{1}{2} \| v - w_k \|^2 \right\} \quad \\
+\equiv \arg \min_{v \in C} \left\{ \frac{\alpha_k^2}{2} \| \nabla f(w_k) \|^2 + \alpha_k \nabla f(w_k)^\top (v - w_k) + \frac{1}{2} \| v - w_k \|^2 \right\} \\
+\equiv \arg \min_{v \in C} \left\{ \| (v - w_k) + \alpha_k \nabla f(w_k) \|^2 \right\} \quad (\text{completing the square}) \\
+\equiv \arg \min_{v \in C} \left\{ \| v - (w_k - \alpha_k \nabla f(w_k)) \| \right\} \quad \text{(regular gradient descent)} \\
+w_{k+1} = \text{proj}_C [w_k - \alpha_k \nabla f(w_k)]
+$$
+
+We can rewrite $w_{k+1} = \text{proj}_C [w_k - \alpha_k \nabla f(w_k)]$ as $w_{k+1} = \text{proj}_C [w_k - \alpha_k g(w^k, \alpha_k)]$ where $g$ is the gradient mapping defined as:
+
+$$
+g(w^k, \alpha_k) = \frac{1}{\alpha_k} (w_k - \text{proj}_C [w_k - \alpha_k \nabla f(w_k))
+$$
+Projected gradient is only efficient if the cost of projection is cheap. If it costs $O(d)$ then it adds no cost to the iteration. Taking the max over 2 values is just $O(1)$ making projected-gradient for non-negative constraints is simple.
+
+
+## L1 Regularization to a Constrained Problem
+
+
+For a smooth objective with L1 regularization:
+$$
+\arg \min_{w \in \mathbb{R}^d} \left\{ f(w) + \lambda \| w \|_1 \right\}
+$$
+Can be transformed to a smooth problem with non-negative constraints:
+$$
+\arg \min_{w^+ \geq 0, w^- \geq 0} \left\{ f(w^+ - w^-) + \lambda \sum_{j=1}^d (w^+_j + w^-_j) \right\}
+$$
+
+Essentially splitting $w$ into the difference of 2 non-negative vectors. Turning the non-smooth objective, smooth. We can now apply projected gradient to this transformed yet equivalent objective.
+
+
+## Active Set Identification and Backtracking
+
+L1 regularization identifies an "active-set" with projected gradient. An active set selects features leaving weights that seem relevant non-zero.
+
+For all sufficiently large $k$, the sparsity pattern of $w_k$ matches the sparsity pattern of $w^*$.
+$$
+w^0 = 
+\begin{pmatrix}
+w^0_1 \\
+w^0_2 \\
+w^0_3 \\
+w^0_4 \\
+w^0_5 
+\end{pmatrix}
+\text{after finite } k \text{ iterations} \quad
+w^k = 
+\begin{pmatrix}
+w^k_1 \\
+0 \\
+0 \\
+w^k_4 \\
+0 
+\end{pmatrix},
+\quad \text{where} \quad
+w^* = 
+\begin{pmatrix}
+w^*_1 \\
+0 \\
+0 \\
+w^*_4 \\
+0 
+\end{pmatrix}
+$$
+
+We can also use **2 step sizes**:
+
+Consider introducing a second step size $\eta_k \leq 1$,
+$$
+w_{k+1} = w_k - \eta_k \alpha_k g(w_k, \alpha_k)
+$$
+Which  affects how far we move in the gradient mapping direction.
+
+2 Backtracking Strategies:
+
+- Backtracking along the feasible direction. Fix $\alpha_k$ and backtrack by reducing $\eta_k$. 1 projection per iteration (good if projection is expensive). But not guaranteed to identify active set.
+
+- Backtracking along the projection. Fix $\eta_k$ at 1 and backtrack by reducing $\alpha_k$. 1 projection per backtracking step (bad if projection is expensive). But identifies active set after finite number of iterations.
+
+## Accelerating Projection Methods
+
+The accelerated projected-gradient method has the form:
+$$
+w_{k+1} = \text{proj}_C [v_k - \alpha_k \nabla f(w_k)] \\
+v_{k+1} = w_{k+1} + \beta_k (w_{k+1} - w_k).
+$$
+
+This achieves the accelerated rate as the unconstrained case. But $v_k$ might not satisfy constraints.
+
+Using Newton's method:
+
+The naive Newton-like methods with the Hessian $H_k$:
+$$
+w_{k+1} = \text{proj}_C \left[ w_k - \alpha_k (H_k)^{-1} \nabla f(w_k) \right].
+$$
+This does not work and can point you in the wrong directions.
+
+The correct projected-Newton method uses
+$$
+w_{k+1/2} = w_k - \alpha_k (H_k)^{-1} \nabla f(w_k) \\
+w_{k+1} = \arg \min_{v \in C} \| v - w_{k+1/2} \|_{H_k} \quad (\text{projection under Hessian metric})
+$$
+
+Projected-gradient minimizes quadratic approximation:
+$$
+w_{k+1} = \arg \min_{v \in C} \left\{ f(w_k) + \nabla f(w_k)(v - w_k) + \frac{1}{2\alpha_k} \| v - w_k \|^2 \right\}\\
+w_{k+1} = \arg \min_{v \in \mathbb{R}^d} \left\{ f(w_k) + \nabla f(w_k)(v - w_k) + \frac{1}{2\alpha_k} (v - w_k)H_k(v - w_k) \right\}\\
+w_{k+1} = \arg \min_{v \in C} \left\{ f(w_k) + \nabla f(w_k)(v - w_k) + \frac{1}{2\alpha_k} (v - w_k)H_k(v - w_k) \right\}
+$$
+Equivalently, we project Newton step under the Hessian-defined norm:
+$$
+w_{k+1} = \arg \min_{v \in C} \left\| v - \left(w_k - \alpha_t H_k^{-1} \nabla f(w_k)\right) \right\|_{H_k}
+$$
+This is expensive and can be dealt with by approximating the step. If $H_k$ is diagonal, it is simple. We can also make the matrix "more diagonal" using two metric projection (below).
+
+**Two-Metric Projection**
+
+Consider again optimizing with non-negative constraints, $$ \min_{w \in C} f(w) $$.
+The two-metric projection method splits the variables into two sets:
+$$
+A_k \equiv \{ i \mid w_k^i = 0, \nabla_i f(w_k) > 0 \}\\
+I_k \equiv \{ i \mid w_k^i \neq 0 \text{ or } \nabla_i f(w_k) \leq 0 \},
+$$
+The active variables (constrained) and “inactive variables”. Then use projected-gradient step on $A_k$ and naive projected-Newton on $I_k$.
+$$
+w_{k+1}^{A_k} = \text{proj}_C \left[ w_k^{A_k} - \alpha_k \nabla_{A_k} f(w_k) \right] \\
+w_{k+1}^{I_k} = \text{proj}_C \left[ w_k^{I_k} - \alpha_k \left( \nabla_{I_k}^2 f(w_k) \right)^{-1} \nabla_{I_k} f(w_k) \right]
+$$
+Eventually switches to unconstrained Newton on unconstrained variables. 
+
+## Projected SGD and CD
+
+Projected Stochastic Gradient Descent:
+$$
+w_{k+1} = \text{proj}_C \left[ w_k - \alpha_k \nabla f_{i_k}(w_k) \right]
+$$
+Is where we do projected gradient on a random training example $i_k$.
+
+Some properties of SGD and projected-gradient that do not hold:
+- Lose fast convergence for over-parameterized models as we no longer even have $\nabla f(w^*) = 0$
+- Lose active set identification property of projected gradient.
+
+Variant that restores this property is dual averaging:
+$$
+w_{k+1} = \text{proj}_C \left[ w_0 - \alpha_k \sum_{t=1}^k \nabla f(w_k) \right],
+$$
+
+Since it uses the average of the previous gradients as variance of the direction goes to 0.
+
+## Frank-Wolfe Method
+
+Frank Wolfe method uses a linear approximation to the function instead of quadratic. The quadratic approximation will be harder to compute and sometimes simpler linear approximation can do the trick.
+
+$$
+argmin_{ v \in C} \left\{ f(w_k) + \nabla f(w_k)^\top (v - w_k) \right\}
+$$
+The set $C$ must be bounded otherwise a solution may not exist. This is because you can move $v$ and we won't have a solution in finite steps.
+
+
+The algorithm is:
+
+$$
+w_{k+1} = w_k + \alpha_k (v_k - w_k)\\
+v_k \in argmin_{v \in C} \nabla f(w_k)^\top v\\
+$$
+The gradient mapping is:
+$$
+\frac{1}{\alpha_k} (w_k - v_k).
+$$
+Can be used with a line search. The convergence rate is $O(\frac{1}{k})$.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

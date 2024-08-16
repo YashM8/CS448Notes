@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 Stochastic Gradient Methods | CS448Notes</title>
+  <meta name="description" content="Chapter 5 Stochastic Gradient Methods | CS448Notes" />
+  <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 Stochastic Gradient Methods | CS448Notes" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 Stochastic Gradient Methods | CS448Notes" />
+  
+  
+  
+
+<meta name="author" content="Yash Mali" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="coordinate-optimization.html"/>
+<link rel="next" href="overparameterization.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">CS448 Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> CPSC 448 Notes</a></li>
+<li class="chapter" data-level="2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html"><i class="fa fa-check"></i><b>2</b> Gradient Descent Analysis</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#gradient-descent-background"><i class="fa fa-check"></i><b>2.1</b> Gradient descent background</a></li>
+<li class="chapter" data-level="2.2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#showing-gradient-descent-reduces-the-objective-function."><i class="fa fa-check"></i><b>2.2</b> Showing gradient descent reduces the objective function.</a></li>
+<li class="chapter" data-level="2.3" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#what-learning-rate-to-use"><i class="fa fa-check"></i><b>2.3</b> What learning rate to use?</a></li>
+<li class="chapter" data-level="2.4" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#convergence-rate"><i class="fa fa-check"></i><b>2.4</b> Convergence rate</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html"><i class="fa fa-check"></i><b>3</b> Improving Gradient Descent</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#oracle-model-of-computation"><i class="fa fa-check"></i><b>3.1</b> Oracle Model of Computation</a></li>
+<li class="chapter" data-level="3.2" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#heavy-ball-method"><i class="fa fa-check"></i><b>3.2</b> Heavy Ball Method</a></li>
+<li class="chapter" data-level="3.3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#conjugate-gradient-heavy-ball-with-optimal-parameters"><i class="fa fa-check"></i><b>3.3</b> Conjugate Gradient: Heavy-Ball with Optimal Parameters</a></li>
+<li class="chapter" data-level="3.4" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#nesterov-accelerated-gradient"><i class="fa fa-check"></i><b>3.4</b> Nesterov Accelerated Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html"><i class="fa fa-check"></i><b>4</b> Coordinate Optimization</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#definition-and-examples"><i class="fa fa-check"></i><b>4.1</b> Definition and examples</a></li>
+<li class="chapter" data-level="4.2" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#analyzing-coordinate-descent"><i class="fa fa-check"></i><b>4.2</b> Analyzing Coordinate Descent</a></li>
+<li class="chapter" data-level="4.3" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#randomized-cd-progress"><i class="fa fa-check"></i><b>4.3</b> Randomized CD Progress</a></li>
+<li class="chapter" data-level="4.4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent"><i class="fa fa-check"></i><b>4.4</b> Gauss-Southwell: Greedy Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>5</b> Stochastic Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
+<li class="chapter" data-level="5.3" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions"><i class="fa fa-check"></i><b>5.3</b> Convergence of SGD for PL functions</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#when-to-stop"><i class="fa fa-check"></i><b>5.3.1</b> When to stop?</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing"><i class="fa fa-check"></i><b>5.4</b> Mini Batches and Batch Growing</a></li>
+<li class="chapter" data-level="5.5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation"><i class="fa fa-check"></i><b>5.5</b> Variation in Mini-Batch Approximation</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="overparameterization.html"><a href="overparameterization.html"><i class="fa fa-check"></i><b>6</b> Overparameterization</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="overparameterization.html"><a href="overparameterization.html#overparameterization-and-sgd"><i class="fa fa-check"></i><b>6.1</b> Overparameterization and SGD</a></li>
+<li class="chapter" data-level="6.2" data-path="overparameterization.html"><a href="overparameterization.html#faster-sgd-for-overparameterized-models"><i class="fa fa-check"></i><b>6.2</b> Faster SGD for Overparameterized Models</a></li>
+<li class="chapter" data-level="6.3" data-path="overparameterization.html"><a href="overparameterization.html#stochastic-line-search"><i class="fa fa-check"></i><b>6.3</b> Stochastic Line Search</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html"><i class="fa fa-check"></i><b>7</b> Variations on SGD</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#stochastic-average-gradient"><i class="fa fa-check"></i><b>7.1</b> Stochastic Average Gradient</a></li>
+<li class="chapter" data-level="7.2" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#variance-reduced-stochastic-gradient"><i class="fa fa-check"></i><b>7.2</b> Variance Reduced Stochastic Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html"><i class="fa fa-check"></i><b>8</b> Approximating the Hessian</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-1---diagonal-hessian"><i class="fa fa-check"></i><b>8.1</b> Cheap Hessian Approximation 1 - Diagonal Hessian</a></li>
+<li class="chapter" data-level="8.2" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-2---preconditioning"><i class="fa fa-check"></i><b>8.2</b> Cheap Hessian Approximation 2 - Preconditioning</a></li>
+<li class="chapter" data-level="8.3" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-3---mini-batch-hessian"><i class="fa fa-check"></i><b>8.3</b> Cheap Hessian Approximation 3 - Mini Batch Hessian</a></li>
+<li class="chapter" data-level="8.4" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#hessian-free-newton-methods-truncated-newton"><i class="fa fa-check"></i><b>8.4</b> Hessian Free Newton Methods (Truncated Newton)</a></li>
+<li class="chapter" data-level="8.5" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#quasi-newton-methods"><i class="fa fa-check"></i><b>8.5</b> Quasi-Newton Methods</a></li>
+<li class="chapter" data-level="8.6" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#barzilai-borwein-method"><i class="fa fa-check"></i><b>8.6</b> Barzilai-Borwein Method</a></li>
+<li class="chapter" data-level="8.7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#bfgs-quasi-newton-method"><i class="fa fa-check"></i><b>8.7</b> BFGS Quasi-Newton Method</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html"><i class="fa fa-check"></i><b>9</b> Projected Gradient Based Algorithms</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-gradient"><i class="fa fa-check"></i><b>9.1</b> Projected Gradient</a></li>
+<li class="chapter" data-level="9.2" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#l1-regularization-to-a-constrained-problem"><i class="fa fa-check"></i><b>9.2</b> L1 Regularization to a Constrained Problem</a></li>
+<li class="chapter" data-level="9.3" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#active-set-identification-and-backtracking"><i class="fa fa-check"></i><b>9.3</b> Active Set Identification and Backtracking</a></li>
+<li class="chapter" data-level="9.4" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#accelerating-projection-methods"><i class="fa fa-check"></i><b>9.4</b> Accelerating Projection Methods</a></li>
+<li class="chapter" data-level="9.5" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd"><i class="fa fa-check"></i><b>9.5</b> Projected SGD and CD</a></li>
+<li class="chapter" data-level="9.6" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#frank-wolfe-method"><i class="fa fa-check"></i><b>9.6</b> Frank-Wolfe Method</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html"><i class="fa fa-check"></i><b>10</b> Global Optimization and Subgradients</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
+<li class="chapter" data-level="10.2" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
+<li class="chapter" data-level="10.3" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
+<li class="chapter" data-level="10.4" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#using-multiple-subgradients"><i class="fa fa-check"></i><b>10.4</b> Using Multiple Subgradients</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html"><i class="fa fa-check"></i><b>11</b> Proximal Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#convergence-rate-1"><i class="fa fa-check"></i><b>11.1</b> Convergence Rate</a></li>
+<li class="chapter" data-level="11.2" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#dualty"><i class="fa fa-check"></i><b>11.2</b> Dualty</a></li>
+<li class="chapter" data-level="11.3" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#supremum-and-infimum"><i class="fa fa-check"></i><b>11.3</b> Supremum and Infimum</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>12</b> Optimization Demo</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-momentum"><i class="fa fa-check"></i><b>12.1</b> Gradient Descent with Momentum</a></li>
+<li class="chapter" data-level="12.2" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-nesterov-acceleration"><i class="fa fa-check"></i><b>12.2</b> Gradient Descent with Nesterov Acceleration</a></li>
+<li class="chapter" data-level="12.3" data-path="optimization-demo.html"><a href="optimization-demo.html#nesterov-with-restart"><i class="fa fa-check"></i><b>12.3</b> Nesterov With Restart</a></li>
+<li class="chapter" data-level="12.4" data-path="optimization-demo.html"><a href="optimization-demo.html#newtons-method"><i class="fa fa-check"></i><b>12.4</b> Newton’s Method</a></li>
+<li class="chapter" data-level="12.5" data-path="optimization-demo.html"><a href="optimization-demo.html#damped-newtons-method"><i class="fa fa-check"></i><b>12.5</b> Damped Newton’s Method</a></li>
+<li class="chapter" data-level="12.6" data-path="optimization-demo.html"><a href="optimization-demo.html#coordinate-descent"><i class="fa fa-check"></i><b>12.6</b> Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html"><i class="fa fa-check"></i><b>13</b> Connvolutional Neural Networks</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#basics"><i class="fa fa-check"></i><b>13.1</b> Basics</a></li>
+<li class="chapter" data-level="13.2" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutions"><i class="fa fa-check"></i><b>13.2</b> Convolutions</a></li>
+<li class="chapter" data-level="13.3" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutional-layers"><i class="fa fa-check"></i><b>13.3</b> Convolutional Layers</a></li>
+<li class="chapter" data-level="13.4" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#pooling-layers"><i class="fa fa-check"></i><b>13.4</b> Pooling layers</a></li>
+<li class="chapter" data-level="13.5" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#example"><i class="fa fa-check"></i><b>13.5</b> Example</a></li>
+<li class="chapter" data-level="13.6" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#conclusion"><i class="fa fa-check"></i><b>13.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html"><i class="fa fa-check"></i><b>14</b> Recurrent Neural Networks</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#background"><i class="fa fa-check"></i><b>14.1</b> Background</a></li>
+<li class="chapter" data-level="14.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#introduction-1"><i class="fa fa-check"></i><b>14.2</b> Introduction</a></li>
+<li class="chapter" data-level="14.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#types-of-rnns"><i class="fa fa-check"></i><b>14.3</b> Types of RNN’s</a>
+<ul>
+<li class="chapter" data-level="14.3.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#one-to-many"><i class="fa fa-check"></i><b>14.3.1</b> One to Many</a></li>
+<li class="chapter" data-level="14.3.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-one"><i class="fa fa-check"></i><b>14.3.2</b> Many to One</a></li>
+<li class="chapter" data-level="14.3.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-many"><i class="fa fa-check"></i><b>14.3.3</b> Many to Many</a></li>
+</ul></li>
+<li class="chapter" data-level="14.4" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#problems-with-basic-rnns"><i class="fa fa-check"></i><b>14.4</b> Problems with (Basic) RNN’s</a></li>
+<li class="chapter" data-level="14.5" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#lstm---long-short-term-memory"><i class="fa fa-check"></i><b>14.5</b> LSTM - Long Short Term Memory</a></li>
+<li class="chapter" data-level="14.6" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#gated-recurrent-units"><i class="fa fa-check"></i><b>14.6</b> Gated Recurrent Units</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html"><i class="fa fa-check"></i><b>15</b> Attention with RNN’s</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#introduction-2"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#downsides-of-this-attention."><i class="fa fa-check"></i><b>15.2</b> Downsides of this attention.</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html"><i class="fa fa-check"></i><b>16</b> Self-Attention and Transformers</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#self-attention-mechanism"><i class="fa fa-check"></i><b>16.1</b> Self-Attention Mechanism</a></li>
+<li class="chapter" data-level="16.2" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#multi-head-attention"><i class="fa fa-check"></i><b>16.2</b> Multi-Head Attention</a></li>
+<li class="chapter" data-level="16.3" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#tips-for-numerical-stability"><i class="fa fa-check"></i><b>16.3</b> Tips for numerical stability</a></li>
+<li class="chapter" data-level="16.4" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#transformers"><i class="fa fa-check"></i><b>16.4</b> Transformers</a></li>
+<li class="chapter" data-level="16.5" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#conclution-and-drawbacks"><i class="fa fa-check"></i><b>16.5</b> Conclution and Drawbacks</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="project.html"><a href="project.html"><i class="fa fa-check"></i><b>17</b> Project</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">CS448Notes</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="stochastic-gradient-methods" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Stochastic Gradient Methods<a href="stochastic-gradient-methods.html#stochastic-gradient-methods" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introduction" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> Introduction<a href="stochastic-gradient-methods.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Stochastic gradient descent is primarily used when calculating the full gradient for <span class="math inline">\(t\)</span> iterations is too costly. In a machine learning prespective, instead of calculating the gradient using the entire dataset, you calculate it using a randomly picked data point (or small batches of data points) instead.</p>
+<p>A couple of data points might point you in the wrong direction. But on average you will move towards the minima. This erractic nature is useful while optimizing non-convex landscapes like neural network where the stochasic nature can allow you to escape saddle points and local optimia and reach a better and deeper optima.</p>
+<p>Random selection of <span class="math inline">\(i_k\)</span> from <span class="math inline">\(\{1, 2, \ldots, n\}\)</span>.
+<span class="math display">\[
+w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k).
+\]</span>
+With <span class="math inline">\(p(i_k = i) = 1/n\)</span>, the stochastic gradient is an unbiased estimate of the gradient:
+<span class="math display">\[
+\mathbb{E}[\nabla f_{i_k}(w)] = \frac{1}{n} \sum_{i=1}^{n} p(i_k = i) \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \frac{1}{n} \nabla f_i(w) = \frac{1}{n} \sum_{i=1}^{n} \nabla f_i(w) = \nabla f(w).
+\]</span>
+Iteration cost is independent of <span class="math inline">\(n\)</span>. Convergence requires <span class="math inline">\(\alpha_k \to 0\)</span>. Stochastic has low iteration cost but slow convergence rate.</p>
+</div>
+<div id="progress-bound-for-sgd" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Progress Bound for SGD<a href="stochastic-gradient-methods.html#progress-bound-for-sgd" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The stochastic gradient descent (SGD) update is
+<span class="math display">\[ w^{k+1} = w^k - \alpha_k \nabla f_{i_k}(w^k) \]</span>
+Recall the descent lemma applied to <span class="math inline">\(w_{k+1}\)</span> and <span class="math inline">\(w_k\)</span>,
+<span class="math display">\[ f(w_{k+1}) \leq f(w_k) + \nabla f(w_k)^\top (w_{k+1} - w_k) + \frac{L}{2} \| w_{k+1} - w_k \|_2^2\]</span>
+Plugging in the SGD iteration <span class="math inline">\((w_{k+1} - w_k) = -\alpha_k \nabla f_{i_k}(w_k)\)</span> gives
+<span class="math display">\[f(w^{k+1}) \leq f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 \frac{ L}{2} \|\nabla f_{i_k}(w^k)\|^2 \]</span></p>
+<p>So far any choice of <span class="math inline">\(\alpha_k\)</span> and <span class="math inline">\(i_k\)</span> we have
+<span class="math display">\[
+f(w_{k+1}) \leq f(w_k) - \alpha_k \nabla f(w_k)^\top \nabla f_{i_k}(w_k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w_k)\|^2.
+\]</span>
+Let’s take the expectation and assume <span class="math inline">\(\alpha_k\)</span> does not depend on <span class="math inline">\(i_k\)</span>,
+<span class="math display">\[
+\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}[f(w^k) - \alpha_k \nabla f(w^k)^\top \nabla f_{i_k}(w^k) + \alpha_k^2 L_k^2 \|\nabla f_{i_k}(w^k)\|^2] \\ = f(w^k) - \alpha_k \nabla f(w^k)^\top \mathbb{E}[\nabla f_{i_k}(w^k)] + \alpha_k^2 L_k^2 \mathbb{E}[\|\nabla f_{i_k}(w^k)\|^2]
+\]</span>
+Under uniform sampling <span class="math inline">\(\mathbb{E}[\nabla f_{i_k}(w_k)] = \nabla f(w_k)\)</span> (unbiased) so this gives
+<span class="math display">\[
+\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha_k k \|\nabla f(w^k)\|^2 + \alpha_k^2 L_k^2 \mathbb{E}[k\|\nabla f_{i_k}(w^k)\|^2]
+\]</span></p>
+<p>Choosing <span class="math inline">\(\alpha_k = 1/L\)</span> might not be small enough. If <span class="math inline">\(\alpha_k\)</span> is small then <span class="math inline">\(\alpha_k &lt;&lt; \alpha_k^2\)</span>. <span class="math inline">\(\alpha_k\)</span> controls how much we move towards the solution at each iteration. <span class="math inline">\(\alpha_k^2\)</span> controls how much the stochasic nature moves us away from the solution.</p>
+<p>Analyzing SGD assuming only that $ f $ is bounded below. So it could be non-convex. To bound the effect of the noise, we assume for some $ $ that:</p>
+<p><span class="math display">\[ \mathbb{E}[k\|\nabla f_i(w)\|^2] \leq \sigma^2 \]</span>.</p>
+<p>It implies gradients are bounded, and cannot hold for PL functions. Using our noise assumption inside the progress bound,
+<span class="math display">\[
+\mathbb{E}[f(w^{k+1})] \leq f(w^k) - \alpha^k k\|\nabla f(w^k)\|^2 + \frac{\alpha_k^2 L\sigma^2}{2}
+\]</span>
+Rearranging to get the gradient norm on the left side:
+<span class="math display">\[
+\alpha_k k\|\nabla f(w^k)\|^2 \leq f(w^k) - \mathbb{E}[f(w^{k+1})] + \frac{\alpha_k^2 L\sigma^2}{2}.
+\]</span>
+Summing this up and using the iterated expectation to get:
+<span class="math display">\[
+\sum_{k=1}^{t} \alpha_{k-1} \mathbb{E}_k\|\nabla f(w^{k-1})\|^2 \leq \sum_{k=1}^{t} [\mathbb{E}f(w^{k-1}) - \mathbb{E}f(w^k)] + \sum_{k=1}^{t} \alpha_{k-1}^2 L\sigma^2
+\]</span>
+Applying the above operations gives
+<span class="math display">\[
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \cdot \sum_{k=0}^{t-1} \alpha_k \leq f(w^0) - \mathbb{E}_f(w^t) + \frac{L\sigma^2}{2} \sum_{k=0}^{t-1} \alpha_k^2.
+\]</span>
+Using <span class="math inline">\(\mathbb{E}_f(w_k) \geq f^*\)</span> and dividing both sides by <span class="math inline">\(\sum_{k} \alpha_{k-1}\)</span> gives
+<span class="math display">\[
+\min_{k=0,1,...,t-1} \{\mathbb{E}_k\|\nabla f(w^k)\|^2\} \leq \frac{f(w^0) - f^*}{\sum_{k} \alpha_{k} (1 - \alpha_{k} L/2)} + \frac{L\sigma^2}{2} \frac{\sum_{k=0}^{t-1} \alpha_k^2}{\sum_{k} \alpha_{k-1}}.
+\]</span></p>
+</div>
+<div id="convergence-of-sgd-for-pl-functions" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> Convergence of SGD for PL functions<a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><span class="math display">\[
+\text{Starting with the SGD progress bound -} \\
+E[f(w_{k+1})] \leq f(w_k) - \alpha_k \| \nabla f(w_k) \|^2 + \frac{\alpha_k^2 L}{2} E[\|\nabla f_i(w_k) \|^2] \\
+\text{Bounding that with the PL inequality (} \| \nabla f(w_k) \|^2 \geq 2\mu(f(w_k) - f^*) \text{)} \\
+E[f(w_{k+1})] \leq f(w_k) - \alpha_k 2\mu (f(w_k) - f^*) + \frac{\alpha_k^2 L \sigma^2}{2}. \\
+E[f(w_{k+1})] - f^* \leq (1 - 2\alpha_k \mu)(f(w_k) - f^*) + \frac{\alpha_k^2 L \sigma^2}{2}. \\
+\leq (1 - 2\alpha\mu) \left((1 - 2\alpha\mu)(f(w_{k-1}) - f^*) + \frac{\alpha^2 L \sigma^2}{2}\right) + \frac{\alpha^2 L \sigma^2}{2} \\
+= (1 - 2\alpha\mu)^2 (f(w_{k-1}) - f^*) + \frac{\alpha^2 L \sigma^2}{2} (1 + (1 - 2\alpha\mu)) \\
+\text{Applying recursively from } k \text{ to } 0, \text{ we get -} \\
+E[f(w_k)] - f^* \leq (1 - 2\alpha\mu)^k (f(w_0) - f^*) + \frac{\alpha^2 L \sigma^2}{2} \sum_{t=0}^k (1 - 2\alpha\mu)^t \\
+\sum_{t=0}^k (1 - 2\alpha\mu)^t &lt; \sum_{t=0}^\infty (1 - 2\alpha\mu)^t = \frac{1}{2\alpha\mu} \text{ ( This is a geometric series)}.
+\]</span>
+Convergence rate of SGD with constant step size for PL functions - \</p>
+<p><span class="math display">\[
+E[f(w_k) - f^*] \leq (1 - 2\alpha\mu)^k (f(w_0) - f^*) + \frac{\alpha \sigma^2 L}{4\mu}
+\]</span></p>
+<p>Thie first term is linear convergence but the 2nd term does not drop to 0. This leads to erratic behavior after making good progress. This aligns with the stochastic nature of SGD. The probability of a random data point pointing you, at least in some part, toward the minima is higher the further away you are. SGD gets confused close to the minima. If that happens, we can half the the step size reducing the space where the optimization is erratic. Halving <span class="math inline">\(\alpha\)</span> divides bound on distance to <span class="math inline">\(f^*\)</span> in half.</p>
+<div id="when-to-stop" class="section level3 hasAnchor" number="5.3.1">
+<h3><span class="header-section-number">5.3.1</span> When to stop?<a href="stochastic-gradient-methods.html#when-to-stop" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>In Gradient Descent we stopped when we are not making enough progress or the gradient is close to zero. But in EGD, the gradients are not guaranteed to go to zero and we cannot see the full gradient. What we can do instead is for every day iterations measure the validation area and if the validation starts to go up, that is when we stop this is also called early stopping</p>
+</div>
+</div>
+<div id="mini-batches-and-batch-growing" class="section level2 hasAnchor" number="5.4">
+<h2><span class="header-section-number">5.4</span> Mini Batches and Batch Growing<a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Deterministic gradient descent uses all <span class="math inline">\(n\)</span> samples to calculate gradient.
+<span class="math display">\[
+\nabla f(w_k) = \frac{1}{n} \sum_{i=1}^n \nabla f_i(w_k)\\
+\]</span></p>
+<p>Stochastic gradient descent approximates gradient with only 1 sample.
+<span class="math display">\[
+\nabla f(w_k) \approx \nabla f_{i_k}(w_k)\\
+\]</span>
+A common variant is to use <span class="math inline">\(m\)</span> samples as a mini-batch <span class="math inline">\(B_k\)</span>
+<span class="math display">\[
+\nabla f(w_k) \approx \frac{1}{m} \sum_{i \in B_k} \nabla f_i(w_k)
+\]</span>
+Using a batch of data points from our data reduces the probability that the gradient points in a “worse” direction than what the full gradient would point to if we calculate it. Mini-batches are useful for parallelization. For example, with 16 cores set <span class="math inline">\(m = 16\)</span> and compute 16 gradients at once.</p>
+<p>The mini-batch gradient, in expectation, is the full gradient in the same way it was for SGD.</p>
+</div>
+<div id="variation-in-mini-batch-approximation" class="section level2 hasAnchor" number="5.5">
+<h2><span class="header-section-number">5.5</span> Variation in Mini-Batch Approximation<a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>To analyze variation in gradients, we use a variance-like identity:
+If random variable g is an unbiased approximation of vector μ, then</p>
+<p><span class="math display">\[
+E[\|g - \mu\|^2] = E[\|g\|^2 - 2g^T \mu + \|\mu\|^2] \quad \\
+= E[\|g\|^2] - 2E[g]^T \mu + \|\mu\|^2 \quad \\
+= E[\|g\|^2] - 2\mu^T \mu + \|\mu\|^2 \quad (\text{unbiased}) \\
+= E[\|g\|^2] - \|\mu\|^2.
+\]</span></p>
+<p>Expectation of inner product between independent samples -</p>
+<p><span class="math display">\[
+E[\nabla f_i(w)^T \nabla f_j(w)] = \sum_{i=1}^n \sum_{j=1}^n \frac{1}{n^2} \nabla f_i(w)^T \nabla f_j(w) \\
+= \frac{1}{n} \sum_{i=1}^n \nabla f_i(w)^T \left(\frac{1}{n} \sum_{j=1}^n \nabla f_j(w)\right) \\
+= \frac{1}{n} \sum_{i=1}^n \nabla f_i(w)^T \nabla f(w) \quad (\text{gradient of } f) \\
+= \left(\frac{1}{n} \sum_{i=1}^n \nabla f_i(w)\right)^T \nabla f(w)  \\
+= \nabla f(w)^T \nabla f(w) = \|\nabla f(w)\|^2 .
+\]</span></p>
+<p>Let us see why the error goes down as we use more points in our batch.</p>
+<p>Let <span class="math inline">\(g_2(w) = \frac{1}{2} (\nabla f_i(w) + \nabla f_j(w))\)</span> be mini-batch approximation with 2 samples.
+<span class="math display">\[
+E[\|g_2(w) - \nabla f(w)\|^2] = E\left[\left\|\frac{1}{2} (\nabla f_i(w) + \nabla f_j(w))\right\|^2\right] - \|\nabla f(w)\|^2  \\
+= \frac{1}{4} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} E[\nabla f_i(w)^T \nabla f_j(w)] + \frac{1}{4} E[\|\nabla f_j(w)\|^2] - \|\nabla f(w)\|^2 \quad  \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} E[\nabla f_i(w)^T \nabla f_j(w)] - \|\nabla f(w)\|^2 \quad (E[\nabla f_i] = E[\nabla f_j]) \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] + \frac{1}{2} \|\nabla f(w)\|^2 - \|\nabla f(w)\|^2 \quad (E[\nabla f_i \nabla f_j] = \|\nabla f(w)\|^2) \\
+= \frac{1}{2} E[\|\nabla f_i(w)\|^2] - \frac{1}{2} \|\nabla f(w)\|^2 \\
+= \frac{1}{2} \left(E[\|\nabla f_i(w)\|^2] - \|\nabla f(w)\|^2\right)  \\
+= \frac{1}{2} E[\|\nabla f_i(w) - \nabla f(w)\|^2] \quad  \\
+= \frac{\sigma(w)^2}{2} \quad (\sigma^2 \text{ is 1-sample variation}) \\
+\]</span></p>
+<p>So SGD error <span class="math inline">\(E[\|e_k\|^2]\)</span> is cut in half compared to using 1 sample.</p>
+<p>With <span class="math inline">\(m\)</span> samples we can show that -</p>
+<p><span class="math display">\[
+E[\|e_k\|^2] = \frac{\sigma(w^k)^2}{m}
+\]</span></p>
+<p>Where <span class="math inline">\(\sigma(w^k)^2\)</span> is the variance of the individual gradients at <span class="math inline">\(w^k\)</span>. With a larger batch size of size <span class="math inline">\(m\)</span>, the the effect of stochasticity is reduced by <span class="math inline">\(m\)</span>. With a larger batch size of size <span class="math inline">\(m\)</span>, we cause use a step size that is <span class="math inline">\(m\)</span> times larger. Doubling batch size has the same effect as halving the step size.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="coordinate-optimization.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="overparameterization.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/05-stochastic.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/05-stochastic.Rmd",
+"text": null
+},
+"download": ["bookdownproj.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

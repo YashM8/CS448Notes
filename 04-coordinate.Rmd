@@ -1,0 +1,200 @@
+# Coordinate Optimization
+
+## Definition and examples
+
+During each iteration of coordinate optimization, only one variable (or coordinate) is updated. By updating only one variable at a time, the optimization process becomes simpler and more efficient.
+
+On iteration $k$ we select a variable $j_k$ and set
+$$
+w_{k+1}^{j_k} = w_k^{j_k} - \alpha_k \nabla_{j_k} f(w_k) 
+$$
+A gradient descent step for one coordinate $j_k$ (other $w_j$ stay the same).
+
+Theoretically, coordinate descent is a provably bad algorithm. The convergence rate is slower than gradient descent. The iteration cost can be similar to gradient descent. Computing 1 partial derivative may have same cost as computing gradient.
+
+But it is widely-used in practice. Nothing works better for certain problems. Certain fields think it is the “ultimate” algorithm.
+
+Global convergence rate can be showed for randomized coordinate selection. Coordinate descent is faster than gradient descent if iterations are $d$ times cheaper. Sometimes called coordinate-friendly structures.
+
+**For what functions is coordinate descent $d$ times faster than gradient descent?**
+
+The simplest example are separable functions:
+$$ 
+f(w) = \sum_{j=1}^{d} f_j(w_j) 
+$$
+Where $f$ is the sum of $f_j$ applied to each $w_j$, like $f(w) = \frac{\lambda}{2} \|w\|^2 = \sum_{j=1}^{d} \frac{\lambda}{2} w_j^2$.
+
+Gradient descent costs $O(d)$ to compute each $f'_j(w_k^j)$.
+Coordinate descent costs $O(1)$ to compute the one $f'_jk(w_k^{jk})$.
+
+For separable functions you should only use coordinate optimization. The variables $w_j$ have “separate” effects, so can be minimized independently.
+
+A more interesting example is pairwise-separable functions:
+$$
+f(w) = \sum_{i=1}^{d} \sum_{j=1}^{d} f_{ij}(w_i, w_j),
+$$
+Which depend on a function of each pair of variables. This includes quadratic functions. An example is label propagation for semi-supervised learning. Here $f_{ij}$ measures how similar labels are between neighbors.
+
+The double sum has $O(d^2)$ terms. Gradient descent needs to compute the gradient of all these terms.
+Each $w_j$ only appears in $O(d)$ terms. Coordinate optimization only needs to use these terms.
+
+The label propagation example looks a bit more like this:
+
+$$
+f(w) = \sum_{j=1}^{d} f_j(w_j) + \sum_{(i,j) \in E} f_{ij}(w_i, w_j),
+$$
+
+where $E$ is a set of $(i, j)$ edges in a graph. Adding a separable function doesn’t change costs. We could just combine each $f_j$ with one $f_{ij}$. Restricting $(i, j)$ to $E$ makes gradient descent cheaper. Now costs $O(|E|)$ to compute gradient. Coordinate descent could also cost $O(|E|)$ if the degree of $j_k$ is $O(|E|)$. Coordinate descent is still $d$ times faster in expectation if you randomly update coordinates. 
+
+Another coordinate-friendly structure is **linear compositions:**
+
+$$
+f(w) = g(Aw), \text{ for a } n \times d \text{ matrix and a sooth function } g
+$$
+It is still coordinate friendly if we add a separable function like an L2-regularizer.
+$$
+f(w) = g(Aw) + \sum_{j=1}^{d} f_j(w_j),
+$$
+
+The main idea is that you can track $Aw_k$ as you go for a cost $O(n)$ instead of $O(nd)$.
+
+For linear compositions problems, the partial derivatives on iteration $k$ have the form:
+$$
+\nabla_j f(w_k) = a_j^T g'(Aw_k),
+$$
+where $a_j$ is column $j$ of $A$.
+
+If we have $Aw^k$, this costs $O(n)$ instead of $O(nd)$ for the full gradient. (Assuming $g'$ costs $O(n)$)
+We can track the product $Aw_k$ as we go with $O(n)$ cost:
+
+$$
+Aw^{k+1} = A(w^k + \gamma_k e_{jk}) = Aw^k + \gamma_k a_j.
+$$
+This allows computing partial derivatives and implementing line-search steps in $O(n)$.
+
+Neural networks are usually not coordinate friendly. Would need something like “number of units after first hidden layer is tiny”. Updating just one parameter can lead to complex and non-local effects on the overall function of the network.
+
+## Analyzing Coordinate Descent
+
+To analyze coordinate descent, we can write it as
+$$
+w_{k+1} = w_k - \alpha_k \nabla_{jk} f(w_k) e_{jk},
+$$
+where the “elementary vector” $e_j$ has a zero in every position except $j$,
+$$
+e_j^T =
+\begin{bmatrix}
+0 & \cdots & 1 & \cdots & 0
+\end{bmatrix}
+$$
+We usually assume that each $\nabla_j f$ is $L$-Lipshitz (“coordinate-wise Lipschitz”),
+$$
+|\nabla_j f(w + \gamma e_j) - \nabla_j f(w)| \leq L|\gamma|
+$$
+which for $C^2$ functions is equivalent to $|\nabla_{jj}^2 f(w)| \leq L$ for all $j$. 
+
+This is not a stronger assumption than for gradient descent - If the gradient is $L$-Lipschitz then it is also coordinate-wise $L$-Lipschitz.
+
+Coordinate-wise Lipschitz assumption implies the descent lemma coordinate-wise:
+$$
+f(w^{k+1}) \leq f(w^k) + \nabla_j f(w^k)(w^{k+1} - w^k)_j + \frac{L}{2}(w^{k+1} - w^k)^2_j
+$$
+for any $w^{k+1}$ and $w_k$ that only differ in coordinate $j$. With $\alpha_k = \frac{1}{L}$ (for simplicity), plugging in $(w_{k+1} - w_k) = -\frac{1}{L}e_{jk}\nabla_{jk} f(w_k)$ gives
+
+$$
+f(w^{k+1}) \leq f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2,
+$$
+a progress bound based on only updating coordinate $j_k$.
+
+## Randomized CD Progress
+
+The progress on a **randomized** coordinate descent depends on the random selection of $j_k$. The expected progress is:
+
+$$
+\mathbb{E}[f(w^{k+1})] \leq \mathbb{E}\left[ f(w^k) - \frac{1}{2L}|\nabla_{jk} f(w^k)|^2 \right] \text{ expected wrt } j_k \text{ given }w^k\\ 
+= \mathbb{E}[f(w^k)] - \frac{1}{2L}\mathbb{E}[|\nabla_{jk} f(w^k)|^2]\\
+= f(w^k) - \frac{1}{2L} \sum_{j=1}^{d} \mathbb{P}(j_k = j)|\nabla_j f(w^k)|^2\\
+$$
+Expectation is conditioned on all steps up to time $k$.
+
+Let’s choose $j_k$ uniformly at random in this bound, $p(j_k = j) = \frac{1}{d}$.
+
+$$
+E[f(w_{k+1})] \leq f(w_k) - \frac{1}{2L} \sum_{j=1}^{d} \frac{1}{d} |\nabla_j f(w_k)|^2\\
+= f(w_k) - \frac{1}{2dL} \sum_{j=1}^{d} |\nabla_j f(w_k)|^2\\
+= f(w_k) - \frac{1}{2dL}k\|\nabla f(w_k)\|^2
+$$
+
+ **Random-Shuffling Coordinate Selection**
+ 
+An alternative to random selection of \( j_k \) is cyclic selection:
+$$
+j_1 = 1, j_2 = 2, \ldots, j_d = d \\
+j_{d+1} = 1, j_{d+2} = 2, \ldots, j_{2d} = d \\
+j_{2d+1} = 1, j_{2d+2} = 2, \ldots, j_{3d} = d \\
+$$
+Cyclic often outperforms random in practice, but is worse in theory.
+
+For some problems, a bad ordering leads to provably-bad performance for cyclic.
+
+**Hybrid between cyclic and random is using random shuffling:**
+
+Choose random permutation $r$ and set $j_1 = r[1], j_2 = r[2], \ldots, j_d = r[d]$.
+
+Choose random permutation $r$ and set $j_{d+1} = r[1], j_{d+2} = r[2], \ldots, j_{2d} = r[d]$.
+
+Choose random permutation $r$ and set $j_{2d+1} = r[1], j_{2d+2} = r[2], \ldots, j_{3d} = r[d]$.
+
+Recent work shows that this fixes cyclic coordinate descent in some settings. Conjectured that random shuffling is faster than cyclic and random.
+
+## Gauss-Southwell: Greedy Coordinate Descent
+
+Instead of cyclic or random, there are also greedy coordinate selection methods.
+
+The classic greedy method is the Gauss-Southwell rule,
+
+$$
+j_k \in \arg\max_j \{|\nabla_j f(w_k)|\}
+$$
+
+which chooses the coordinate with the largest directional derivative.
+
+This leads to a progress bound of:
+
+$$
+f(w_{k+1}) \leq f(w_k) - \frac{1}{2L} \|\nabla f(w_k)\|^2_\infty
+$$
+
+Which is similar to gradient descent but in a different norm. Unlike random coordinate descent, this is dimension independent. And for PL functions this leads to a rate of:
+
+$$ 
+f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*]
+$$
+
+Where $\mu_1$ is the PL constant in the $\infty$-norm
+
+$$
+\mu_1 [f(w) - f^*] \leq \frac{1}{2} \|\nabla f(w)\|^2_\infty
+$$
+
+This is faster than random because $\mu_d \leq \mu_1 \leq \mu$ (by norm equivalences). The $\mu_1$-PL condition is implied by strong-convexity in the 1-norm.
+
+**Convergence Rate**
+
+$$
+f(w_{k+1}) \leq f(w_k) - \frac{1}{2L_k} \|\nabla f(w_k)\|_\infty^2,\\
+\text{PL gives us:}\\
+f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*] \\
+\text{Where } \mu_1 \text{ is the PL constant maximum norm:}\\
+\mu_1[f(w) - f^*] \leq \frac{1}{2} \| \nabla f(w) \|_\infty^2
+$$
+
+ Lipschitz Sampling
+
+
+
+
+
+
+
+

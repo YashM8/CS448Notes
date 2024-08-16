@@ -1,0 +1,155 @@
+# Approximating the Hessian
+
+Newton’s method is expensive if dimension $d$ is large as it requires solving $\nabla^2 f(w_k) d_k = \nabla f(w_k)$. For logistic regression this costs $O(nd^2)$ to form the Hessian and $O(d^3)$ to solve.
+
+Many methods proposed to approximate Newton’s method at reduced cost -
+- Cheaper Hessian approximations
+- Hessian-free Newton method
+- Quasi-Newton methods
+
+## Cheap Hessian Approximation 1 - Diagonal Hessian
+
+Use $\nabla^2 f(w^k) \approx D^k$ where $D$ is the diagonal matrix. This makes the damped newton update - 
+
+$$
+w^{k+1} = w^{k} - \alpha_{k} D^{k} \nabla f(w^{k})
+$$
+This costs $O(d)$.
+
+The downside is that the diagonal approximations loses the superlinear convergence. For some problems Hessian diagonals outperforms gradient descent. For many problems using Hessian diagonals is worse than gradient descent.
+
+## Cheap Hessian Approximation 2 - Preconditioning
+
+Using a fixed positive definite fixed matrix $M$. The update becomes -
+
+$$
+w^{k+1} = w^{k} - \alpha_{k} M \nabla f(w^{k})
+$$
+The matrix can be chosen to include some second order information and that the dot product costs $O(d^2)$ or less. This is called preconditioning.
+
+It can be thought of as performing gradient descent under change of variables. 
+
+Using the Matrix Upper Bound - 
+
+$$
+\text{Using the Lipschitz continuity assumption on the gradient} \\
+\|\nabla f(w) - \nabla f(v)\| \leq L \|w - v\|. \\
+\text{We could instead assume Lipschitz continuity with respect to a matrix } M, \\
+\|\nabla f(w) - \nabla f(v)\|_M^{-1} \leq \|w - v\|_M, \\
+\text{where } \|d\|_M = \sqrt{d^T M d} \text{ and we assume } M \text{ is positive definite.} \\
+\text{For quadratic functions, we can use } M = \nabla^2 f(w) \text{ and we get Newton} \\
+\text{For binary logistic regression, we can use } M = \frac{1}{4} X^T X \\
+$$
+The matrix-norm Lipschitz continuity leads to a descent lemma of the form
+$$
+f(w_{k+1}) \leq f(w_k) + \nabla f(w_k)^T (w_{k+1} - w_k) + \frac{1}{2} \|w_{k+1} - w_k\|_M^2
+$$
+
+And minimizing the right side yields the Newton-like step
+
+$$
+w_{k+1} = w_k - M^{-1} \nabla f(w_k)
+$$
+This step does not require a step size and guarantees descent. With appropriate $M$ guarantees more progress per iteration than gradient descent. Though in practice you may get better performance using a line-search. You loose superlinear convergence and cost is $O(d^2)$.
+
+
+## Cheap Hessian Approximation 3 - Mini Batch Hessian
+
+For ML problems with lots of data, we can use a mini-batch Hessian approximation
+$$
+\nabla^2 f(w_k) = \frac{1}{n} \sum_{i=1}^n \nabla^2 f_i(w_k) \approx \frac{1}{|B|} \sum_{i \in B} \nabla^2 f_i(w_k), \\
+\text{which removes dependence on } n \text{ in the Hessian calculation.} \\
+$$
+Leads to superlinear convergence if batch size grows fast enough. For L2-regularized logistic regression, costs $O(|B|^2d + |B|^3)$ by using a kernalized version.
+
+
+## Hessian Free Newton Methods (Truncated Newton)
+
+Cheap Hessian methods approximate $\nabla^2 f(w_k)$ and lose superlinear convergence. Hessian-free Newton uses the exact $\nabla^2 f(w_k)$ but approximates the Newton direction.
+
+For strongly-convex $f$ Newton’s method minimizes a quadratic - 
+
+$$
+\text{argmin}_g f(w_k) + \nabla f(w_k)^T g + \frac{1}{2} g^T \nabla^2 f(w_k) g
+$$
+
+For binary logistic regression we have
+$$
+\nabla f(w) = X^T r(w), \quad \nabla^2 f(w) = X^T D(w) X, \\
+\text{where } r(w) \text{ and } D(w) \text{ each cost } O(n) \text{ to compute for } n \text{ training examples.} \\
+$$
+
+Cost of computing gradient is $O(nd)$ due to the matrix-vector product. Cost of computing Hessian is $O(nd^2)$ due to the matrix-matrix product.
+
+$$
+\text{But cost of computing Hessian-vector product is only } O(nd) - \\
+\nabla^2 f(w) d = X^T D(w) Xd = X^T (D(w) (Xd)), \\
+\text{due to the matrix-vector products.}
+$$
+This is a directional derivative of the gradient. You can compute it efficiently and exactly using automatic differentiation.
+
+Key ideas behind Hessian-free Newton method is to approximate and compute Newton direction using conjugate gradient. Each iteration of conjugate gradient only needs a "cheap" Hessian-vector product instead of the "expensive" matrix-matrix product.
+
+## Quasi-Newton Methods
+
+Quasi-Newton build a sequence of Hessian approximations $B_0, B_2, B_3, ...$ and using $B_k$ - 
+
+$$
+w_{k+1} = w_k - \alpha_k B_k^{-1} \nabla f(w_k)
+$$
+With the goal that approximations eventually act like the Hessian. Usually used with a line-search that initially tries $\alpha_k = 1$.
+
+Classic quasi-Newton methods choose Bk to satisfy the **secant equation** -
+
+$$
+B_{k+1} (w_k - w_{k-1}) = \nabla f(w_k) - \nabla f(w_{k-1})
+$$
+
+This only iterate and gradient differences no Hessian information is needed.
+
+## Barzilai-Borwein Method
+
+Uses an approximation of the form $B_k = \frac{1}{\alpha_k} I$
+
+This $B_k$ cannot always solve the secant equations, so we minimize squared error
+
+$$
+\alpha_{k+1} \in \text{argmin} ||\alpha_k B_{k+1} (w_k - w_{k-1}) - (\nabla f(w_k) - \nabla f(w_{k-1})) ||^2 \\
+\alpha_{k+1} = \frac{\|w_k - w_{k-1}\|^2}{(w_k - w_{k-1})^T (\nabla f(w_k) - \nabla f(w_{k-1}))}
+$$
+
+Barzilai and Borwein showed this gives superlinear convergence for 2d quadratics. We could also require inverse to satisfy secant equations -
+
+$$
+(w_k - w_{k-1}) = [B_{k+1}]^{-1} \nabla f(w_k) - \nabla f(w_{k-1}) \\
+\text{This gives an alternate BB step size of} \\
+\alpha_{k+1} = \frac{(w_k - w_{k-1})^T (\nabla f(w_k) - \nabla f(w_{k-1}))}{\|\nabla f(w_k) - \nabla f(w_{k-1})\|^2}
+$$
+
+## BFGS Quasi-Newton Method
+
+Most quasi-Newton methods use dense matrices $B_k$. In this case there may be an infinite number of solutions to secant equations. Many methods exist, and typical methods also require $B_{k+1}$ to be symmetric and $B_{k+1}$ to be close to $B_k$ under some norm
+
+Most popular is the Broyden-Fletcher-Goldfarb-Shanno (BFGS) update - 
+
+$$
+B_{k+1} = B_k - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} + \frac{y_k y_k^T}{y_k^T s_k}, \\
+\text{where } s_k = w_k - w_{k-1} \text{ and } y_k = \nabla f(w_k) - \nabla f(w_{k-1}).\\ 
+$$
+
+Derived as rank-2 update so that the updates stay close to previous matrix in some norm. Cost of inverting a dense $B_k$ is $O(d^3)$. This can be reduced to $O(md)$.
+
+Instead of storing $B_k$, only store $m$ vectors $s_k$ and $y_k$. Uses an update based on a matrix $H_k$ and the “limited” memory. Applies the BFGS update $m$ times starting from $H_k$. Typically we choose $H_k = \alpha_k I$. This is called the Limited-Memory BFGS method. This is the default non-stochastic optimizer in many cases.  
+
+
+
+
+
+
+
+
+
+
+
+
+

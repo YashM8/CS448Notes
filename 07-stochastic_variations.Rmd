@@ -1,0 +1,86 @@
+# Variations on SGD
+
+## Stochastic Average Gradient
+
+Growing $|B_k|$ eventually requires $O(n)$ iteration cost. 
+
+Let’s view gradient descent as performing the iteration:
+
+$$
+w_{k+1} = w_k - \frac{\alpha_k}{n} \sum_{i=1}^n v_k^i, \\
+\text{where on each step we set } v_k^i = \nabla f_i(w_k) \text{ for all } i. \\
+$$
+
+SAG method - only set $v_k^{i_k} = \nabla f_{i_k}(w_k)$ for a randomly-chosen $i_k$. All other $v_k^i$ are kept at their previous value.
+
+We can think of SAG as having a memory -
+
+$$
+\text{} \\
+\begin{pmatrix}
+...& v_1 &...\\
+...& v_2 &...\\
+...& \vdots &... \\
+...& v_n &...
+\end{pmatrix} \\
+$$
+Where $v_k^i$ is the gradient $\nabla f_i(w_k)$ from the last $k$ where $i$ was selected.
+
+On each iteration we -
+
+- Randomly select an index $i_k$ from $\{1, 2, ..., n\}$.
+
+- Compute the gradient $\nabla f_{i_k}(w_k)$ using only the data point corresponding to index $i_k$.
+
+- Update the corresponding entry in $v_k$ to $\nabla f_{i_k}(w_k)$.
+
+- Update the parameter vector $w_{k+1}$ using the average of the gradients stored in $v_k$.
+
+Unlike batches, we use a gradient for every example. But the gradients are out of date.
+
+## Variance Reduced Stochastic Gradient
+
+SVRG iteration -
+
+$$
+w_{k+1} = w_k - \alpha_k(\nabla f_{i_k}(w_k) - \nabla f_{i_k}(v_k) + \nabla f(v_k)) \\
+$$
+Unlike SAG, this gives an unbiased gradient approximation.
+
+$$
+E[g_k] = \nabla f(w_k) - E[\nabla f_{i_k}(v_k)] + \nabla f(v_k) \underbrace{= 0}. \\
+$$
+And we can show that gradient approximation goes to 0 as $w_k$ and $v_k$ approaches $w^*$.
+$$
+E[\|g_k\|^2] \leq 4L(f(w_k) - f^*) + 4L(f(v_k) - f^*).
+$$
+
+The idea behind SVRG is to compute the full gradient sometimes and leverages both local information and a global information to reduce the variance of updates.
+
+So for most iterations we have "cheap" iterations where $v^k = v^{k+1}$that only require 2 gradient evaluations if we have saved $\nabla f (v^{k-1})$. 
+
+But occasionally we compute the full gradient which is expensive ($O(n)$) by setting $v^k = w^k$.
+
+SVRG is not usually used for deep learning since large networks usually lie in the overparameterized regime. Variance reduction may be useful for generative adversarial networks (GAN's).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

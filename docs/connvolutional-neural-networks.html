@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 13 Connvolutional Neural Networks | CS448Notes</title>
+  <meta name="description" content="Chapter 13 Connvolutional Neural Networks | CS448Notes" />
+  <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 13 Connvolutional Neural Networks | CS448Notes" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 13 Connvolutional Neural Networks | CS448Notes" />
+  
+  
+  
+
+<meta name="author" content="Yash Mali" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="optimization-demo.html"/>
+<link rel="next" href="recurrent-neural-networks.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">CS448 Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> CPSC 448 Notes</a></li>
+<li class="chapter" data-level="2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html"><i class="fa fa-check"></i><b>2</b> Gradient Descent Analysis</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#gradient-descent-background"><i class="fa fa-check"></i><b>2.1</b> Gradient descent background</a></li>
+<li class="chapter" data-level="2.2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#showing-gradient-descent-reduces-the-objective-function."><i class="fa fa-check"></i><b>2.2</b> Showing gradient descent reduces the objective function.</a></li>
+<li class="chapter" data-level="2.3" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#what-learning-rate-to-use"><i class="fa fa-check"></i><b>2.3</b> What learning rate to use?</a></li>
+<li class="chapter" data-level="2.4" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#convergence-rate"><i class="fa fa-check"></i><b>2.4</b> Convergence rate</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html"><i class="fa fa-check"></i><b>3</b> Improving Gradient Descent</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#oracle-model-of-computation"><i class="fa fa-check"></i><b>3.1</b> Oracle Model of Computation</a></li>
+<li class="chapter" data-level="3.2" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#heavy-ball-method"><i class="fa fa-check"></i><b>3.2</b> Heavy Ball Method</a></li>
+<li class="chapter" data-level="3.3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#conjugate-gradient-heavy-ball-with-optimal-parameters"><i class="fa fa-check"></i><b>3.3</b> Conjugate Gradient: Heavy-Ball with Optimal Parameters</a></li>
+<li class="chapter" data-level="3.4" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#nesterov-accelerated-gradient"><i class="fa fa-check"></i><b>3.4</b> Nesterov Accelerated Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html"><i class="fa fa-check"></i><b>4</b> Coordinate Optimization</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#definition-and-examples"><i class="fa fa-check"></i><b>4.1</b> Definition and examples</a></li>
+<li class="chapter" data-level="4.2" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#analyzing-coordinate-descent"><i class="fa fa-check"></i><b>4.2</b> Analyzing Coordinate Descent</a></li>
+<li class="chapter" data-level="4.3" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#randomized-cd-progress"><i class="fa fa-check"></i><b>4.3</b> Randomized CD Progress</a></li>
+<li class="chapter" data-level="4.4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent"><i class="fa fa-check"></i><b>4.4</b> Gauss-Southwell: Greedy Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>5</b> Stochastic Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
+<li class="chapter" data-level="5.3" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions"><i class="fa fa-check"></i><b>5.3</b> Convergence of SGD for PL functions</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#when-to-stop"><i class="fa fa-check"></i><b>5.3.1</b> When to stop?</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing"><i class="fa fa-check"></i><b>5.4</b> Mini Batches and Batch Growing</a></li>
+<li class="chapter" data-level="5.5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation"><i class="fa fa-check"></i><b>5.5</b> Variation in Mini-Batch Approximation</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="overparameterization.html"><a href="overparameterization.html"><i class="fa fa-check"></i><b>6</b> Overparameterization</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="overparameterization.html"><a href="overparameterization.html#overparameterization-and-sgd"><i class="fa fa-check"></i><b>6.1</b> Overparameterization and SGD</a></li>
+<li class="chapter" data-level="6.2" data-path="overparameterization.html"><a href="overparameterization.html#faster-sgd-for-overparameterized-models"><i class="fa fa-check"></i><b>6.2</b> Faster SGD for Overparameterized Models</a></li>
+<li class="chapter" data-level="6.3" data-path="overparameterization.html"><a href="overparameterization.html#stochastic-line-search"><i class="fa fa-check"></i><b>6.3</b> Stochastic Line Search</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html"><i class="fa fa-check"></i><b>7</b> Variations on SGD</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#stochastic-average-gradient"><i class="fa fa-check"></i><b>7.1</b> Stochastic Average Gradient</a></li>
+<li class="chapter" data-level="7.2" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#variance-reduced-stochastic-gradient"><i class="fa fa-check"></i><b>7.2</b> Variance Reduced Stochastic Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html"><i class="fa fa-check"></i><b>8</b> Approximating the Hessian</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-1---diagonal-hessian"><i class="fa fa-check"></i><b>8.1</b> Cheap Hessian Approximation 1 - Diagonal Hessian</a></li>
+<li class="chapter" data-level="8.2" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-2---preconditioning"><i class="fa fa-check"></i><b>8.2</b> Cheap Hessian Approximation 2 - Preconditioning</a></li>
+<li class="chapter" data-level="8.3" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-3---mini-batch-hessian"><i class="fa fa-check"></i><b>8.3</b> Cheap Hessian Approximation 3 - Mini Batch Hessian</a></li>
+<li class="chapter" data-level="8.4" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#hessian-free-newton-methods-truncated-newton"><i class="fa fa-check"></i><b>8.4</b> Hessian Free Newton Methods (Truncated Newton)</a></li>
+<li class="chapter" data-level="8.5" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#quasi-newton-methods"><i class="fa fa-check"></i><b>8.5</b> Quasi-Newton Methods</a></li>
+<li class="chapter" data-level="8.6" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#barzilai-borwein-method"><i class="fa fa-check"></i><b>8.6</b> Barzilai-Borwein Method</a></li>
+<li class="chapter" data-level="8.7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#bfgs-quasi-newton-method"><i class="fa fa-check"></i><b>8.7</b> BFGS Quasi-Newton Method</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html"><i class="fa fa-check"></i><b>9</b> Projected Gradient Based Algorithms</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-gradient"><i class="fa fa-check"></i><b>9.1</b> Projected Gradient</a></li>
+<li class="chapter" data-level="9.2" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#l1-regularization-to-a-constrained-problem"><i class="fa fa-check"></i><b>9.2</b> L1 Regularization to a Constrained Problem</a></li>
+<li class="chapter" data-level="9.3" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#active-set-identification-and-backtracking"><i class="fa fa-check"></i><b>9.3</b> Active Set Identification and Backtracking</a></li>
+<li class="chapter" data-level="9.4" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#accelerating-projection-methods"><i class="fa fa-check"></i><b>9.4</b> Accelerating Projection Methods</a></li>
+<li class="chapter" data-level="9.5" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd"><i class="fa fa-check"></i><b>9.5</b> Projected SGD and CD</a></li>
+<li class="chapter" data-level="9.6" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#frank-wolfe-method"><i class="fa fa-check"></i><b>9.6</b> Frank-Wolfe Method</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html"><i class="fa fa-check"></i><b>10</b> Global Optimization and Subgradients</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
+<li class="chapter" data-level="10.2" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
+<li class="chapter" data-level="10.3" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
+<li class="chapter" data-level="10.4" data-path="global-optimization-and-subgradients.html"><a href="global-optimization-and-subgradients.html#using-multiple-subgradients"><i class="fa fa-check"></i><b>10.4</b> Using Multiple Subgradients</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html"><i class="fa fa-check"></i><b>11</b> Proximal Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#convergence-rate-1"><i class="fa fa-check"></i><b>11.1</b> Convergence Rate</a></li>
+<li class="chapter" data-level="11.2" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#dualty"><i class="fa fa-check"></i><b>11.2</b> Dualty</a></li>
+<li class="chapter" data-level="11.3" data-path="proximal-gradient-methods.html"><a href="proximal-gradient-methods.html#supremum-and-infimum"><i class="fa fa-check"></i><b>11.3</b> Supremum and Infimum</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>12</b> Optimization Demo</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-momentum"><i class="fa fa-check"></i><b>12.1</b> Gradient Descent with Momentum</a></li>
+<li class="chapter" data-level="12.2" data-path="optimization-demo.html"><a href="optimization-demo.html#gradient-descent-with-nesterov-acceleration"><i class="fa fa-check"></i><b>12.2</b> Gradient Descent with Nesterov Acceleration</a></li>
+<li class="chapter" data-level="12.3" data-path="optimization-demo.html"><a href="optimization-demo.html#nesterov-with-restart"><i class="fa fa-check"></i><b>12.3</b> Nesterov With Restart</a></li>
+<li class="chapter" data-level="12.4" data-path="optimization-demo.html"><a href="optimization-demo.html#newtons-method"><i class="fa fa-check"></i><b>12.4</b> Newton’s Method</a></li>
+<li class="chapter" data-level="12.5" data-path="optimization-demo.html"><a href="optimization-demo.html#damped-newtons-method"><i class="fa fa-check"></i><b>12.5</b> Damped Newton’s Method</a></li>
+<li class="chapter" data-level="12.6" data-path="optimization-demo.html"><a href="optimization-demo.html#coordinate-descent"><i class="fa fa-check"></i><b>12.6</b> Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html"><i class="fa fa-check"></i><b>13</b> Connvolutional Neural Networks</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#basics"><i class="fa fa-check"></i><b>13.1</b> Basics</a></li>
+<li class="chapter" data-level="13.2" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutions"><i class="fa fa-check"></i><b>13.2</b> Convolutions</a></li>
+<li class="chapter" data-level="13.3" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#convolutional-layers"><i class="fa fa-check"></i><b>13.3</b> Convolutional Layers</a></li>
+<li class="chapter" data-level="13.4" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#pooling-layers"><i class="fa fa-check"></i><b>13.4</b> Pooling layers</a></li>
+<li class="chapter" data-level="13.5" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#example"><i class="fa fa-check"></i><b>13.5</b> Example</a></li>
+<li class="chapter" data-level="13.6" data-path="connvolutional-neural-networks.html"><a href="connvolutional-neural-networks.html#conclusion"><i class="fa fa-check"></i><b>13.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html"><i class="fa fa-check"></i><b>14</b> Recurrent Neural Networks</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#background"><i class="fa fa-check"></i><b>14.1</b> Background</a></li>
+<li class="chapter" data-level="14.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#introduction-1"><i class="fa fa-check"></i><b>14.2</b> Introduction</a></li>
+<li class="chapter" data-level="14.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#types-of-rnns"><i class="fa fa-check"></i><b>14.3</b> Types of RNN’s</a>
+<ul>
+<li class="chapter" data-level="14.3.1" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#one-to-many"><i class="fa fa-check"></i><b>14.3.1</b> One to Many</a></li>
+<li class="chapter" data-level="14.3.2" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-one"><i class="fa fa-check"></i><b>14.3.2</b> Many to One</a></li>
+<li class="chapter" data-level="14.3.3" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#many-to-many"><i class="fa fa-check"></i><b>14.3.3</b> Many to Many</a></li>
+</ul></li>
+<li class="chapter" data-level="14.4" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#problems-with-basic-rnns"><i class="fa fa-check"></i><b>14.4</b> Problems with (Basic) RNN’s</a></li>
+<li class="chapter" data-level="14.5" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#lstm---long-short-term-memory"><i class="fa fa-check"></i><b>14.5</b> LSTM - Long Short Term Memory</a></li>
+<li class="chapter" data-level="14.6" data-path="recurrent-neural-networks.html"><a href="recurrent-neural-networks.html#gated-recurrent-units"><i class="fa fa-check"></i><b>14.6</b> Gated Recurrent Units</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html"><i class="fa fa-check"></i><b>15</b> Attention with RNN’s</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#introduction-2"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#downsides-of-this-attention."><i class="fa fa-check"></i><b>15.2</b> Downsides of this attention.</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html"><i class="fa fa-check"></i><b>16</b> Self-Attention and Transformers</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#self-attention-mechanism"><i class="fa fa-check"></i><b>16.1</b> Self-Attention Mechanism</a></li>
+<li class="chapter" data-level="16.2" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#multi-head-attention"><i class="fa fa-check"></i><b>16.2</b> Multi-Head Attention</a></li>
+<li class="chapter" data-level="16.3" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#tips-for-numerical-stability"><i class="fa fa-check"></i><b>16.3</b> Tips for numerical stability</a></li>
+<li class="chapter" data-level="16.4" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#transformers"><i class="fa fa-check"></i><b>16.4</b> Transformers</a></li>
+<li class="chapter" data-level="16.5" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html#conclution-and-drawbacks"><i class="fa fa-check"></i><b>16.5</b> Conclution and Drawbacks</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="project.html"><a href="project.html"><i class="fa fa-check"></i><b>17</b> Project</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">CS448Notes</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="connvolutional-neural-networks" class="section level1 hasAnchor" number="13">
+<h1><span class="header-section-number">Chapter 13</span> Connvolutional Neural Networks<a href="connvolutional-neural-networks.html#connvolutional-neural-networks" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="basics" class="section level2 hasAnchor" number="13.1">
+<h2><span class="header-section-number">13.1</span> Basics<a href="connvolutional-neural-networks.html#basics" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Basic neural networks take and perform a linear transformation followed by a non-linear function.</p>
+<p><span class="math display">\[
+z = h(Wx + b)\\
+\text{For single hidden layer network with } W \text{ being a learnable matrix and } b \text{ a learnable vector.}
+\]</span></p>
+<p>These layers can be stacked together to for a larger network which consists of “dense” or fully connected linear layers that pass through a non-linear “activation” function before moving onto the next layer.</p>
+<p><span class="math display">\[
+y = h_3(W_3 \cdot (h_2(W_2 \cdot h_1(W_1 x + b+1) + b_2)) + b)\\
+\text{This network has 3 hidden layers.}
+\]</span></p>
+<p>As the data comes in it is mapped to space where it is more linearly separable. The mapping is learned from the data using backpropagation and variations of gradient descent.</p>
+<p><strong>Need for convolutional neural networks?</strong></p>
+<p>The issue with dense networks is the number of parameters and sizes of inputs quickly gets out of hand. A tiny <span class="math inline">\(100 \times 100\)</span> gray image has <span class="math inline">\(10,000\)</span> parameters. Assuming the output is predicting what number a picture of a digit is, the size of the output layer is 10 (0 - 9 digits). This yields a network with at least <span class="math inline">\(10,000 \times 10 = 100, 000\)</span> parameters. This is huge for an impractically small image size and modern networks have output sizes of in the tens if not hundreds of thousands.</p>
+<p>The second issue is if you feed a picture into a dense neural network, you would have to flatten the image’s <span class="math inline">\(n\)</span>-dimensional array. So a <span class="math inline">\(100 \times 100\)</span> image matrix becomes a <span class="math inline">\(10,000\)</span> sized vector. This leads to a total loss of structure in an image which means we completely ignore the spatial locality that helps us identify what a picture contains. For example, a picture of an apple is likely to have a specific curvature.</p>
+<p>We need a way to reduce the size of the input leading to a reduced set of parameters. And we need a way to learn spacial localities from data. That is where convolutional neural networks come into play.</p>
+</div>
+<div id="convolutions" class="section level2 hasAnchor" number="13.2">
+<h2><span class="header-section-number">13.2</span> Convolutions<a href="connvolutional-neural-networks.html#convolutions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Assume discrete data with a height and width, like a gray image. A convolution can be mathematically expressed as:</p>
+<p><span class="math display">\[
+(I * K)(i, j) = \sum_{m=-k}^{k} \sum_{n=-k}^{k} I(i-m, j-n) \cdot K(m, n)\\
+\text{Where } I \text{ is the image.}\\
+\text{And } K \text{ is a relatively tiny matrix called a kernel or a filter.}
+\]</span></p>
+<p>Intuitively, this operation slides a tiny matrix over the image and computes a dot product at each stage. This changes the image and highlights things tat resemble the kernel. You can pass the convolved image through a non linear function <span class="math inline">\(h\)</span> to produce more complex patterns.</p>
+<p>Convolutions help capture spacial localities from data. This is especially useful in images to learn underlying patterns. But, convolutions are helpful in all kinds of data gain meaning from “what is around” features in the data. For example, speech data, flow fields and signals. This notion is useful in neural networks and can be found in convolutional layers.</p>
+</div>
+<div id="convolutional-layers" class="section level2 hasAnchor" number="13.3">
+<h2><span class="header-section-number">13.3</span> Convolutional Layers<a href="connvolutional-neural-networks.html#convolutional-layers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Convolutional layers allow neural networks to learn spatial localities in data for example the flow of fluid or features in an image. Convolutional filters are randomly initialized before training and learn to highlight certain teaches from the data. They can drastically reduce the number of parameters needed in a network.</p>
+<div class="float">
+<img src="images/IMG_0008.jpg" alt="One Convolutional Layer" />
+<div class="figcaption">One Convolutional Layer</div>
+</div>
+<p>Filters are typically the same depth as the impact that they receive once the filter has been convolved over the image. a bias is added, and the whole thing is passed through a non-linearity assuming you use D filters you will get an output of depth D for that particular layer.</p>
+<p>In the above picture, the large image with depth 4 it convolved with two small filters also of depth 4. Then bias is added to each output and fed through a non-linear function. The output will be of depth 2.</p>
+<p>The size of an image after a convolution of course depends on the stride (how many pixels you skip while you slide over) and the padding (how you deal with the boundary).</p>
+</div>
+<div id="pooling-layers" class="section level2 hasAnchor" number="13.4">
+<h2><span class="header-section-number">13.4</span> Pooling layers<a href="connvolutional-neural-networks.html#pooling-layers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="float">
+<img src="images/pooling.jpeg" style="width:50.0%;height:50.0%" alt="Pooling Layers" />
+<div class="figcaption">Pooling Layers</div>
+</div>
+<p>Pooling layers are <strong>do not include learnable parameters</strong>. They are used to reduce the height and width of your data as well as build invariances from data that help in generalization and making the model more robust. There are two types of pooling - <strong>max</strong> pooling and <strong>average</strong> pooling.</p>
+<p>Pooling is done using a <span class="math inline">\(k \times k\)</span> filter that is slid over the image and either the <strong>maximum</strong> or <strong>average</strong> value of numbers in the kernel is kept thereby reducing the size of the data passing through the pooling layer. These layers are typically placed after convolutional layers.</p>
+</div>
+<div id="example" class="section level2 hasAnchor" number="13.5">
+<h2><span class="header-section-number">13.5</span> Example<a href="connvolutional-neural-networks.html#example" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Below is an example convolutional neural network with two convolutional layers and two linear layers:</p>
+<div class="float">
+<img src="images/cnnexample.jpeg" alt="Example" />
+<div class="figcaption">Example</div>
+</div>
+<p><span class="math display">\[
+I_1(c_1, i, j) = h_{conv_1}\left[\sum_{c=1}^{3} \sum_{m=-k_1}^{k_1} \sum_{n=-k_1}^{k_1} I(c, i-m, j-n) \cdot K_1(c_1, c, m, n) + b_{conv_1}\right] \\\\
+\quad \\
+P_1(c_1, i, j) = \max_{m,n \in \{0, \ldots, p_1-1\}} I_1(c_1, i \cdot p_1 + m, j \cdot p_1 + n) \\\\
+\quad \\
+I_2(c_2, i, j) = h_{conv_2}\left[\sum_{c_1=1}^{C_1} \sum_{m=-k_2}^{k_2} \sum_{n=-k_2}^{k_2} P_1(c_1, i-m, j-n) \cdot K_2(c_2, c_1, m, n)+ b_{conv_2}\right] \\\\
+\quad \\
+P_2(c_2, i, j) = \max_{m,n \in \{0, \ldots, p_2-1\}} I_2(c_2, i \cdot p_2 + m, j \cdot p_2 + n) \\\\
+\quad \\
+f = \text{flatten}(P_2) \\\\
+\quad \\
+z_1 = h_1(W_1 f + b_1) \\\\
+\quad \\
+Y = h_2(W_2 z_1 + b_2) \\\\
+\]</span></p>
+</div>
+<div id="conclusion" class="section level2 hasAnchor" number="13.6">
+<h2><span class="header-section-number">13.6</span> Conclusion<a href="connvolutional-neural-networks.html#conclusion" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Convolutional layers allow us to extract features from our input in hierarchical way. Let us see we are training a CNN predict if an image is a human, dog or cat using say 3 convolutional layers followed by some fully connected layers where the output is three neurons.</p>
+<p>The first convolutional layer might have a certain set of filters that detect edges and boundaries. The second convolutional might have a set of filters that detect eyes, noses, ears and hair. And the third set of filters in a convolutional layers might detect limbs and appendages. At each stage some of these filters might only light up if they see, for example, see a human hand but not light up when they see a dogs paw. That condensed information is the flattened and passed through fully connected layers to finally predict what the image is.</p>
+<p>For more information see <a href="https://yosinski.com/media/papers/Yosinski__2015__ICML_DL__Understanding_Neural_Networks_Through_Deep_Visualization__.pdf">this</a> paper.</p>
+<p><strong>Fully Convolutional U-NET Type architecture</strong></p>
+<div class="float">
+<img src="CNN_Fluids/figures/testset.jpg" alt="Flow Approximation" />
+<div class="figcaption">Flow Approximation</div>
+</div>
+<p>This is a prediction (from a test set) using a simplified UNET based fully convolutional neural network.</p>
+<p>The network takes in data from distance functions from the object and a flow region channel where each number represents information of the flow - 0 for the obstacle, 1 for the free flow region, 2 for the upper/bottom no-slip wall condition, 3 for the constant velocity inlet condition, and 4 for the zero-gradient velocity outlet condition.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="optimization-demo.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="recurrent-neural-networks.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/13-convNets.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/13-convNets.Rmd",
+"text": null
+},
+"download": ["bookdownproj.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

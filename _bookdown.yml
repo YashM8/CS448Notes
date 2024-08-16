@@ -1,0 +1,9 @@
+book_filename: "bookdownproj"
+output_dir: docs
+delete_merged_file: true
+edit: https://github.com/YashM8/CS448Notes/blob/main/%s
+view: https://github.com/YashM8/CS448Notes/blob/main/%s
+language:
+  ui:
+    chapter_name: "Chapter "
+output: pdf_document

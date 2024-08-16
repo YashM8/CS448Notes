@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 10 Global Optimization | CS448Notes</title>
+  <meta name="description" content="Chapter 10 Global Optimization | CS448Notes" />
+  <meta name="generator" content="bookdown 0.39 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 10 Global Optimization | CS448Notes" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 10 Global Optimization | CS448Notes" />
+  
+  
+  
+
+<meta name="author" content="Yash Mali" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="projected-gradient-based-algorithms.html"/>
+<link rel="next" href="optimization-demo.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">CS448 Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> CPSC 448 Notes</a></li>
+<li class="chapter" data-level="2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html"><i class="fa fa-check"></i><b>2</b> Gradient Descent Analysis</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#gradient-descent-background"><i class="fa fa-check"></i><b>2.1</b> Gradient descent background</a></li>
+<li class="chapter" data-level="2.2" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#showing-gradient-descent-reduces-the-objective-function."><i class="fa fa-check"></i><b>2.2</b> Showing gradient descent reduces the objective function.</a></li>
+<li class="chapter" data-level="2.3" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#what-learning-rate-to-use"><i class="fa fa-check"></i><b>2.3</b> What learning rate to use?</a></li>
+<li class="chapter" data-level="2.4" data-path="gradient-descent-analysis.html"><a href="gradient-descent-analysis.html#convergence-rate"><i class="fa fa-check"></i><b>2.4</b> Convergence rate</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html"><i class="fa fa-check"></i><b>3</b> Improving Gradient Descent</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#oracle-model-of-computation"><i class="fa fa-check"></i><b>3.1</b> Oracle Model of Computation</a></li>
+<li class="chapter" data-level="3.2" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#heavy-ball-method"><i class="fa fa-check"></i><b>3.2</b> Heavy Ball Method</a></li>
+<li class="chapter" data-level="3.3" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#conjugate-gradient-heavy-ball-with-optimal-parameters"><i class="fa fa-check"></i><b>3.3</b> Conjugate Gradient: Heavy-Ball with Optimal Parameters</a></li>
+<li class="chapter" data-level="3.4" data-path="improving-gradient-descent.html"><a href="improving-gradient-descent.html#nesterov-accelerated-gradient"><i class="fa fa-check"></i><b>3.4</b> Nesterov Accelerated Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html"><i class="fa fa-check"></i><b>4</b> Coordinate Optimization</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#definition-and-examples"><i class="fa fa-check"></i><b>4.1</b> Definition and examples</a></li>
+<li class="chapter" data-level="4.2" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#analyzing-coordinate-descent"><i class="fa fa-check"></i><b>4.2</b> Analyzing Coordinate Descent</a></li>
+<li class="chapter" data-level="4.3" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#randomized-cd-progress"><i class="fa fa-check"></i><b>4.3</b> Randomized CD Progress</a></li>
+<li class="chapter" data-level="4.4" data-path="coordinate-optimization.html"><a href="coordinate-optimization.html#gauss-southwell-greedy-coordinate-descent"><i class="fa fa-check"></i><b>4.4</b> Gauss-Southwell: Greedy Coordinate Descent</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html"><i class="fa fa-check"></i><b>5</b> Stochastic Gradient Methods</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#progress-bound-for-sgd"><i class="fa fa-check"></i><b>5.2</b> Progress Bound for SGD</a></li>
+<li class="chapter" data-level="5.3" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#convergence-of-sgd-for-pl-functions"><i class="fa fa-check"></i><b>5.3</b> Convergence of SGD for PL functions</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#when-to-stop"><i class="fa fa-check"></i><b>5.3.1</b> When to stop?</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#mini-batches-and-batch-growing"><i class="fa fa-check"></i><b>5.4</b> Mini Batches and Batch Growing</a></li>
+<li class="chapter" data-level="5.5" data-path="stochastic-gradient-methods.html"><a href="stochastic-gradient-methods.html#variation-in-mini-batch-approximation"><i class="fa fa-check"></i><b>5.5</b> Variation in Mini-Batch Approximation</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="overparameterization.html"><a href="overparameterization.html"><i class="fa fa-check"></i><b>6</b> Overparameterization</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="overparameterization.html"><a href="overparameterization.html#overparameterization-and-sgd"><i class="fa fa-check"></i><b>6.1</b> Overparameterization and SGD</a></li>
+<li class="chapter" data-level="6.2" data-path="overparameterization.html"><a href="overparameterization.html#faster-sgd-for-overparameterized-models"><i class="fa fa-check"></i><b>6.2</b> Faster SGD for Overparameterized Models</a></li>
+<li class="chapter" data-level="6.3" data-path="overparameterization.html"><a href="overparameterization.html#stochastic-line-search"><i class="fa fa-check"></i><b>6.3</b> Stochastic Line Search</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html"><i class="fa fa-check"></i><b>7</b> Variations on SGD</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#stochastic-average-gradient"><i class="fa fa-check"></i><b>7.1</b> Stochastic Average Gradient</a></li>
+<li class="chapter" data-level="7.2" data-path="variations-on-sgd.html"><a href="variations-on-sgd.html#variance-reduced-stochastic-gradient"><i class="fa fa-check"></i><b>7.2</b> Variance Reduced Stochastic Gradient</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html"><i class="fa fa-check"></i><b>8</b> Approximating the Hessian</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-1---diagonal-hessian"><i class="fa fa-check"></i><b>8.1</b> Cheap Hessian Approximation 1 - Diagonal Hessian</a></li>
+<li class="chapter" data-level="8.2" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-2---preconditioning"><i class="fa fa-check"></i><b>8.2</b> Cheap Hessian Approximation 2 - Preconditioning</a></li>
+<li class="chapter" data-level="8.3" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#cheap-hessian-approximation-3---mini-batch-hessian"><i class="fa fa-check"></i><b>8.3</b> Cheap Hessian Approximation 3 - Mini Batch Hessian</a></li>
+<li class="chapter" data-level="8.4" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#hessian-free-newton-methods-truncated-newton"><i class="fa fa-check"></i><b>8.4</b> Hessian Free Newton Methods (Truncated Newton)</a></li>
+<li class="chapter" data-level="8.5" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#quasi-newton-methods"><i class="fa fa-check"></i><b>8.5</b> Quasi-Newton Methods</a></li>
+<li class="chapter" data-level="8.6" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#barzilai-borwein-method"><i class="fa fa-check"></i><b>8.6</b> Barzilai-Borwein Method</a></li>
+<li class="chapter" data-level="8.7" data-path="approximating-the-hessian.html"><a href="approximating-the-hessian.html#bfgs-quasi-newton-method"><i class="fa fa-check"></i><b>8.7</b> BFGS Quasi-Newton Method</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html"><i class="fa fa-check"></i><b>9</b> Projected Gradient Based Algorithms</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-gradient"><i class="fa fa-check"></i><b>9.1</b> Projected Gradient</a></li>
+<li class="chapter" data-level="9.2" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#l1-regularization-to-a-constrained-problem"><i class="fa fa-check"></i><b>9.2</b> L1 Regularization to a Constrained Problem</a></li>
+<li class="chapter" data-level="9.3" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#active-set-identification-and-backtracking"><i class="fa fa-check"></i><b>9.3</b> Active Set Identification and Backtracking</a></li>
+<li class="chapter" data-level="9.4" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#accelerating-projection-methods"><i class="fa fa-check"></i><b>9.4</b> Accelerating Projection Methods</a></li>
+<li class="chapter" data-level="9.5" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#projected-sgd-and-cd"><i class="fa fa-check"></i><b>9.5</b> Projected SGD and CD</a></li>
+<li class="chapter" data-level="9.6" data-path="projected-gradient-based-algorithms.html"><a href="projected-gradient-based-algorithms.html#frank-wolfe-method"><i class="fa fa-check"></i><b>9.6</b> Frank-Wolfe Method</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="global-optimization.html"><a href="global-optimization.html"><i class="fa fa-check"></i><b>10</b> Global Optimization</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="global-optimization.html"><a href="global-optimization.html#considering-minimizing-lipschitz-continuous-functions"><i class="fa fa-check"></i><b>10.1</b> Considering Minimizing Lipschitz-Continuous Functions</a></li>
+<li class="chapter" data-level="10.2" data-path="global-optimization.html"><a href="global-optimization.html#subgradient-methods"><i class="fa fa-check"></i><b>10.2</b> Subgradient Methods</a></li>
+<li class="chapter" data-level="10.3" data-path="global-optimization.html"><a href="global-optimization.html#linear-convergence"><i class="fa fa-check"></i><b>10.3</b> Linear convergence</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="optimization-demo.html"><a href="optimization-demo.html"><i class="fa fa-check"></i><b>11</b> Optimization Demo</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">CS448Notes</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="global-optimization" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Global Optimization<a href="global-optimization.html#global-optimization" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Real valued functions are extremely tricky to optimize globally.</p>
+<p>Consider minimizing a function over the unit hyper-cube:
+<span class="math display">\[
+\min_{w \in [0,1]^d} f(w),
+\]</span></p>
+<p>Using any algorithm, you can construct <span class="math inline">\(f(w_k) - f(w^*) &gt; \epsilon\)</span> forever due to there being infinite real numbers between any two real numbers.</p>
+<div id="considering-minimizing-lipschitz-continuous-functions" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> Considering Minimizing Lipschitz-Continuous Functions<a href="global-optimization.html#considering-minimizing-lipschitz-continuous-functions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><span class="math display">\[
+\vert f(w) - f(v) \vert \leq L \lVert w - v \rVert
+\]</span></p>
+<p>Functions that don’t change arbitrarily fast as you change <span class="math inline">\(x\)</span>.</p>
+<p>Considering the unit hypercube again, it becomes easier to optimize. A worst case of <span class="math inline">\(O(\frac{1}{\epsilon^d})\)</span> is achieved by a simple grid search.</p>
+<p>You can go faster if you use random guesses. Lipschitz-continuity implies there is a ball of <span class="math inline">\(\epsilon\)</span> optimal solutions around <span class="math inline">\(w^*\)</span>. The radius of the ball is <span class="math inline">\(\Omega(\epsilon)\)</span>so its “volume” is <span class="math inline">\(\Omega(\epsilon^d)\)</span>.</p>
+</div>
+<div id="subgradient-methods" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> Subgradient Methods<a href="global-optimization.html#subgradient-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>What is a subgradient?</strong></p>
+<p>Differentiable convex functions are always above their tangent lines:</p>
+<p><span class="math display">\[
+f(v) \geq f(w) + \nabla f(w)^\top (v - w), \quad \forall w, v.
+\
+\]</span>
+<span class="math display">\[
+\text{A vector } d \text{ is a subgradient of a convex function } f \text{ at } w \text{ if}\\
+f(v) \geq f(w) + d^\top (v - w), \quad \forall v.
+\]</span>
+For example, sub-differential of absolute value function:
+<span class="math display">\[
+\partial |w| =
+\begin{cases}
+1 &amp; \text{if } w &gt; 0 \\
+-1 &amp; \text{if } w &lt; 0 \\
+[-1, 1] &amp; \text{if } w = 0
+\end{cases}
+\]</span></p>
+<p><strong>Why does L1 regularization give sparsity?</strong></p>
+<p>Considering L2-regularized least squares:
+<span class="math display">\[
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \frac{\lambda}{2} \| w \|_2^2.
+\]</span>
+Element <span class="math inline">\(j\)</span> of the gradient at <span class="math inline">\(w_j = 0\)</span> is given by
+<span class="math display">\[
+\nabla_j f(w) = x_j^\top (Xw - y) \big| + \lambda w
+\]</span>
+For <span class="math inline">\(w_j = 0\)</span> to be a solution we need <span class="math inline">\(\nabla_j f(w^*) = 0\)</span> or that <span class="math inline">\(0 = x_j^\top r^*\)</span>
+where <span class="math inline">\(r^* = Xw^* - y\)</span> for the solution <span class="math inline">\(w^*\)</span> that column <span class="math inline">\(j\)</span>is orthogonal to the final residual.</p>
+<p>This is possible, but it is very unlikely. Increasing <span class="math inline">\(\lambda\)</span> doesn’t help.</p>
+<p>Considering L1-regularized least squares:
+<span class="math display">\[
+f(w) = \frac{1}{2} \| Xw - y \|_2^2 + \lambda \| w \|_1.
+\]</span>
+Element <span class="math inline">\(j\)</span> of the subdifferential at <span class="math inline">\(w_j = 0\)</span> is given by
+<span class="math display">\[
+\partial_j f(w) \equiv x_j^\top (Xw - y) \big| + \lambda [-1, 1] .
+\]</span>
+For <span class="math inline">\(w_j = 0\)</span> to be a solution, we need <span class="math inline">\(0 \in \partial_j f(w^*)\)</span> or that
+<span class="math display">\[
+0 \in x_j^\top r^* + \lambda [-1, 1] \\
+-x_j^\top r^* \in \lambda [-1, 1] \\
+|x_j^\top r^*| \leq \lambda,
+\]</span>
+So features <span class="math inline">\(j\)</span> that have little to do with <span class="math inline">\(y\)</span> will often lead to <span class="math inline">\(w_j = 0\)</span>. Increasing <span class="math inline">\(\lambda\)</span> makes this more likely to happen.</p>
+<p>The subgradient method:</p>
+<p><span class="math display">\[
+w_{k+1} = w_k - \alpha_k g_k,
+\]</span>
+For any <span class="math inline">\(g_k \in \partial f(w_k)\)</span>.</p>
+<p>At a non-differentiable point, some subgradients may reduce the objective. At differentiable points, subgradient is the gradient and reduces the objective.</p>
+<p>For the subgradient method applied to Lipschitz and convex <span class="math inline">\(f\)</span> we have
+<span class="math display">\[
+\|w_{k+1} - w^*\|^2 = \|w_k - w^*\|^2 - 2\alpha_k g_k^\top (w_k - w^*) + \alpha_k^2 ||g_k||^2\\
+\leq \|w_k - w^*\|^2 - 2\alpha_k[f(w_k) - f(w^*)] + \alpha_k^2 L^2.\\\\
+\rightarrow 2\alpha_k[f(w_k) - f(w^*)] \leq \|w_k - w^*\|^2 - \|w_{k+1} - w^*\|^2 + \alpha_k^2 L^2
+\]</span>
+And summing the telescoping values from <span class="math inline">\(k = 1\)</span> to <span class="math inline">\(t\)</span> we get
+<span class="math display">\[
+2 \sum_{k=1}^t \alpha_k[f(w_k) - f(w^*)] \leq \|w_0 - w^*\|^2 - \|w_{k+1} - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k.
+\]</span></p>
+<p>Using <span class="math inline">\(f_b\)</span> as the lowest <span class="math inline">\(f(w_k)\)</span> and <span class="math inline">\(\|w_{k+1} - w^*\|^2 \geq 0\)</span> we can re-arrange to get a bound that is very similar to what we showed for SGD:
+<span class="math display">\[
+f(w_b) - f(w^*) \leq \frac{\|w_1 - w^*\|^2 + L^2 \sum_{k=1}^t \alpha_k^2}{2 \sum_{k=1}^t \alpha_k}
+= O \left( \frac{1}{\sum_{k} \alpha_k} \right) + O \left( \frac{\sum_{k} \alpha_k^2}{\sum_{k} \alpha_k} \right)
+\]</span>
+## Smooth Approximations</p>
+<p>Non smooth functions can be approximated using smooth functions. Non smooth regions can be smoothed leaving the rest of the function untouched. Like Huber loss for the absolute value function.</p>
+<p>The advantage is to smoothing can be faster conversions than sub gradient methods. You can use line search and momentum or acceleration for faster convergence. Huber smoothed objective functions often have similar test error.</p>
+<p>Some reasons not to smooth are that smoothing can destroy the structure of the solution. For example, L1 regularization leads to sparse solutions because it is not smooth Huber loss does not lead to sparse solutions. Smooth approximations can be expensive to evaluate and they don’t converge faster when you add stochasticity.</p>
+</div>
+<div id="linear-convergence" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Linear convergence<a href="global-optimization.html#linear-convergence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bisection: Linear convergence in 1 dimension -</p>
+<p>Consider the following method for finding a minimizer:</p>
+<ol style="list-style-type: decimal">
+<li>At each iteration, compute a subgradient at the middle of the interval.</li>
+<li>Set the lower/upper bound of the interval to the midpoint (using subgradient sign)</li>
+</ol>
+<p>Maximum distance to <span class="math inline">\(w^*\)</span> is cut in half giving iteration complexity of <span class="math inline">\(O(log(1/\epsilon))\)</span></p>
+<p>Cutting Plane: Linear Convergence in <span class="math inline">\(d\)</span> dimensions -</p>
+<p>This generalizes bijections to higher dimensions. Can be used to optimize convex functions over bounded polygons.</p>
+<ol style="list-style-type: decimal">
+<li><p>At each iteration, compute a subgradient at the center of the polygon. From the definition of subgradient we have for any <span class="math inline">\(w\)</span> that <span class="math inline">\(f(w) \geq f(w_k) +g_k^\top (w - w_k)\)</span>. So any <span class="math inline">\(w\)</span> satisfying <span class="math inline">\(g_k^\top (w - w_k) &gt; 0\)</span> will be greater than <span class="math inline">\(f(w_k)\)</span>.</p></li>
+<li><p>This constraint is analogous to a plane that cuts the polygon.</p></li>
+</ol>
+<p>Worst-case theoretical rates for convex optimization with subgradients are:</p>
+<p>Best subgradient methods require <span class="math inline">\(O(1/\epsilon^2)\)</span> iterations.
+Best cutting plane methods require <span class="math inline">\(O(d log(1/\epsilon))\)</span> iterations</p>
+<p><strong>Using Multiple Subgradients</strong></p>
+<p>We get a tighter bound by using all previous function and subgradient values:
+<span class="math display">\[
+f(w) \geq \max_{t \in \{1, \ldots, k\}} f(w_t) + g_t^\top (w - w_t)
+\]</span>
+We can also choose the “best” subgradient?
+Convex functions have directional derivatives everywhere. Direction <span class="math inline">\(-g_t\)</span> that minimizes directional derivative is minimum-norm subgradient:
+<span class="math display">\[
+g_k \in \arg\min_{g \in \partial f(w_k)} \|g\|
+\]</span>
+This is the steepest descent direction for non-smooth convex optimization problems.</p>
+<p>Some advantages are that the solution is a fixed point: <span class="math inline">\(w^* = w^* - \alpha g^*\)</span> since <span class="math inline">\(g^* = 0\)</span>. We can satisfy line-search criteria since <span class="math inline">\(-g_k\)</span> is a descent direction.
+- And line searches work with directional derivatives, which exist.</p>
+<p>Some issues are that he minimum-norm subgradient may be difficult to find. Convergence not well understood and it is not shown to improve worst-case rate over subgradient method. Counter-examples exist where line search causes convergence to sub-optimal values.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="projected-gradient-based-algorithms.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="optimization-demo.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/10-global.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/YashM8/CS448Notes/blob/main/10-global.Rmd",
+"text": null
+},
+"download": ["bookdownproj.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
