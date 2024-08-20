@@ -105,9 +105,6 @@ As with gradient descent, this can work much better than knowing $L$.
 
 Nesterov’s method is often non-monotonic. We do not always have $ f(w_{k+1}) < f(w_k) $. As with momentum, this is not necessarily a bad thing.
 
-**TODO 2nd derivative method**
-
-
 
 
 

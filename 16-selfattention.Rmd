@@ -104,7 +104,7 @@ Assume $w$ is a single word vector.
 
 Transformers rely on self attention and were introduced in the paper "Attention is all you need" by Vasvani et al. They can just put together based on the things we discussed earlier and multi head attention is the main idea that pulls it together.
 
-![Transformer For Machine Translation (Vasvani et al.)](images/transformer.png)
+![Transformer For Machine Translation (Vasvani et al.)](images/transformer.png){width=50%}
 
 The **Encoder** does the following:
 

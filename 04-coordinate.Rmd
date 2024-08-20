@@ -189,7 +189,6 @@ f(w_k) - f^* \leq \left( 1 - \frac{\mu_1}{L} \right)^k [f(w_0) - f^*] \\
 \mu_1[f(w) - f^*] \leq \frac{1}{2} \| \nabla f(w) \|_\infty^2
 $$
 
- Lipschitz Sampling
 
 
 
