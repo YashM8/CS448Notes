@@ -116,6 +116,7 @@ $$
 $h_t$ is the output at time step $t$. There are many variations on this memory architecture. From the above example, this may help in predicting things that usually come after quotes like a full stop.
 
 ![LSTM](images/lstm.jpeg)
+This describes one LSTM cell which has one set of weights and biases. We can add more each of which is unrolled on it's own. So now we have many LSTM cells. We can do deep by haing this first set of cells feed into another set of cells. This is how we go deep in LSTM's.
 
 ## Gated Recurrent Units
 

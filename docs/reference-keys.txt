@@ -78,7 +78,7 @@ lstm---long-short-term-memory
 gated-recurrent-units
 attention-with-rnns
 introduction-2
-downsides-of-this-attention.
+pros-and-cons-of-attention.
 self-attention-and-transformers
 self-attention-mechanism
 multi-head-attention

@@ -186,7 +186,7 @@
 <li class="chapter" data-level="15" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html"><i class="fa fa-check"></i><b>15</b> Attention with RNN’s</a>
 <ul>
 <li class="chapter" data-level="15.1" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#introduction-2"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
-<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#downsides-of-this-attention."><i class="fa fa-check"></i><b>15.2</b> Downsides of this attention.</a></li>
+<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#pros-and-cons-of-attention."><i class="fa fa-check"></i><b>15.2</b> Pros and Cons of attention.</a></li>
 </ul></li>
 <li class="chapter" data-level="16" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html"><i class="fa fa-check"></i><b>16</b> Self-Attention and Transformers</a>
 <ul>
@@ -314,10 +314,8 @@ o_t = \sigma(W_o [h_{t-1}, x_t] + b_o) \\
 h_t = o_t \odot tanh(C_t)
 \]</span></p>
 <p><span class="math inline">\(h_t\)</span> is the output at time step <span class="math inline">\(t\)</span>. There are many variations on this memory architecture. From the above example, this may help in predicting things that usually come after quotes like a full stop.</p>
-<div class="float">
-<img src="images/lstm.jpeg" alt="LSTM" />
-<div class="figcaption">LSTM</div>
-</div>
+<p><img src="images/lstm.jpeg" alt="LSTM" />
+This describes one LSTM cell which has one set of weights and biases. We can add more each of which is unrolled on it’s own. So now we have many LSTM cells. We can do deep by haing this first set of cells feed into another set of cells. This is how we go deep in LSTM’s.</p>
 </div>
 <div id="gated-recurrent-units" class="section level2 hasAnchor" number="14.6">
 <h2><span class="header-section-number">14.6</span> Gated Recurrent Units<a href="recurrent-neural-networks.html#gated-recurrent-units" class="anchor-section" aria-label="Anchor link to header"></a></h2>

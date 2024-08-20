@@ -186,7 +186,7 @@
 <li class="chapter" data-level="15" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html"><i class="fa fa-check"></i><b>15</b> Attention with RNN’s</a>
 <ul>
 <li class="chapter" data-level="15.1" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#introduction-2"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
-<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#downsides-of-this-attention."><i class="fa fa-check"></i><b>15.2</b> Downsides of this attention.</a></li>
+<li class="chapter" data-level="15.2" data-path="attention-with-rnns.html"><a href="attention-with-rnns.html#pros-and-cons-of-attention."><i class="fa fa-check"></i><b>15.2</b> Pros and Cons of attention.</a></li>
 </ul></li>
 <li class="chapter" data-level="16" data-path="self-attention-and-transformers.html"><a href="self-attention-and-transformers.html"><i class="fa fa-check"></i><b>16</b> Self-Attention and Transformers</a>
 <ul>
@@ -235,6 +235,8 @@
 <li>The keys are given by <span class="math inline">\(k_i = W^Kx_i\)</span> or <span class="math inline">\(K = XW^K\)</span></li>
 <li>The values are given by <span class="math inline">\(v_i = W^Vx_i\)</span> or <span class="math inline">\(V = XW^V\)</span></li>
 </ul>
+<p><img src="images/keyquery.png" />
+<img src="images/value.png" /></p>
 <p>Now the raw attention scores are calculated using: <span class="math inline">\(e_{ij} = q_i^Tk_j\)</span> or <span class="math inline">\(E = QK^T\)</span></p>
 <p>Now we normalize to probabilities (or interpreted like probabilities) using using the softmax function: <span class="math inline">\(\alpha_ij = \frac{e^{e_{ij}}}{\sum_{ij^*} e^{ij^*}}\)</span> or <span class="math inline">\(A = softmax(E)\)</span></p>
 <p>Then, we compute the output as the weighted sum: <span class="math inline">\(o_i = \sum_{j} \alpha_{ij} v_j\)</span> or <span class="math inline">\(O = AW^V\)</span></p>
@@ -259,7 +261,7 @@ q_i^Tk_j &amp; \text{if } j \leq i \\
 -\infty &amp; \text{if } j &gt; i
 \end{cases}
 \]</span>
-Note that the softamx of <span class="math inline">\(-\infty\)</span> is 0 which implies we can’t “look” at it.</p>
+Note that the softamx of <span class="math inline">\(-\infty\)</span> is 0 which implies we can’t “look” at it. This is called “Masked Attention”.</p>
 </div>
 <div id="multi-head-attention" class="section level2 hasAnchor" number="16.2">
 <h2><span class="header-section-number">16.2</span> Multi-Head Attention<a href="self-attention-and-transformers.html#multi-head-attention" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -279,7 +281,7 @@ Note that the softamx of <span class="math inline">\(-\infty\)</span> is 0 which
 <div id="tips-for-numerical-stability" class="section level2 hasAnchor" number="16.3">
 <h2><span class="header-section-number">16.3</span> Tips for numerical stability<a href="self-attention-and-transformers.html#tips-for-numerical-stability" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><strong>Scaled dot product</strong></p>
-<p>When vectors grow very large, the dot product of two vectors become very large. We need to control for this to preserve numerical stability. Instead of <span class="math inline">\(O = softmax(XW^Q \phantom{1}W^{K^T} X^T) \cdot XW^V\)</span>, we do <span class="math inline">\(O = softmax(\frac{XW^Q \phantom{1}W^{K^T} X^T}{\sqrt{d/h}}) \cdot XW^V\)</span></p>
+<p>When vectors grow very large, the dot product of two vectors become very large. We need to control for this to preserve numerical stability. Instead of <span class="math inline">\(O = softmax(XW^Q \phantom{1}W^{K^T} X^T) \cdot XW^V\)</span>, we do <span class="math inline">\(O = softmax(\frac{XW^Q \phantom{1}W^{K^T} X^T}{\sqrt{d/h}}) \cdot XW^V\)</span>. This is coined as scaled dot product attention in the original paper.</p>
 <p><strong>Skip connections</strong></p>
 <p>Skip connections are used in various types of networks and are almost always useful. They help smooth out the loss landscape. They are implemented simply like this <span class="math inline">\(X_i = X_{i-1} + Layer(X_{i-1})\)</span>.</p>
 <p><strong>Layer normalization</strong></p>
@@ -294,9 +296,13 @@ o = \frac{x - \mu}{\sigma}
 <div id="transformers" class="section level2 hasAnchor" number="16.4">
 <h2><span class="header-section-number">16.4</span> Transformers<a href="self-attention-and-transformers.html#transformers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Transformers rely on self attention and were introduced in the paper “Attention is all you need” by Vasvani et al. They can just put together based on the things we discussed earlier and multi head attention is the main idea that pulls it together.</p>
+<div class="float">
+<img src="images/transformer.png" alt="Transformer For Machine Translation (Vasvani et al.)" />
+<div class="figcaption">Transformer For Machine Translation (Vasvani et al.)</div>
+</div>
 <p>The <strong>Encoder</strong> does the following:</p>
 <ul>
-<li>Inputs, which are your words.</li>
+<li>Inputs, which can b words.</li>
 <li>You embed them as a vector.</li>
 <li>Develop context using multi-head attention.</li>
 <li>Layer norm to prevent numerical instability.</li>
@@ -313,10 +319,6 @@ v_i = W^Vh_i\\
 q_i = W^Qz_i
 \]</span></p>
 <p>The decoder also follows the general theme of <strong>embed -&gt; attention -&gt; normalize -&gt; dense</strong>. In the decoder however, a linear layer followed my the softmax function is used to get probabilities.</p>
-<div class="float">
-<img src="images/transformer.jpg" alt="Transformer" />
-<div class="figcaption">Transformer</div>
-</div>
 </div>
 <div id="conclution-and-drawbacks" class="section level2 hasAnchor" number="16.5">
 <h2><span class="header-section-number">16.5</span> Conclution and Drawbacks<a href="self-attention-and-transformers.html#conclution-and-drawbacks" class="anchor-section" aria-label="Anchor link to header"></a></h2>

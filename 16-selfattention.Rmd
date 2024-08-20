@@ -18,6 +18,10 @@ We then transform each embedding using 3 different learnable matrices $W^K, W^Q,
 - The keys are given by $k_i = W^Kx_i$ or $K = XW^K$
 - The values are given by $v_i = W^Vx_i$ or $V = XW^V$
 
+
+![](images/keyquery.png)
+![](images/value.png)
+
 Now the raw attention scores are calculated using: $e_{ij} = q_i^Tk_j$ or $E = QK^T$
 
 Now we normalize to probabilities (or interpreted like probabilities) using using the softmax function: $\alpha_ij = \frac{e^{e_{ij}}}{\sum_{ij^*} e^{ij^*}}$ or $A = softmax(E)$
@@ -47,7 +51,7 @@ q_i^Tk_j & \text{if } j \leq i \\
 -\infty & \text{if } j > i
 \end{cases}
 $$
-Note that the softamx of $-\infty$ is 0 which implies we can't "look" at it.
+Note that the softamx of $-\infty$ is 0 which implies we can't "look" at it. This is called "Masked Attention".
 
 ## Multi-Head Attention
 
@@ -76,7 +80,7 @@ Now, the value matrix takes the soft, maxed vector and moves it. In the restaura
 
 **Scaled dot product**
 
-When vectors grow very large, the dot product of two vectors become very large. We need to control for this to preserve numerical stability. Instead of $O = softmax(XW^Q \phantom{1}W^{K^T} X^T) \cdot XW^V$, we do $O = softmax(\frac{XW^Q \phantom{1}W^{K^T} X^T}{\sqrt{d/h}}) \cdot XW^V$
+When vectors grow very large, the dot product of two vectors become very large. We need to control for this to preserve numerical stability. Instead of $O = softmax(XW^Q \phantom{1}W^{K^T} X^T) \cdot XW^V$, we do $O = softmax(\frac{XW^Q \phantom{1}W^{K^T} X^T}{\sqrt{d/h}}) \cdot XW^V$. This is coined as scaled dot product attention in the original paper.
 
 **Skip connections**
 
@@ -98,9 +102,11 @@ Assume $w$ is a single word vector.
 
 Transformers rely on self attention and were introduced in the paper "Attention is all you need" by Vasvani et al. They can just put together based on the things we discussed earlier and multi head attention is the main idea that pulls it together.
 
+![Transformer For Machine Translation (Vasvani et al.)](images/transformer.png)
+
 The **Encoder** does the following:
 
-- Inputs, which are your words.
+- Inputs, which can b words.
 - You embed them as a vector.
 - Develop context using multi-head attention.
 - Layer norm to prevent numerical instability.
@@ -120,8 +126,6 @@ q_i = W^Qz_i
 $$
 
 The decoder also follows the general theme of **embed -> attention -> normalize -> dense**. In the decoder however, a linear layer followed my the softmax function is used to get probabilities.
-
-![Transformer](images/transformer.jpg)
 
 ## Conclution and Drawbacks
 
