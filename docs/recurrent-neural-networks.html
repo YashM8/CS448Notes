@@ -266,7 +266,8 @@ y = f_2(W_{y} h_{t} + b_y)
 </div>
 <div id="problems-with-basic-rnns" class="section level2 hasAnchor" number="14.4">
 <h2><span class="header-section-number">14.4</span> Problems with (Basic) RNN’s<a href="recurrent-neural-networks.html#problems-with-basic-rnns" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>We do backpropagation on the “unrolled” RNN. But when we do this we run into problems as the gradient passes through this unrolled network. More concretely:</p>
+<p>Consider the problem where we are trying to predict the next word after a sequence of words “The code is working. We are nearly <strong>done</strong>”. Here a RNN will do well because it only needs to be able to learn context in a small sequence. But if we consider a larger sequence, say, “The code is working but we need to work on … and then we will be done in a <strong>month</strong>.” Here predicting the word month becomes much more difficult for RNN since the context that it needs Is further back in the sequence. As the gap between “what to predict” “and what context you need to predict” grows, RNN’s perform worse.</p>
+<p>Looking at the problem, more mathematically, we do backpropagation on the “unrolled” RNN. But when we do this we run into problems as the gradient passes through this unrolled network. More concretely:</p>
 <p>Let us consider 3 iterations of <span class="math inline">\(h_t\)</span>
 <span class="math display">\[
 h1 = g(W_hh0 + W_xx1) \\
@@ -283,7 +284,7 @@ Let <span class="math inline">\(L\)</span> be a loss function</p>
 \frac{\partial L}{\partial W_{h}} = \frac{1}{n} \sum_{t=1}^{n} \frac{\partial L_{t}}{\partial h_{t}} \prod_{j=i+1}^t \frac{\partial h_{j}}{\partial h_{j-1}} \frac{\partial h_{i}}{\partial W_{h}}
 \]</span></p>
 <p>If the gradients are consistently more than 1, the gradient is multiplied <span class="math inline">\(t\)</span> times and explodes resulting in a overflow. If the gradients are consistently less than 1, the gradient is multiplied <span class="math inline">\(t\)</span> times and vanishes resulting in a underflow.</p>
-<p><strong>We can deal with these issues by architectures that are more robust to the Exploding/Vanishing gradient problem.</strong></p>
+<p><strong>We can deal with these issues by architectures that are more robust to the Exploding/Vanishing gradient problem.</strong> LSTM’s (covered next) use a series of gates to reduce the effect of this problem by controlling gradient flow.</p>
 </div>
 <div id="lstm---long-short-term-memory" class="section level2 hasAnchor" number="14.5">
 <h2><span class="header-section-number">14.5</span> LSTM - Long Short Term Memory<a href="recurrent-neural-networks.html#lstm---long-short-term-memory" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -294,9 +295,9 @@ Let <span class="math inline">\(L\)</span> be a loss function</p>
 <p><span class="math display">\[
 f_t = \sigma(W_f [h_{t-1}, x_t] + b_f)
 \]</span>
-<span class="math inline">\([h_{t-1}, x_t]\)</span> simply concats the vectors. The range of the sigmoid function <span class="math inline">\(\sigma\)</span> is <span class="math inline">\([0, 1]\)</span>. An output of 1 means that all the information is retain and 0 means “forget everything”. This controls what percentage of information can influence the long term memory at <span class="math inline">\(C_t\)</span>. For a language task, we can imagine forgetting predicting the end quote character <strong>“</strong> after we have already closed it.</p>
+<span class="math inline">\([h_{t-1}, x_t]\)</span> simply concats the vectors. The range of the sigmoid function <span class="math inline">\(\sigma\)</span> is <span class="math inline">\([0, 1]\)</span>. An output of 1 means that all the information is retained and 0 means “forget” the all information. This controls what percentage of information can influence the long term memory at <span class="math inline">\(C_t\)</span>. For a language task, we can imagine forgetting predicting the end quote character <strong>“</strong> after we have already closed it.</p>
 <p><strong>Input Gate -</strong></p>
-<p>This gate adds information to the cell state as follows -</p>
+<p>The first part of this gate decides what to update in the cell state. The second part creates candidate values. the two steps are combined to produce an update to the cell state. This gate adds information to the cell state as follows -</p>
 <p><span class="math display">\[
 i_t = \sigma(W_i [h_{t-1}, x_t] + b_i) \\
 \bar{C_t} = tanh(W_C [h_{t-1}, x_t] + b_C)
@@ -305,14 +306,14 @@ i_t = \sigma(W_i [h_{t-1}, x_t] + b_i) \\
 <p><span class="math display">\[
 C_t = f_t \odot C_{t-1} + i_t \odot \bar{C_t}
 \]</span></p>
-<p>In a language context, this would be the update of the sales state where we would loose memory of the quote character.</p>
+<p>The first term here “forgets” in the second term updates the cell state. In a language context, this would be the update of the sales state where we would loose memory of the quote character.</p>
 <p><strong>Output Gate -</strong></p>
-<p>This is where we get a an output for a time step <span class="math inline">\(t\)</span>.</p>
+<p>At this gate we go through the cell state to produce an output. This is where we get a an output for a time step <span class="math inline">\(t\)</span>.</p>
 <p><span class="math display">\[
 o_t = \sigma(W_o [h_{t-1}, x_t] + b_o) \\
 h_t = o_t \odot tanh(C_t)
 \]</span></p>
-<p><span class="math inline">\(h_t\)</span> is the output at time step <span class="math inline">\(t\)</span>. There are many variations on this memory architecture.</p>
+<p><span class="math inline">\(h_t\)</span> is the output at time step <span class="math inline">\(t\)</span>. There are many variations on this memory architecture. From the above example, this may help in predicting things that usually come after quotes like a full stop.</p>
 <div class="float">
 <img src="images/lstm.jpeg" alt="LSTM" />
 <div class="figcaption">LSTM</div>
@@ -320,7 +321,7 @@ h_t = o_t \odot tanh(C_t)
 </div>
 <div id="gated-recurrent-units" class="section level2 hasAnchor" number="14.6">
 <h2><span class="header-section-number">14.6</span> Gated Recurrent Units<a href="recurrent-neural-networks.html#gated-recurrent-units" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>GRUs also selectively updates and expose information over time. The architecture is simplified compared to LSTM by combining the forget and input gates into a single gate and merging the cell and hidden state.</p>
+<p>GRU’s also selectively updates and expose information over time. The architecture is simplified compared to LSTM by combining the forget and input gates into a single gate and merging the cell and hidden state.</p>
 <p><strong>Update Gate -</strong></p>
 <p><span class="math display">\[
 z_t = \sigma(W_z [h_{t-1}, x_t] + b_z)

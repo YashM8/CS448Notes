@@ -47,7 +47,9 @@ Here, the input and output have a variable sequence length. For example, using d
 
 ## Problems with (Basic) RNN's
 
-We do backpropagation on the "unrolled" RNN. But when we do this we run into problems as the gradient passes through this unrolled network. More concretely: 
+Consider the problem where we are trying to predict the next word after a sequence of words "The code is working. We are nearly **done**". Here a RNN will do well because it only needs to be able to learn context in a small sequence. But if we consider a larger sequence, say, "The code is working but we need to work on ... and then we will be done in a **month**." Here predicting the word month becomes much more difficult for RNN since the context that it needs Is further back in the sequence. As the gap between "what to predict" "and what context you need to predict" grows, RNN's perform worse.
+
+Looking at the problem, more mathematically, we do backpropagation on the "unrolled" RNN. But when we do this we run into problems as the gradient passes through this unrolled network. More concretely: 
 
 Let us consider 3 iterations of $h_t$
 $$
@@ -68,10 +70,9 @@ $$
 
 If the gradients are consistently more than 1, the gradient is multiplied $t$ times and explodes resulting in a overflow. If the gradients are consistently less than 1, the gradient is multiplied $t$ times and vanishes resulting in a underflow.
 
-**We can deal with these issues by architectures that are more robust to the Exploding/Vanishing gradient problem.**
+**We can deal with these issues by architectures that are more robust to the Exploding/Vanishing gradient problem.** LSTM's (covered next) use a series of gates to reduce the effect of this problem by controlling gradient flow.
 
 ## LSTM - Long Short Term Memory
-
 
 LSTM's have a channel for information to flow for the entire recurrent network giving it a long term memory. This information can only be modified very carefully through a series of gates. This is called the cell state. $C_t$ represents the cell state at a time interval $t$.
 
@@ -84,12 +85,11 @@ This modifies the previous state of the cell, determining now much information i
 $$
 f_t = \sigma(W_f [h_{t-1}, x_t] + b_f)
 $$
-$[h_{t-1}, x_t]$ simply concats the vectors. The range of the sigmoid function $\sigma$ is $[0, 1]$. An output of 1 means that all the information is retain and 0 means "forget everything". This controls what percentage of information can influence the long term memory at $C_t$. For a language task, we can imagine forgetting predicting the end quote character **"** after we have already closed it.
-
+$[h_{t-1}, x_t]$ simply concats the vectors. The range of the sigmoid function $\sigma$ is $[0, 1]$. An output of 1 means that all the information is retained and 0 means "forget" the all information. This controls what percentage of information can influence the long term memory at $C_t$. For a language task, we can imagine forgetting predicting the end quote character **"** after we have already closed it.
 
 **Input Gate -**
 
-This gate adds information to the cell state as follows -
+The first part of this gate decides what to update in the cell state. The second part creates candidate values. the two steps are combined to produce an update to the cell state. This gate adds information to the cell state as follows -
 
 $$
 i_t = \sigma(W_i [h_{t-1}, x_t] + b_i) \\
@@ -102,25 +102,24 @@ $$
 C_t = f_t \odot C_{t-1} + i_t \odot \bar{C_t}
 $$
 
-In a language context, this would be the update of the sales state where we would loose memory of the quote character.
-
+The first term here "forgets" in the second term updates the cell state. In a language context, this would be the update of the sales state where we would loose memory of the quote character.
 
 **Output Gate -**
 
-This is where we get a an output for a time step $t$.
+At this gate we go through the cell state to produce an output. This is where we get a an output for a time step $t$.
 
 $$
 o_t = \sigma(W_o [h_{t-1}, x_t] + b_o) \\
 h_t = o_t \odot tanh(C_t)
 $$
 
-$h_t$ is the output at time step $t$. There are many variations on this memory architecture. 
+$h_t$ is the output at time step $t$. There are many variations on this memory architecture. From the above example, this may help in predicting things that usually come after quotes like a full stop.
 
 ![LSTM](images/lstm.jpeg)
 
 ## Gated Recurrent Units
 
-GRUs also selectively updates and expose information over time. The architecture is simplified compared to LSTM by combining the forget and input gates into a single gate and merging the cell and hidden state.
+GRU's also selectively updates and expose information over time. The architecture is simplified compared to LSTM by combining the forget and input gates into a single gate and merging the cell and hidden state.
 
 **Update Gate -**
 
