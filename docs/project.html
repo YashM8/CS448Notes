@@ -226,7 +226,7 @@
 <li>Can deep autoencoders denoise a specific color map’s interferometry data?</li>
 <li>Can denoising apporches trained on one color map generalize to other color maps?</li>
 </ol>
-<p>The model used 3 convolutional layers, then 2 dense layers in the encoder. Then, 2 dense layers followed by 3 transposed convolutional layers. The Leaky ReLU nonlinearity and skip connections were used. Kaiming and Xavier initilizations were used. This was trained with AdamW.</p>
+<p>The model used 3 convolutional layers, then 2 dense layers in the encoder. Then, 2 dense layers followed by 3 transposed convolutional layers in the decoder. The Leaky ReLU nonlinearity and skip connections were used. Kaiming and Xavier initilizations were used. This was trained with AdamW.</p>
 <p>The test error is a Mean Squared Error of 0.0002</p>
 <p><strong>Lower Noise Level -</strong></p>
 <p><img src="images/3.png" />
