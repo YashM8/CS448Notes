@@ -32,7 +32,9 @@ This is done like this to be more GPU efficient manner like this -
 
 ![Calculation](images/gpu_calc.jpg)
 
-The freedom of the self-attention mechanism also allows for parallelization but we loose what position a vector is in a sequence. It is an operation on sets not an ordered sequence. So what is commonly used is **learned absolute position encoding**. Here we use a $n \times d \text{ matrix }P$ matrix and each column $p_i$ is the positional encoding. Then we simply let $\hat{x_i} = x_i + p_i$
+The freedom of the self-attention mechanism also allows for parallelization but we loose what position a vector is in a sequence. It is an operation on sets not an ordered sequence. So what is commonly used is **learned absolute position encoding**. Here we use a $n \times d \text{ matrix }P$ matrix and each column $p_i$ is the positional encoding. Then we simply let $\hat{x_i} = x_i + p_i$. 
+
+Note that we cannot simply assign inputs in a sequence a number like 1, 2, 3.. and so on for two reasons. the first one is the sequence might grow very large and the sequence number could be in the millions. The second reason is - let's say we have an input embedding for the word "cat". Right now, without any positional embedding, the vector is pointing in a certain direction. If you add a large number to it or a vector with large numbers, we might push the cat vector to the point where it no longer signifies the word "cat". We need small updates that signify the position to retain the meaning of that input. The the original paper, this positional encoding was done with sine and cosine functions but it is now more common to make it a learned position matrix.
 
 Also, from the mechanism used above self-attention is just a linear transformation. In order to introduce non-linearity, we can simply add dense layers with some activation function after self-attention.
 
@@ -129,7 +131,7 @@ The decoder also follows the general theme of **embed -> attention -> normalize 
 
 ## Conclution and Drawbacks
 
-Transformers have achieved state of the art of the art results in most tasks, including natural language, processing computer vision and time series modelling. Due to, they are very parallel nature during training, huge amount of data can be thrown into them developing a more robust model capable of generalizing better. the downside is that transformers require a large amount of data for example, if you have less data, a convolutional neural net is likely to work better but with more data, a transformer is more likely to beat a CNN.
+Transformers have achieved state of the art of the art results in most tasks, including natural language, processing computer vision and time series modelling. They can model extremely long range dependencies and due to their very parallel nature during training, a huge amount of data can be thrown into them developing a more robust model capable of generalizing better. the downside is that transformers require a large amount of data for example, if you have less data, a convolutional neural net is likely to work better but with more data, a transformer is more likely to beat a CNN.
 
 Another downside is that in self attention, there is a quadratic need for computation with sequence length $O(n^2 d)$. For recurrent models, it grew linearly. There are other methods that reduce the quadratic runtime, but don't scale efficiently, which is why they're not used in very large models.
 
